@@ -1,0 +1,18 @@
+{
+  "name": "ucsd-decorator-kit",
+  "owner": {
+    "name": "Cristian Horta, Web Technology Services, UC San Diego"
+  },
+  "metadata": {
+    "description": "The official agent-facing contract for building on the UC San Diego Decorator 5 design system.",
+    "version": "1.0.0",
+    "repository": "https://github.com/chorta/ucsd-decorator-kit"
+  },
+  "plugins": [
+    {
+      "name": "ucsd-decorator",
+      "description": "Build and edit UC San Diego web pages on the Decorator 5 design system without damaging the shared page chrome. Provides one writable canvas, a pinned source of truth for markup so agents stop reconstructing chrome from rendered DOMs, verbatim markup for the regions that break in practice (both search forms, the mobile toggle, campus widget embeds), component and widget extraction rules, navigation synchronization, WCAG 2.1 AA requirements, and UC IS-3 security requirements.",
+      "source": "./"
+    }
+  ]
+}
