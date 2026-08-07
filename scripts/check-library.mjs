@@ -18,8 +18,14 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const LIBRARY_DIR = path.join(ROOT, "library");
+const SKILLS_DIR = path.join(ROOT, "skills");
 const COLLECTIONS = new Set(["tritonai", "community"]);
 const RESOURCE_DIRS = new Set(["references", "scripts", "assets"]);
+
+// library/ entries that are published copies of skills/ live here. The two must
+// stay byte-identical: a hand-copied duplicate that silently drifts is the same
+// failure mode this whole kit exists to prevent.
+const MIRRORED = new Map([["tritonai/ucsd-decorator", "ucsd-decorator"]]);
 
 // Claude Code surfaces the description when deciding whether to load a skill.
 // Long ones get truncated in listings; the sync itself sets no limit.
@@ -47,9 +53,13 @@ function parseFrontmatter(source, where) {
   return data;
 }
 
+// The real sync reads the repository's git tree, so it never sees dotfiles that
+// .gitignore keeps out (.DS_Store being the one that actually shows up). Model
+// the same view here, or local macOS junk reports as skill content.
 async function walk(directory, base) {
   const out = [];
   for (const entry of await readdir(directory, { withFileTypes: true })) {
+    if (entry.name.startsWith(".")) continue;
     const absolute = path.join(directory, entry.name);
     if (entry.isDirectory()) out.push(...(await walk(absolute, base)));
     else out.push(path.relative(base, absolute).split(path.sep).join("/"));
@@ -112,6 +122,37 @@ for (const collection of (await readdir(LIBRARY_DIR, { withFileTypes: true })).f
     }
 
     skills.push({ collection: collection.name, name: name || entry.name, description, resources, files: files.length });
+  }
+}
+
+// Verify the published copies still match their source in skills/.
+for (const [libraryPath, skillName] of MIRRORED) {
+  const publishedDir = path.join(LIBRARY_DIR, libraryPath);
+  const sourceDir = path.join(SKILLS_DIR, skillName);
+  const where = `library/${libraryPath}`;
+  if (!(await stat(sourceDir).then(() => true).catch(() => false))) {
+    fail(where, `mirrors skills/${skillName}, which does not exist`);
+    continue;
+  }
+  if (!(await stat(publishedDir).then(() => true).catch(() => false))) {
+    fail(where, `is missing; run \`npm run sync:library\` to publish skills/${skillName}`);
+    continue;
+  }
+  const published = (await walk(publishedDir, publishedDir)).sort();
+  const sourceFiles = (await walk(sourceDir, sourceDir)).sort();
+
+  for (const file of sourceFiles) {
+    if (!published.includes(file)) fail(where, `is missing ${file} from skills/${skillName}; run \`npm run sync:library\``);
+  }
+  for (const file of published) {
+    if (!sourceFiles.includes(file)) fail(where, `has ${file}, which no longer exists in skills/${skillName}; run \`npm run sync:library\``);
+  }
+  for (const file of sourceFiles.filter((entry) => published.includes(entry))) {
+    const [a, b] = await Promise.all([
+      readFile(path.join(sourceDir, file), "utf8"),
+      readFile(path.join(publishedDir, file), "utf8"),
+    ]);
+    if (a !== b) fail(where, `${file} has drifted from skills/${skillName}/${file}; run \`npm run sync:library\``);
   }
 }
 

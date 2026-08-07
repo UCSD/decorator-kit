@@ -91,12 +91,24 @@ from a Skills Library repository, synced by `tritonai-website` and rendered from
 `content/skills/library.json`. Only paths matching
 `<collection>/<name>/SKILL.md` are read — nothing deeper.
 
+**Do not put this repository inside the Skills Library.** The sync only reads
+`<collection>/<name>/SKILL.md` and nothing deeper, so a kit dropped at
+`tritonai/ucsd-decorator-kit/` would leave the skill at
+`.../skills/ucsd-decorator/SKILL.md` — two levels too deep, and invisible. The
+kit is the upstream source; the Skills Library is one of its distribution
+channels, alongside the Claude Code plugin and the generated IDE rule files.
+
 `library/` holds the publish-ready shape:
 
 ```
-library/tritonai/ucsd-decorator/SKILL.md   + references/
+library/tritonai/ucsd-decorator/SKILL.md   + references/  (published from skills/)
 library/tritonai/ucsd-branding/SKILL.md    retirement pointer
 ```
+
+`library/tritonai/ucsd-decorator/` is a **published copy** of
+`skills/ucsd-decorator/`. Regenerate it with `npm run sync:library`;
+`check:library` fails if the two have drifted, because a hand-maintained
+duplicate is the same failure mode this kit exists to prevent.
 
 `ucsd-branding` is the skill this one replaces. It is reduced to a pointer
 rather than deleted, so anyone already invoking that slug is told where it went

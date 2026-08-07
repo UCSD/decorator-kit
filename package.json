@@ -8,7 +8,8 @@
     "compile": "node scripts/compile-rules.mjs",
     "check:library": "node scripts/check-library.mjs",
     "pin:decorator": "node scripts/pin-decorator.mjs",
-    "test": "node scripts/compile-rules.mjs --check && node scripts/check-library.mjs"
+    "test": "node scripts/compile-rules.mjs --check && node scripts/check-library.mjs",
+    "sync:library": "node scripts/sync-library.mjs"
   },
   "engines": {
     "node": ">=22"
