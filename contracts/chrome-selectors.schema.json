@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/chorta/ucsd-decorator-kit/contracts/chrome-selectors.schema.json",
+  "title": "UCSD Decorator chrome selector contract",
+  "description": "Declarative require/forbid rules evaluated against the protected chrome regions of a rendered Decorator page. This is the tier that encodes what the chrome is FOR, so it must not be satisfiable by regenerating a golden fingerprint.",
+  "type": "object",
+  "required": ["schemaVersion", "rules"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "note": { "type": "string" },
+    "derivedFrom": {
+      "type": "object",
+      "description": "Provenance. Present on generated files, absent on hand-maintained overlays.",
+      "properties": {
+        "lockfile": { "type": "string" },
+        "template": { "type": "string" },
+        "upstreamSha256": { "type": ["string", "null"] }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/rule" }
+    }
+  },
+  "definitions": {
+    "rule": {
+      "type": "object",
+      "required": ["id", "region"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable identifier, reported as chrome/structure/<id>. Overlays override derived rules by matching id.",
+          "pattern": "^[a-z0-9-]+\\.[a-z0-9-]+$"
+        },
+        "region": {
+          "type": "string",
+          "description": "Which protected chrome region this rule applies to."
+        },
+        "within": {
+          "type": "string",
+          "description": "Optional CSS selector narrowing the scope inside the region."
+        },
+        "source": {
+          "type": "string",
+          "description": "Path to the file this rule was derived from, printed in failure output so an agent knows where to restore markup from."
+        },
+        "remedy": {
+          "type": "string",
+          "description": "One or two sentences telling the reader what to do. Printed on failure."
+        },
+        "require": { "type": "array", "items": { "$ref": "#/definitions/requirement" } },
+        "forbid": { "type": "array", "items": { "$ref": "#/definitions/prohibition" } }
+      }
+    },
+    "requirement": {
+      "type": "object",
+      "description": "Either a count assertion (selector + count) or an attribute assertion (attribute + equals/equalsUrl/absent, optionally targeted by selector).",
+      "properties": {
+        "selector": { "type": "string" },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Exact number of matches required. Defaults to 1."
+        },
+        "attribute": { "type": "string" },
+        "equals": {
+          "type": "string",
+          "description": "Exact attribute value."
+        },
+        "equalsUrl": {
+          "type": "string",
+          "description": "Attribute value compared after stripping the deployment base path, so one rule holds for every deployment mode. Use this for any href/src/action."
+        },
+        "absent": {
+          "type": "boolean",
+          "description": "The attribute must not be present."
+        }
+      },
+      "anyOf": [{ "required": ["selector"] }, { "required": ["attribute"] }]
+    },
+    "prohibition": {
+      "type": "object",
+      "required": ["selector", "reason"],
+      "properties": {
+        "selector": { "type": "string" },
+        "reason": {
+          "type": "string",
+          "description": "Why this is prohibited. Printed on failure, so write it for someone who thinks their substitution was reasonable."
+        }
+      }
+    }
+  }
+}

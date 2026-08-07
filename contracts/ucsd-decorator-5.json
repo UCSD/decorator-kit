@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "note": "Portable default chrome rules for UC San Diego Decorator 5. These pin structure only — no ids, no site-specific URLs, no scope option values — so they hold for any Decorator site. Add site-specific rules in a local overlay. Validate against contracts/chrome-selectors.schema.json.",
+  "derivedFrom": {
+    "template": "templates/two-column.html",
+    "archive": "https://developer.ucsd.edu/_files/decorator-downloads/v5/Decorator-V5.zip",
+    "pinnedAt": "2026-07-22T07:03:02Z"
+  },
+  "rules": [
+    {
+      "id": "mobile-drawer.search-form",
+      "region": "mobile-drawer",
+      "within": ".search-content",
+      "source": "vendor/decorator-5/templates/two-column.html",
+      "require": [
+        { "selector": "form[action][method='get']", "count": 1 },
+        { "selector": "form select.search-scope[name='search-scope']", "count": 1 },
+        { "selector": "form input.search-term[type='search']", "count": 1 }
+      ],
+      "forbid": [
+        {
+          "selector": "a[href]",
+          "reason": "the drawer search must submit a form; a link to the search page loses the scope selector and the typed query"
+        }
+      ],
+      "remedy": "Restore the drawer search form from the vendor template. See skills/ucsd-decorator/references/protected-regions.md."
+    },
+    {
+      "id": "navbar.search-form",
+      "region": "navbar",
+      "within": ".search-content",
+      "source": "vendor/decorator-5/templates/two-column.html",
+      "require": [
+        { "selector": "form[action]", "count": 1 },
+        { "selector": "form select.search-scope[name='search-scope']", "count": 1 },
+        { "selector": "form input.search-term", "count": 1 }
+      ],
+      "forbid": [
+        { "selector": "a[href]", "reason": "the desktop search must submit a form, not link away" }
+      ],
+      "remedy": "Restore the desktop search form from the vendor template."
+    },
+    {
+      "id": "navbar.mobile-toggle",
+      "region": "navbar",
+      "within": "button.navbar-toggle[data-toggle='offcanvas']",
+      "source": "vendor/decorator-5/templates/two-column.html",
+      "require": [
+        { "selector": "span.sr-only", "count": 1 },
+        { "selector": ".mobile-nav-bars", "count": 1 },
+        { "selector": ".mobile-nav-bars span.icon-bar", "count": 3 },
+        { "selector": ".mobile-nav-icon", "count": 1 }
+      ],
+      "remedy": "The MENU label and the three bars live inside the toggle button, not beside it."
+    },
+    {
+      "id": "site-title.branding",
+      "region": "site-title",
+      "source": "vendor/decorator-5/templates/two-column.html",
+      "require": [
+        { "selector": "a.title-header", "count": 2 },
+        { "selector": "a.title-logo", "count": 1 }
+      ],
+      "remedy": "The title band carries the long and short site title links plus the UC San Diego logo link."
+    }
+  ]
+}

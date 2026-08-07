@@ -1,0 +1,15 @@
+{
+  "name": "ucsd-decorator-kit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Agent-facing contract for building on the UC San Diego Decorator 5 design system.",
+  "scripts": {
+    "compile": "node scripts/compile-rules.mjs",
+    "test": "node scripts/compile-rules.mjs --check"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "ISC"
+}

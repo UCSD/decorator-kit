@@ -1,0 +1,17 @@
+{
+  "name": "ucsd-decorator",
+  "version": "1.0.0",
+  "description": "Build and edit UC San Diego web pages on the Decorator 5 design system without damaging the shared page chrome. Provides one writable canvas, a pinned source of truth for markup, and a CI-checkable chrome contract.",
+  "author": {
+    "name": "Cristian Horta, Web Technology Services, UC San Diego"
+  },
+  "homepage": "https://github.com/chorta/ucsd-decorator-kit",
+  "keywords": [
+    "ucsd",
+    "decorator",
+    "design-system",
+    "accessibility",
+    "wcag",
+    "bootstrap"
+  ]
+}
