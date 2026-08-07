@@ -57,9 +57,12 @@ design.
 
 ```
 skills/ucsd-decorator/       the skill — SKILL.md plus references
+library/                     Skills Library publishing staging (see below)
 rules/                       canonical rule source
 scripts/compile-rules.mjs    rules/ -> CLAUDE.md, AGENTS.md, .cursorrules,
                              .github/copilot-instructions.md
+scripts/check-library.mjs    validates library/ against the sync contract
+scripts/pin-decorator.mjs    dependency-free template bootstrap
 contracts/                   portable chrome selector rules + JSON schema
 checks/                      how to adopt the gate
 ```
@@ -80,6 +83,37 @@ project's `.claude/skills/`.
 
 **Cursor, Copilot, Antigravity** — the compiled instruction files are picked up
 automatically once present at the project root.
+
+## Publishing to the TritonAI Skills Library
+
+The public page at <https://tritonai.ucsd.edu/skills/index.html> is generated
+from a Skills Library repository, synced by `tritonai-website` and rendered from
+`content/skills/library.json`. Only paths matching
+`<collection>/<name>/SKILL.md` are read — nothing deeper.
+
+`library/` holds the publish-ready shape:
+
+```
+library/tritonai/ucsd-decorator/SKILL.md   + references/
+library/tritonai/ucsd-branding/SKILL.md    retirement pointer
+```
+
+`ucsd-branding` is the skill this one replaces. It is reduced to a pointer
+rather than deleted, so anyone already invoking that slug is told where it went
+instead of silently loading guidance that routes agents into rendered chrome.
+
+Validate before publishing:
+
+```bash
+npm run check:library
+```
+
+It enforces exactly what the sync enforces — path shape, non-empty `name` and
+`description`, name matching the directory, `maintainer` on community skills,
+no duplicate names, and no nested `SKILL.md` files that would be silently
+ignored.
+
+Copy `library/tritonai/*` into the Skills Library repository to publish.
 
 ## Reference implementation
 

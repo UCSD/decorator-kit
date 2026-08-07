@@ -6,7 +6,9 @@
   "description": "Agent-facing contract for building on the UC San Diego Decorator 5 design system.",
   "scripts": {
     "compile": "node scripts/compile-rules.mjs",
-    "test": "node scripts/compile-rules.mjs --check"
+    "check:library": "node scripts/check-library.mjs",
+    "pin:decorator": "node scripts/pin-decorator.mjs",
+    "test": "node scripts/compile-rules.mjs --check && node scripts/check-library.mjs"
   },
   "engines": {
     "node": ">=22"
