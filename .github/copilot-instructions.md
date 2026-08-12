@@ -72,6 +72,19 @@ work only inside its canvas. Do not overwrite `index.html` unless asked.
 
 ### Styling
 
+**Style the canvas, never the shell.** Inside the canvas, CSS is unlimited. The
+shell arrives already styled from `cdn.ucsd.edu`, including responsive behavior
+an override will not follow, so site CSS must not target a chrome class or id —
+not scoped, and least of all with `!important`. If the chrome renders wrong,
+read the CDN CSS and JS before writing a rule.
+
+**Scope every site rule under the canvas selector.** The shell and the canvas
+share the whole Bootstrap 3 vocabulary — `.form-control`, `.input-group`,
+`.btn`, `.container`, `.row` — so a bare `.input-group { padding: 2px }` reaches
+into the drawer search without naming a single chrome class. Write
+`main#main-content .input-group`, or a component class that only exists inside
+the canvas.
+
 - **No new `<style>` blocks and no inline `style` attributes.**
 - Use classes that already exist in the Decorator stylesheet. Read the
   unminified `base.css` from the pinned copy to find class names; the page loads
@@ -88,6 +101,37 @@ work only inside its canvas. Do not overwrite `index.html` unless asked.
   inside the pristine template directory.
 - No inline initialization. Extract `$(document).ready(...)` blocks from
   reference files into a named file.
+- **Never rewrite ids, classes, or inline styles on a chrome element at
+  runtime.** Reading the shell is fine, and so is syncing `aria-expanded` on a
+  control you own. Rewriting what the Decorator put there is not.
+
+### The shell is scripted, not just styled
+
+`base.min.js` defines `toggleIdsAndClassesBasedOnScreenWidth()`, binds it to
+`window.resize`, and runs it on load. Scoped to `ul.msearch` — the drawer search
+pattern Cascade emits — it renames ids across 768px: below the breakpoint
+`#search-m` → `#search`, `#search-scope-m` → `#search-scope`, `#q-m` → `#q`, and
+the term input's class and `name` from `search-term-m` to `search-term`. Above
+it, all of that reverses.
+
+That id swap is the only thing that makes the drawer search render on phones:
+`base.min.css` lays the panel out through
+`.offcanvas > ul.nav.navbar-nav.navbar-right #search`, inside a
+`max-width: 767px` media query. Two consequences:
+
+- Below 768px the drawer panel's `id="search"` **deliberately duplicates** the
+  desktop navbar panel's id. The navbar is collapsed at that width. This is the
+  design, not a defect — code that "fixes" the duplicate for accessibility
+  silently collapses the drawer search.
+- The `name` swap is why the drawer form submits `search-term` on phones and
+  `search-term-m` on desktop. The hosted search API reads
+  `input[name="search-term"]` and `select[name="search-scope"]`, never ids.
+  Changing the input `name` breaks search with nothing visible on the page.
+
+None of this is in `Decorator-V5.zip` or the `ucsd-decorator-v5` npm package —
+both ship templates and `base.css` but not the CDN scripts, and `.msearch`
+appears in neither. Reading markup from a file is still the rule; a file just
+will not tell you that this region is governed at runtime.
 
 ### Verified chrome facts
 
@@ -116,6 +160,13 @@ Do not inline, self-host, restyle, re-time, or reconfigure them. Do not "improve
 a widget you found by reading the page it renders into. A project's build may
 defer loading for performance — that is the project's code acting on the tag,
 not a change to the widget.
+
+**Restyling is the failure mode that slips through.** A widget builds its own
+DOM after load, so its elements appear in no source file and no markup check can
+see them — but a site stylesheet can still reach them, and `!important` makes it
+stick. `#chat-bubble` is the TritonGPT launcher; reshaping it into a circle on
+phones clipped the "Ask TritonGPT" label in production. Load `tgpt-loader.js`
+and take what it renders.
 
 ### Scope
 

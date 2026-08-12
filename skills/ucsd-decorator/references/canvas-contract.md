@@ -60,7 +60,7 @@ and cover the script tail with a separate ordered contract.
 file, the `<ul>` element is chrome but its `<li>` children are not. Empty those
 subtrees before hashing, and let the data file's own validation cover the links.
 
-## The three tiers
+## The four tiers
 
 A single check is not enough, and the reason is specific.
 
@@ -73,6 +73,9 @@ and accepts it — because presentation changes are legitimate.
 
 **Tier 3 — structural contract.** The chrome must satisfy selector rules derived
 from the pristine Decorator template.
+
+**Tier 4 — styling and scripting.** No site-authored stylesheet or script may
+target the shell. Catches the regressions that leave the markup untouched.
 
 Tier 3 is the one that cannot be dropped. Replay the actual incident: an agent
 replaces the drawer search form with a link, in the one shell that feeds every
@@ -88,6 +91,23 @@ interlock is the design.
 
 The split is: tier 2 governs presentation, where "a human read the diff" is a
 sufficient control. Tier 3 governs function, where it is not.
+
+Tier 4 is outside that split entirely, and this is why it had to be added.
+Tiers 1–3 all read markup, and the three chrome regressions that reached
+production after the gate was live changed no markup at all — they were CSS
+overrides and a runtime JS mutation, and all three tiers passed them. `accept`
+must refuse while tier 4 fails as well, for a reason unlike tier 3's: the markup
+is intact, so regenerating the golden cannot make the rule legitimate. It would
+only hide the finding.
+
+Tier 4's protected token set should be **derived per run** — every class and id
+appearing inside a chrome region and nowhere inside the canvas — not
+hand-maintained. A hand-written list goes stale the first time a content
+component picks up a Bootstrap primitive, and a check with known false positives
+gets ignored. The exception is campus-widget ids: those elements are built after
+load and never reach the markup, so nothing can derive them.
+`contracts/chrome-styling.json` carries that list; `checks/README.md` has the
+rest of the design.
 
 ## Normalization
 

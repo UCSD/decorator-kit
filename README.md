@@ -22,6 +22,12 @@ Two real regressions motivated this kit:
 Both happened under rules that already said "do not modify the header, nav, or
 footer." Prose was not the missing piece.
 
+Three more reached production after the markup gate was live, and **none of them
+changed a tag**: site CSS rebuilt the drawer search, `#chat-bubble { …
+!important }` reshaped the TritonGPT launcher, and site JS deleted an id the
+Decorator assigns at runtime and styles the mobile drawer search through. A
+markup contract cannot see any of that, which is why there is a fourth tier.
+
 ## What actually prevents it
 
 Three things, in order of how much they matter.
@@ -38,13 +44,14 @@ chrome, declared as a selector list that lives outside the markup it protects.
 In-file `<!-- DO NOT EDIT -->` markers do not work — the agent you are defending
 against can delete them too.
 
-**3. A gate that fails the build, with an interlock.** Three tiers:
+**3. A gate that fails the build, with an interlock.** Four tiers:
 
 | Tier | Asks | Escape hatch |
 |---|---|---|
 | `chrome/consistent/*` | do all routes agree? | none needed |
 | `chrome/golden/*` | does chrome match the recorded contract? | `chrome:accept`, after a human reads the diff |
 | `chrome/structure/*` | is it still a search form? | **none** |
+| `chrome/styling/*` | does site CSS or JS reach into the shell? | **none** — a reviewed exception with an expiry date |
 
 Tier 3 is the load-bearing one. When one shell feeds every route, a shell edit
 is *perfectly consistent* drift — tier 1 stays green. Tier 2 fails, but its
@@ -52,6 +59,13 @@ remedy says "accept if intentional," and an agent that believes its own change
 is intentional will do exactly that, rebaselining the regression. So
 `chrome:accept` must **refuse to write while tier 3 fails**. That refusal is the
 design.
+
+Tier 4 exists because tiers 1–3 all read markup, and the shell can be wrecked
+without touching any. Its protected token set is derived per run — every class
+and id inside a chrome region and nowhere inside the canvas — so it tracks the
+Decorator instead of a list someone has to remember to update. `chrome:accept`
+must refuse while it fails too, for a different reason: the markup is intact, so
+regenerating the golden would hide the finding rather than resolve it.
 
 ## Contents
 
@@ -63,7 +77,8 @@ scripts/compile-rules.mjs    rules/ -> CLAUDE.md, AGENTS.md, .cursorrules,
                              .github/copilot-instructions.md
 scripts/check-library.mjs    validates library/ against the sync contract
 scripts/pin-decorator.mjs    dependency-free template bootstrap
-contracts/                   portable chrome selector rules + JSON schema
+contracts/                   portable chrome selector rules and styling policy,
+                             each with a JSON schema
 checks/                      how to adopt the gate
 ```
 

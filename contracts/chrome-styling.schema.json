@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/chorta/ucsd-decorator-kit/contracts/chrome-styling.schema.json",
+  "title": "UCSD Decorator chrome styling policy",
+  "description": "Configuration for tier 4 of the chrome integrity gate: site-authored CSS and JavaScript may not target the Decorator shell. The protected token set is derived per run from the built pages, so this file carries only the parts that cannot be derived — campus-widget ids, and reviewed exceptions.",
+  "type": "object",
+  "required": ["schemaVersion"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "note": { "type": "string" },
+    "widgetTokensNote": { "type": "string" },
+    "allowNote": { "type": "string" },
+    "widgetTokens": {
+      "type": "array",
+      "description": "Ids owned by campus widgets that build their own DOM after load. These never appear in built markup and so cannot be derived from it. Ids only — widget class names collide with words a canvas component may legitimately own.",
+      "items": {
+        "type": "string",
+        "pattern": "^#[A-Za-z_][-\\w]*$"
+      }
+    },
+    "allow": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/exception" }
+    }
+  },
+  "definitions": {
+    "exception": {
+      "type": "object",
+      "required": ["file", "selector", "reason", "reviewOn"],
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "Repository-relative path of the stylesheet or script the exception applies to."
+        },
+        "selector": {
+          "type": "string",
+          "description": "For CSS, the exact selector as it appears in the rule, whitespace-collapsed. For JS, `function:<name>` — anchored to the enclosing function rather than a line, so reformatting the body does not silently drop the exception."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Why this rule is legitimate. A rule that repairs layout around site-authored markup can qualify; restyling the shell never does.",
+          "minLength": 1
+        },
+        "reviewOn": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Once this date passes the exception stops applying and reports itself as chrome/styling/expired-exception. A one-time judgement call must not quietly become permanent."
+        }
+      }
+    }
+  }
+}

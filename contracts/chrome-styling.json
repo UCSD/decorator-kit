@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "note": "Portable tier 4 starter for UC San Diego Decorator 5. Tier 4 is the rule that site-authored CSS and JS may not target the Decorator shell; it exists because every chrome regression this kit was built from left the markup intact. The protected token set is derived on every run from the built pages — every class and id appearing inside a chrome region and nowhere inside the canvas — so this file holds only what cannot be derived. Validate against contracts/chrome-styling.schema.json. See checks/README.md.",
+  "widgetTokens": [
+    "#chat-bubble",
+    "#chat-widget",
+    "#chat-header",
+    "#chat-messages",
+    "#chat-input",
+    "#chat-footer",
+    "#message-input",
+    "#send-btn",
+    "#close-btn",
+    "#menu-btn",
+    "#menu-close-btn",
+    "#info-menu",
+    "#info-menu-container",
+    "#uc-emergency"
+  ],
+  "widgetTokensNote": "Ids owned by campus widgets that build their own DOM after load: the TritonGPT launcher and panel (styled by cdn.ucsd.edu/tritongpt/widget/css/tgpt.css) and the emergency broadcast target. They never appear in built markup, so a derived token set cannot see them — this is the one hand-maintained part of tier 4. Ids only: widget class names include generic words like .message and .user that a canvas component may legitimately own.",
+  "allow": [],
+  "allowNote": "Reviewed exceptions, empty by default. A CSS entry keys on `file` plus the exact `selector`; a JS entry keys on `file` plus `function:<name>`, anchored to the function so reformatting its body does not silently drop the exception. Every entry carries a `reason` and a `reviewOn` date; past that date it stops applying and reports itself as chrome/styling/expired-exception. Grant one only when a rule repairs layout around site-authored markup, never to restyle the shell."
+}

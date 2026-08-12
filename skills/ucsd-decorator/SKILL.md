@@ -66,6 +66,11 @@ If the project ships `npm run chrome:explain` (or `checks/chrome-contract.mjs
 region, explain why the task seems to need it, and let a human decide. Do not
 reshape the shell so a content change fits.
 
+That governs the *edit*, not the investigation — diagnose first. For styling
+requests in particular, see "When you are asked to restyle the shell" below: the
+cause is usually the site's own CSS, and stopping before you look means missing
+it.
+
 ## Protected regions
 
 These are the regions that break in practice. `references/protected-regions.md`
@@ -77,7 +82,10 @@ template, never from recall.
   not a link. Replacing it with an anchor to the search page is the single most
   common regression: it looks equivalent, and it silently drops the scope
   selector and the typed query. Sites customize the `action` and the scope
-  options; the form itself is not customizable.
+  options; the form itself is not customizable. Its ids, term-input class, and
+  term-input `name` are **rewritten at runtime across 768px** — see the worked
+  example under Styling and scripting, and the breakpoint contract in
+  `references/protected-regions.md`.
 - **Desktop navbar search.** Same shape, in `nav.navbar`. Note the input `name`
   usually differs between the two forms (`search-term` desktop,
   `search-term-m` mobile). Changing either breaks the hosted search API with
@@ -92,6 +100,13 @@ template, never from recall.
   search, Today@UCSD). Load them verbatim from `cdn.ucsd.edu`. Do not inline,
   self-host, re-time, restyle, or reconfigure them. A project may defer loading
   in its own build; that is the project's code, not the widget's.
+
+  **Restyling is the one that slips through.** A widget builds its own DOM after
+  load, so its elements appear in no source file and no markup check can see
+  them — but a site stylesheet can still reach them, and `!important` makes it
+  stick. `#chat-bubble` is the TritonGPT launcher; reshaping it into a circle on
+  phones clipped the "Ask TritonGPT" label in production. Load `tgpt-loader.js`
+  and take what it renders.
 
 ## Building a page
 
@@ -126,7 +141,146 @@ population logic alone.
 
 `references/component-inventory.md` lists what lives where.
 
-## Styling
+## Styling and scripting
+
+**Style the canvas, never the shell.**
+
+Inside the canvas, styling and scripting your own components is the job — that
+is what the canvas is for, and the rules below do not restrict what you build
+there. The shell is different. It arrives already styled and already scripted
+from `cdn.ucsd.edu`, including responsive behavior that an override will not
+follow. So:
+
+- **Site CSS must not target a chrome class or id.** Not even scoped, not even
+  with `!important` — especially with `!important`.
+- **Scope every site rule under the canvas selector.** The shell and the canvas
+  share the whole Bootstrap 3 vocabulary — `.form-control`, `.input-group`,
+  `.btn`, `.container`, `.row` — so a bare `.input-group { padding: 2px }` in a
+  site stylesheet reaches into the drawer search without naming a single chrome
+  class. Write `main#main-content .input-group`, or a page/component class that
+  only exists inside the canvas.
+- **Watch what a selector cannot scope.** `@keyframes` and `@font-face` names,
+  and custom properties on `:root`, are global. Redefining one the Decorator
+  consumes restyles the shell with no chrome selector anywhere in your file.
+  Namespace yours.
+- **Site JavaScript must not rewrite ids, classes, or inline styles on a chrome
+  element.** Reading the shell is fine. Syncing `aria-expanded` on a control you
+  own is fine. Rewriting what the Decorator put there is not. `document`-wide
+  queries do not respect the canvas, so scope your selectors the same way you
+  scope CSS — and never redefine `toggleIdsAndClassesBasedOnScreenWidth` or
+  dispatch synthetic `resize` events to re-trigger it.
+- **If the chrome renders wrong, read the CDN JavaScript before you write a
+  rule.** The behavior you are fighting is usually deliberate, and the fix is
+  usually to stop something the site is already doing.
+
+This is the failure mode that gets past a markup contract, because nothing in
+the markup changes. Three of them shipped to `tritonai.ucsd.edu` at once: a
+drawer search rebuilt in site CSS, a `#chat-bubble { … !important }` block
+reshaping the TritonGPT launcher, and site JS deleting an id that `base.min.js`
+had just assigned.
+
+### Worked example: the drawer search across 768px
+
+`https://cdn.ucsd.edu/cms/decorator-5/scripts/base.min.js` defines
+`toggleIdsAndClassesBasedOnScreenWidth()`, binds it to `window.resize`, and runs
+it once on load. It exists to support the `ul.msearch` drawer-search pattern
+Cascade emits. Below 768px, scoped to `ul.msearch`, it renames:
+
+| Below 768px | 768px and up |
+|---|---|
+| `#search` | `#search-m` |
+| `#search-scope` | `#search-scope-m` |
+| `#q` | `#q-m` |
+| term input class `search-term` | `search-term-m` |
+| term input `name="search-term"` | `name="search-term-m"` |
+
+**There are two drawer-search shapes, and only one of them moves.** The ZIP
+templates ship the panel as a static `#search` inside a plain
+`ul.nav.navbar-nav.navbar-right`; it never matches `ul.msearch`, the handler
+never touches it, and it is already in the state the mobile stylesheet wants.
+Cascade adds `msearch` to that `ul` and serves the panel as `#search-m`, so
+the handler has to move it. Check which shape your project has before you reason
+about this region — and never mix them by adding `msearch` to a static drawer or
+removing it from a Cascade one.
+
+For the Cascade shape, that id swap is **the only thing that makes the drawer
+search render on phones.** `base.min.css` styles the panel through
+`.offcanvas > ul.nav.navbar-nav.navbar-right #search`, inside a
+`max-width: 767px` media query. Two consequences:
+
+1. The drawer panel's `id="search"` **deliberately duplicates** the desktop
+   navbar panel's id — always in the ZIP shape, and below 768px in the Cascade
+   shape. That is the Decorator's design, not a defect: both are styled through
+   the same id, and the drawer is hidden whenever the navbar is expanded. Site
+   code that "fixes" the duplicate for accessibility silently collapses the
+   drawer search.
+2. The `name` swap is why the drawer form submits `search-term` on phones and
+   `search-term-m` on desktop. The hosted search API
+   (`cdn.ucsd.edu/cms/search/js/search-api.js`) reads
+   `input[name="search-term"]` and `select[name="search-scope"]`, never ids.
+   Changing the input `name` breaks search with nothing visible on the page.
+
+**None of this is discoverable from the pinned sources.** Both
+`Decorator-V5.zip` and the `ucsd-decorator-v5` npm package ship templates and
+`base.css` but not the CDN scripts, and `.msearch` appears in neither. Reading
+markup from a file is still the rule — but a file will not tell you that this
+region is governed at runtime. `references/protected-regions.md` carries the
+full breakpoint contract.
+
+### When you are asked to restyle the shell
+
+"The mobile drawer search looks cramped, tighten it up" is a chrome change. It
+does not stop being one because it is CSS rather than markup, or because the
+change is small, or because the request was specific about what it wanted.
+
+The "stop and say so" rule governs the *edit*, not the investigation. Diagnose
+first — an agent that stops before step 2 never finds the site override that was
+the actual bug. Work it in this order:
+
+1. **Read the shipped presentation first.** Open the unminified `base.css` in
+   the pinned copy — same resolution order as markup, so
+   `node_modules/@ucsd/decorator/`, then `vendor/decorator-5/`, then
+   `core-template/` — and find the rules that already govern the region. For the
+   drawer search, that is the block inside
+   `@media only screen and (max-width: 767px)`. Very often what looks like a
+   missing rule is a site rule already fighting one of these, and the fix is to
+   delete the site rule. The pinned copy carries no scripts; for those, and only
+   those, read `base.min.js` from the CDN. If the pinned `base.css` and the live
+   `base.min.css` disagree about a rule you are relying on, the live CDN wins —
+   re-pin, and say that you did.
+2. **Check whether site code broke it.** Search the project's own CSS and JS for
+   the region's classes and ids, and for the bare Bootstrap classes it shares
+   with the canvas. A shell that renders wrong is much more often a site
+   override or a runtime mutation than a Decorator bug.
+3. **Prefer an existing Decorator class.** If the canvas needs a search UI that
+   looks different, build it in the canvas with Decorator classes. The shell's
+   copy stays as shipped. Give the canvas copy its own `name` and `id` values:
+   the runtime handler finds the term input with an **unscoped**
+   `document.querySelector('input[name="search-term-m"]')`, so a canvas form
+   that inherits that `name` can capture a swap meant for the drawer.
+4. **Otherwise, stop and say so.** Name the region, quote the rule you would
+   have had to write, and let a human decide. Do not add a `.msearch`,
+   `.search-content`, `#search`, `.navmenu`, `.navbar-default`, or `#chat-bubble`
+   rule to a site stylesheet to close out the task.
+
+A human may conclude the rule is warranted anyway — normally when it repairs
+layout around site-authored markup rather than restyling the shell. That answer
+is recorded as an exception in the project's chrome-styling config
+(`config/chrome-styling.json`, shaped like `contracts/chrome-styling.json` in
+this kit), with a reason and a `reviewOn` date after which it expires and
+reports itself. There is no command for it — it is a reviewed edit to a config
+file, and it is not yours to grant.
+
+Before and after any change here, verify by rendering at both viewports.
+`references/protected-regions.md` has the exact checks — the markup and the
+stylesheet cannot tell you whether the drawer search works.
+
+A breakpoint-scoped override is not a safe compromise either. The regression that
+shipped was breakpoint-*un*scoped and so leaked past 768px, but scoping it
+correctly would only have made it harder to find — the Decorator still owns the
+region, and its next release moves out from under the override either way.
+
+### The rest of the styling rules
 
 - No new `<style>` blocks and no inline `style` attributes.
 - Use the classes that already exist in the Decorator stylesheet. Read the
@@ -185,6 +339,15 @@ Read the rule name in the failure:
   the pristine Decorator template. **This cannot be cleared by running
   `chrome:accept`,** and the tool will refuse. Something functional is gone.
   Restore the markup from the vendor template.
+- **`chrome/styling/*`** — a site stylesheet or script reaches into the shell.
+  `…/stylesheet` names the selector and the protected tokens it hits;
+  `…/script` names the file and the function rewriting an element id;
+  `…/expired-exception` means a recorded exception passed its `reviewOn` date
+  and stopped applying. **This cannot be cleared by running `chrome:accept`
+  either,** and not for the same reason as `structure`: the markup is intact.
+  That is the point — the golden records markup, so regenerating it cannot make
+  the rule legitimate. Move the rule inside the canvas, or record a reviewed
+  exception with a reason and a `reviewOn` date.
 
 The failure message names the rule, prints the markup it found, and points at
 the source file to restore from. Use it; do not guess.
@@ -194,6 +357,9 @@ the source file to restore from. Use it; do not guess.
 - `references/canvas-contract.md` — the canvas boundary, and how a project declares it
 - `references/protected-regions.md` — verbatim markup for each protected region
 - `references/chrome-anatomy.md` — the shell, verified colors and dimensions
+- `references/decorator5-chrome.md` — annotated skeleton, colors, and component
+  table written from live pages; where it disagrees with the references above,
+  prefer them
 - `references/component-inventory.md` — kitchen sink, widgets, modules
 - `references/accessibility.md` — full WCAG 2.1 AA rule set
 - `references/security.md` — full IS-3 / PPM 135-3 rule set
