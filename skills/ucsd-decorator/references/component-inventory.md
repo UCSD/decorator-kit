@@ -71,7 +71,13 @@ editable value is the endpoint URL.
 
 ## Where these files live
 
-In resolution order: `node_modules/@ucsd/decorator/`, the project's pinned
-`vendor/decorator-5/`, `core-template/`, then
-`https://developer.ucsd.edu/design/v5-kitchen-sink/kitchen-sink/<component>.html`
-as a last resort.
+In resolution order: `node_modules/ucsd-decorator-v5/dist/`, the project's pinned
+`vendor/decorator-5/`, then `core-template/`. If none of those exist, install or
+pin the package — `npm i -D ucsd-decorator-v5` — rather than fetching the hosted
+kitchen sink, which is a gallery wrapped in Decorator chrome and the source of
+the demo-scaffolding regressions this page exists to prevent.
+
+Inside the package, component galleries are at `dist/kitchen-sink/` and widget
+reference pages at `dist/widgets/`. Nothing under `dist/vendor/` is Decorator
+markup — that tree holds FullCalendar and Modernizr demo pages, which will match
+a component search and are not ours.

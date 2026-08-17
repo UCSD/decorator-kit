@@ -37,12 +37,39 @@ So: resolve markup from a file, in this order.
 
 | Order | Source | When |
 |---|---|---|
-| 1 | `node_modules/@ucsd/decorator/…` | the package is installed |
+| 1 | `node_modules/ucsd-decorator-v5/dist/…` | the package is installed |
 | 2 | `vendor/decorator-5/…` (or the project's pinned copy) | a sync script pins it |
 | 3 | `core-template/…` | Antigravity Code Kit layout |
-| 4 | `https://developer.ucsd.edu/…` | nothing local exists — fetch, then pin it |
+| 4 | install or pin the package | nothing local exists |
 
-If you reach step 4, say so, and treat what you fetched as provisional.
+If you reach step 4, do not fetch a page — run `npm i -D ucsd-decorator-v5` or
+the project's pin script, and say that you had to.
+
+**`Decorator-V5.zip` on developer.ucsd.edu is not a source of truth,** even
+though the documentation still presents it as the download. Measured 2026-08
+against `ucsd-decorator-v5@5.0.4`: every template and kitchen-sink page in the
+archive differs from the package, still carrying IE9 conditional blocks the
+current build has dropped, and its `scripts/base.min.js` is three years stale
+(see "Styling and scripting"). The archive was re-cut 2026-07-22, so its
+freshness is not a signal — a recent archive is shipping old contents.
+
+That is the **on-disk path**, not the export specifier. The package declares
+`exports`, so `ucsd-decorator-v5/templates/two-column.html` resolves for a
+bundler — but you are reading files, not importing them, and the file is at
+`node_modules/ucsd-decorator-v5/dist/templates/two-column.html`.
+
+**Read only these paths inside the package.** It leaves `files` unset and so
+ships 222 files, `dist/vendor/fullcalendar-3.9.0/demos/` and
+`dist/vendor/modernizr/test/` among them. A search for something button-shaped
+can land in a third-party demo page that is not Decorator markup.
+
+| Want | Path under `node_modules/ucsd-decorator-v5/` |
+|---|---|
+| Layout templates and modules | `dist/templates/` |
+| Component galleries | `dist/kitchen-sink/` |
+| Widget reference pages | `dist/widgets/` |
+| Readable stylesheet | `dist/css/base.css` |
+| Runtime behavior | `dist/scripts/base.min.js` |
 
 ## The canvas
 
@@ -220,12 +247,23 @@ search render on phones.** `base.min.css` styles the panel through
    `input[name="search-term"]` and `select[name="search-scope"]`, never ids.
    Changing the input `name` breaks search with nothing visible on the page.
 
-**None of this is discoverable from the pinned sources.** Both
-`Decorator-V5.zip` and the `ucsd-decorator-v5` npm package ship templates and
-`base.css` but not the CDN scripts, and `.msearch` appears in neither. Reading
-markup from a file is still the rule — but a file will not tell you that this
-region is governed at runtime. `references/protected-regions.md` carries the
-full breakpoint contract.
+**Read this from the npm package**, at
+`node_modules/ucsd-decorator-v5/dist/scripts/base.min.js`, or from
+`vendor/decorator-5/scripts/base.min.js` if the project pins. That build differs
+from the live CDN copy only in minifier output style — an arrow IIFE where the
+CDN emits `function` — with identical occurrence counts for every behavioral
+marker. The CDN remains the authority when the two disagree.
+
+**`Decorator-V5.zip` will tell you this behavior does not exist.** It ships a
+`scripts/base.min.js` too, and measured 2026-08 it is an 8,024-byte build stamped
+2023-01-26 with zero occurrences of `toggleIdsAndClassesBasedOnScreenWidth`,
+`.msearch`, or `search-term-m` — against 9,871 bytes on the CDN carrying all
+three. An agent that reads the archive and reports the behavior absent has
+followed every rule in this skill and reached the wrong answer, which is why the
+archive is no longer a source of truth here and `scripts/pin-decorator.mjs` will
+not read it.
+
+`references/protected-regions.md` carries the full breakpoint contract.
 
 ### When you are asked to restyle the shell
 
@@ -239,15 +277,16 @@ the actual bug. Work it in this order:
 
 1. **Read the shipped presentation first.** Open the unminified `base.css` in
    the pinned copy — same resolution order as markup, so
-   `node_modules/@ucsd/decorator/`, then `vendor/decorator-5/`, then
-   `core-template/` — and find the rules that already govern the region. For the
-   drawer search, that is the block inside
-   `@media only screen and (max-width: 767px)`. Very often what looks like a
-   missing rule is a site rule already fighting one of these, and the fix is to
-   delete the site rule. The pinned copy carries no scripts; for those, and only
-   those, read `base.min.js` from the CDN. If the pinned `base.css` and the live
-   `base.min.css` disagree about a rule you are relying on, the live CDN wins —
-   re-pin, and say that you did.
+   `node_modules/ucsd-decorator-v5/dist/css/base.css`, then
+   `vendor/decorator-5/styles/base.css`, then `core-template/` — and find the
+   rules that already govern the region. For the drawer search, that is the
+   block inside `@media only screen and (max-width: 767px)`. Very often what
+   looks like a missing rule is a site rule already fighting one of these, and
+   the fix is to delete the site rule. For behavior, read
+   `node_modules/ucsd-decorator-v5/dist/scripts/base.min.js` or
+   `vendor/decorator-5/scripts/base.min.js`. If a pinned file and the live CDN
+   disagree about a rule you are relying on, the live CDN wins — re-pin, and say
+   that you did.
 2. **Check whether site code broke it.** Search the project's own CSS and JS for
    the region's classes and ids, and for the bare Bootstrap classes it shares
    with the canvas. A shell that renders wrong is much more often a site
@@ -367,10 +406,13 @@ the source file to restore from. Use it; do not guess.
 
 ## Sources
 
-- UCSD Decorator archive: `https://developer.ucsd.edu/_files/decorator-downloads/v5/Decorator-V5.zip`
+- **Decorator package (source of truth): `https://www.npmjs.com/package/ucsd-decorator-v5`**
 - Decorator source: `https://github.com/UCSD/Decorator`
-- Kitchen sink: `https://developer.ucsd.edu/design/v5-kitchen-sink/kitchen-sink/index.html`
+- Served assets: `https://cdn.ucsd.edu/cms/decorator-5/`
 - Developer docs: `https://developer.ucsd.edu/design/decorator/index.html`
+- Kitchen sink: `https://developer.ucsd.edu/design/v5-kitchen-sink/kitchen-sink/index.html`
+- `Decorator-V5.zip` — **not a source of truth.** Still linked from the docs;
+  behind the package on every file. See `references/distribution.md`.
 - Accessibility: `https://accessibility.ucsd.edu/`
 - Brand: `https://brand.ucsd.edu/`
 

@@ -36,7 +36,7 @@ root.
 ## Scope
 
 Never modify navigation inside `core-template/`, `vendor/decorator-5/`, or
-`node_modules/@ucsd/decorator/`. Those are read-only reference copies.
+`node_modules/ucsd-decorator-v5/`. Those are read-only reference copies.
 
 ## What is not navigation
 

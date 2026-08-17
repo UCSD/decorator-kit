@@ -32,8 +32,8 @@ reshape the shell so a content change fits.
 
 ### The pristine template is read-only
 
-`core-template/`, `vendor/decorator-5/`, and `node_modules/@ucsd/decorator/` are
-reference copies. Never create, modify, or store working files inside them.
+`core-template/`, `vendor/decorator-5/`, and `node_modules/ucsd-decorator-v5/`
+are reference copies. Never create, modify, or store working files inside them.
 
 ### Never reconstruct markup from a rendered DOM
 
@@ -49,9 +49,29 @@ regressions:
 3. Kitchen-sink pages are galleries wrapped in Decorator chrome. Copying what
    "looks like" a component fuses demo scaffolding into production markup.
 
-Resolution order for markup: `node_modules/@ucsd/decorator/` →
-`vendor/decorator-5/` → `core-template/` → `developer.ucsd.edu`. If you reach
-the last one, say so and treat the result as provisional.
+Resolution order for markup: `node_modules/ucsd-decorator-v5/dist/` →
+`vendor/decorator-5/` → `core-template/`. If none of those exist, install or pin
+the package rather than fetching a page — `npm i -D ucsd-decorator-v5`, or run
+`pin-decorator.mjs`. Say so if you had to.
+
+**`Decorator-V5.zip` on developer.ucsd.edu is not a source of truth.** Measured
+2026-08 against `ucsd-decorator-v5@5.0.4`, the archive is behind on every file it
+ships, and its `scripts/base.min.js` is a 2023 build missing the runtime behavior
+that governs the drawer search. Read the npm package.
+
+**Read only these paths inside the npm package.** It ships 222 files, including
+`dist/vendor/fullcalendar-3.9.0/demos/` and `dist/vendor/modernizr/test/`, so a
+search for something button-shaped can land in a third-party demo page:
+
+| Want | Path |
+|---|---|
+| Layout templates and modules | `node_modules/ucsd-decorator-v5/dist/templates/` |
+| Component galleries | `node_modules/ucsd-decorator-v5/dist/kitchen-sink/` |
+| Widget reference pages | `node_modules/ucsd-decorator-v5/dist/widgets/` |
+| Readable stylesheet | `node_modules/ucsd-decorator-v5/dist/css/base.css` |
+| Runtime behavior | `node_modules/ucsd-decorator-v5/dist/scripts/base.min.js` |
+
+Nothing under `dist/vendor/` is Decorator markup.
 
 ### Template selection requires an explicit instruction
 
@@ -128,10 +148,18 @@ That id swap is the only thing that makes the drawer search render on phones:
   `input[name="search-term"]` and `select[name="search-scope"]`, never ids.
   Changing the input `name` breaks search with nothing visible on the page.
 
-None of this is in `Decorator-V5.zip` or the `ucsd-decorator-v5` npm package —
-both ship templates and `base.css` but not the CDN scripts, and `.msearch`
-appears in neither. Reading markup from a file is still the rule; a file just
-will not tell you that this region is governed at runtime.
+Read this from `node_modules/ucsd-decorator-v5/dist/scripts/base.min.js` (or
+`vendor/decorator-5/scripts/base.min.js` if the project pins). That build differs
+from the live `cdn.ucsd.edu` copy only in minifier output style, with identical
+occurrence counts for every behavioral marker; the CDN is still the authority
+when the two disagree.
+
+**Do not read it from `Decorator-V5.zip`.** The archive ships a file by that
+name, and that is the trap: measured 2026-08 it is an 8,024-byte build stamped
+2023-01-26 with no `toggleIdsAndClassesBasedOnScreenWidth`, no `.msearch`, and no
+`search-term-m`, against 9,871 bytes on the CDN carrying all three. Reading it
+and concluding this behavior does not exist is the wrong answer arrived at
+honestly.
 
 ### Verified chrome facts
 
@@ -261,7 +289,7 @@ root.
 ### Scope
 
 Never modify navigation inside `core-template/`, `vendor/decorator-5/`, or
-`node_modules/@ucsd/decorator/`. Those are read-only reference copies.
+`node_modules/ucsd-decorator-v5/`. Those are read-only reference copies.
 
 ### What is not navigation
 

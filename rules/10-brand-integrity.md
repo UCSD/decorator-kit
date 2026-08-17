@@ -62,10 +62,18 @@ That id swap is the only thing that makes the drawer search render on phones:
   `input[name="search-term"]` and `select[name="search-scope"]`, never ids.
   Changing the input `name` breaks search with nothing visible on the page.
 
-None of this is in `Decorator-V5.zip` or the `ucsd-decorator-v5` npm package —
-both ship templates and `base.css` but not the CDN scripts, and `.msearch`
-appears in neither. Reading markup from a file is still the rule; a file just
-will not tell you that this region is governed at runtime.
+Read this from `node_modules/ucsd-decorator-v5/dist/scripts/base.min.js` (or
+`vendor/decorator-5/scripts/base.min.js` if the project pins). That build differs
+from the live `cdn.ucsd.edu` copy only in minifier output style, with identical
+occurrence counts for every behavioral marker; the CDN is still the authority
+when the two disagree.
+
+**Do not read it from `Decorator-V5.zip`.** The archive ships a file by that
+name, and that is the trap: measured 2026-08 it is an 8,024-byte build stamped
+2023-01-26 with no `toggleIdsAndClassesBasedOnScreenWidth`, no `.msearch`, and no
+`search-term-m`, against 9,871 bytes on the CDN carrying all three. Reading it
+and concluding this behavior does not exist is the wrong answer arrived at
+honestly.
 
 ## Verified chrome facts
 

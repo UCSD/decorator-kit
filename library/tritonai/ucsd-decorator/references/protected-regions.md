@@ -4,8 +4,14 @@ Verbatim markup for the regions that break in practice. Restore from here or
 from the project's pinned vendor template — never from recall, and never from a
 rendered DOM.
 
-Markup below is from `Decorator-V5.zip` → `templates/two-column.html`, pinned
-2026-07-22. Site-specific values are called out per region.
+Markup below is from `templates/two-column.html`. It was originally transcribed
+from `Decorator-V5.zip` (pinned 2026-07-22) and re-verified 2026-08 against
+`ucsd-decorator-v5@5.0.4`, now the source of truth: normalizing whitespace and
+comments, the two templates' bodies are identical apart from one stray space in
+demo filler copy, so every region below holds for both. The channels diverge only
+in the `<head>` — the archive still carries IE9 conditional blocks the current
+build has dropped — and in `scripts/base.min.js`, where the archive is three
+years behind. Site-specific values are called out per region.
 
 ---
 
@@ -231,12 +237,26 @@ measuring. Reading earlier reads the build's markup, not the rendered result.
 (On a ZIP-shape page the function still exists — `base.min.js` defines it
 unconditionally — it just matches nothing.)
 
-### None of this is in the pinned sources
+### Whether this is in your pinned source depends on which one you pinned
 
-`Decorator-V5.zip` and the `ucsd-decorator-v5` npm package ship the templates
-and `base.css`, but not the CDN scripts, and `.msearch` appears in neither. An
-agent following this skill's own "read it from a file" rule will never see the
-behavior that governs this region. That is why it is written down here.
+Verified 2026-08:
+
+Measured 2026-08:
+
+| Source | `scripts/base.min.js` | Has this behavior? |
+|---|---|---|
+| `ucsd-decorator-v5@5.0.4` | 9,852 bytes | Yes |
+| `cdn.ucsd.edu` (live) | 9,871 bytes | Yes |
+| `Decorator-V5.zip` | 8,024 bytes, stamped 2023-01-26 | **No.** Zero occurrences of `toggleIdsAndClassesBasedOnScreenWidth`, `.msearch`, or `search-term-m`. |
+
+The archive is the trap, and it is why this region is written down here: it ships
+a file with the right name and a build three years stale, so an agent following
+this skill's own "read it from a file" rule reads it and concludes the behavior
+does not exist. `scripts/pin-decorator.mjs` no longer reads the archive at all.
+
+The npm and CDN builds differ only in minifier output style, an arrow IIFE where
+the CDN emits `function`, with identical occurrence counts for every marker
+above.
 
 ---
 

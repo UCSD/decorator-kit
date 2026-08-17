@@ -28,8 +28,8 @@ reshape the shell so a content change fits.
 
 ## The pristine template is read-only
 
-`core-template/`, `vendor/decorator-5/`, and `node_modules/@ucsd/decorator/` are
-reference copies. Never create, modify, or store working files inside them.
+`core-template/`, `vendor/decorator-5/`, and `node_modules/ucsd-decorator-v5/`
+are reference copies. Never create, modify, or store working files inside them.
 
 ## Never reconstruct markup from a rendered DOM
 
@@ -45,9 +45,29 @@ regressions:
 3. Kitchen-sink pages are galleries wrapped in Decorator chrome. Copying what
    "looks like" a component fuses demo scaffolding into production markup.
 
-Resolution order for markup: `node_modules/@ucsd/decorator/` →
-`vendor/decorator-5/` → `core-template/` → `developer.ucsd.edu`. If you reach
-the last one, say so and treat the result as provisional.
+Resolution order for markup: `node_modules/ucsd-decorator-v5/dist/` →
+`vendor/decorator-5/` → `core-template/`. If none of those exist, install or pin
+the package rather than fetching a page — `npm i -D ucsd-decorator-v5`, or run
+`pin-decorator.mjs`. Say so if you had to.
+
+**`Decorator-V5.zip` on developer.ucsd.edu is not a source of truth.** Measured
+2026-08 against `ucsd-decorator-v5@5.0.4`, the archive is behind on every file it
+ships, and its `scripts/base.min.js` is a 2023 build missing the runtime behavior
+that governs the drawer search. Read the npm package.
+
+**Read only these paths inside the npm package.** It ships 222 files, including
+`dist/vendor/fullcalendar-3.9.0/demos/` and `dist/vendor/modernizr/test/`, so a
+search for something button-shaped can land in a third-party demo page:
+
+| Want | Path |
+|---|---|
+| Layout templates and modules | `node_modules/ucsd-decorator-v5/dist/templates/` |
+| Component galleries | `node_modules/ucsd-decorator-v5/dist/kitchen-sink/` |
+| Widget reference pages | `node_modules/ucsd-decorator-v5/dist/widgets/` |
+| Readable stylesheet | `node_modules/ucsd-decorator-v5/dist/css/base.css` |
+| Runtime behavior | `node_modules/ucsd-decorator-v5/dist/scripts/base.min.js` |
+
+Nothing under `dist/vendor/` is Decorator markup.
 
 ## Template selection requires an explicit instruction
 
