@@ -1,0 +1,49 @@
+# Two jobs, answering two different questions.
+#
+#   contract  Are this project's generated instruction files current with the
+#             installed ucsd-decorator-kit? Fails the pull request if a kit
+#             upgrade landed without `npm run decorator:sync`.
+#
+#   drift     Has the Decorator moved upstream without an npm release? Dependabot
+#             watches the registry; nothing watches a push to UCSD/Decorator or a
+#             cdn.ucsd.edu deploy. This job does, weekly, and reports rather than
+#             failing a branch — upstream moving is news, not a broken build.
+name: Decorator
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 13 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Generated rule files are current with the installed kit
+        run: npm run decorator:check
+
+  drift:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Report whether the Decorator moved upstream
+        run: npm run decorator:drift

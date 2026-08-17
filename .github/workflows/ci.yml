@@ -1,0 +1,29 @@
+# The kit's own gate. Three things must hold on every push:
+#
+#   * the committed CLAUDE.md / AGENTS.md / .cursorrules /
+#     copilot-instructions.md are current with rules/ — they are generated, and a
+#     hand-edit to one of them is drift by definition
+#   * library/ still satisfies the Skills Library sync contract, so a skill
+#     cannot reach the public page in a shape that makes the sync throw
+#   * `add` still refuses to write AGENTS.md, which is the property that keeps
+#     this kit safe to run inside a repository that has its own agent contract
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test

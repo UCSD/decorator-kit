@@ -1,0 +1,27 @@
+# Keeps a Decorator project current with one mechanism for both dependencies.
+#
+#   ucsd-decorator-v5   the Decorator itself — templates, base.css, base.min.js
+#   ucsd-decorator-kit  the rules and the skill this project was set up from
+#
+# A release of either arrives as a pull request with a diff. After a kit bump,
+# run `npm run decorator:sync` to rewrite the generated instruction files;
+# `npm run decorator:check` fails in CI until you do.
+#
+# Dependabot only fires on a published release. A push to UCSD/Decorator or a
+# cdn.ucsd.edu deploy without an npm publish is invisible to it — that is what
+# the scheduled `decorator:drift` job in decorator.yml is for.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - decorator
+    groups:
+      decorator:
+        patterns:
+          - ucsd-decorator-v5
+          - ucsd-decorator-kit

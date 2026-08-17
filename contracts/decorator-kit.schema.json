@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/UCSD/decorator-kit/contracts/decorator-kit.schema.json",
+  "title": "decorator-kit.json",
+  "description": "Written into a project by `ucsd-decorator-kit init` or `add`. Declares the writable canvas, where Decorator markup is read from, and exactly which files the kit owns in this project.",
+  "type": "object",
+  "required": ["kitVersion", "canvas", "manages"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "kitVersion": {
+      "type": "string",
+      "description": "The ucsd-decorator-kit version that last wrote the managed files. `check` compares against the installed version and fails when they differ."
+    },
+    "canvas": {
+      "type": "string",
+      "description": "CSS selector for the one writable region. Everything else on the page is chrome. `main#main-content` for a plain Decorator template and for tritonai-website; `div#ag-app-canvas` for the Antigravity Code Kit.",
+      "examples": ["main#main-content", "div#ag-app-canvas"]
+    },
+    "decorator": {
+      "type": "object",
+      "description": "Where Decorator markup is resolved from.",
+      "additionalProperties": false,
+      "properties": {
+        "package": { "type": "string", "const": "ucsd-decorator-v5" },
+        "readFrom": {
+          "type": "string",
+          "description": "On-disk path agents read templates, base.css and base.min.js from — not an import specifier."
+        }
+      }
+    },
+    "manages": {
+      "type": "array",
+      "description": "Exactly the paths this kit owns here. `sync` rewrites these and nothing else; `check` verifies these and nothing else. A file absent from this list can never be reached by either command — which is how a repository keeps its own AGENTS.md when `add` declined to write one.",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    }
+  }
+}

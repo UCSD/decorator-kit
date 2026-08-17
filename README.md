@@ -3,6 +3,65 @@
 The official agent-facing contract for building on the UC San Diego Decorator 5
 design system.
 
+## Getting started
+
+Building a new UC San Diego site with an AI agent:
+
+```bash
+mkdir my-site && cd my-site
+npx ucsd-decorator-kit@latest init
+```
+
+That installs `ucsd-decorator-v5` — the Decorator itself — plus this kit, writes
+the rules in the format each AI tool reads, installs the skill, and wires
+Dependabot.
+
+Then open Claude Code, Cursor, Copilot or Antigravity in that directory and
+describe the site you want. There is nothing to point the tool at: the rule files
+sit at the project root, which is where all of them already look, and they name
+`node_modules/ucsd-decorator-v5/dist/` as the source of truth for markup.
+
+The agent will ask which layout to start from rather than picking one. That is
+deliberate — choosing a template unasked is exactly the class of decision this
+kit exists to prevent.
+
+### Already have a project
+
+```bash
+npx ucsd-decorator-kit add
+```
+
+`add` installs the rules and the skill and touches nothing else. It does not
+modify `package.json`, does not add CI, and **never writes `AGENTS.md`** — that
+filename is also the convention for a repository's own agent contract, and yours
+is the more specific document. Pass `--with-decorator` to add the Decorator
+dependency, `--with-ci` for the Dependabot config and workflow.
+
+### Staying current
+
+| Command | Does |
+|---|---|
+| `npx ucsd-decorator-kit sync` | rewrite the generated files after a kit upgrade |
+| `npx ucsd-decorator-kit check` | fail if they are stale — wire this into CI |
+| `npx ucsd-decorator-kit drift` | report whether the Decorator moved upstream |
+
+Both `ucsd-decorator-v5` and `ucsd-decorator-kit` are devDependencies, so
+Dependabot opens a pull request when either moves: the Decorator and the rules
+update through one mechanism. `check` fails the build if a kit upgrade landed
+without a `sync`, so a project cannot quietly run last year's rules.
+
+`drift` covers the gap Dependabot cannot see — a push to `UCSD/Decorator` or a
+`cdn.ucsd.edu` deploy with no npm release.
+
+### Where markup comes from
+
+`ucsd-decorator-v5` on npm is the source of truth. **`Decorator-V5.zip` is not**,
+despite being the download the documentation links to: measured 2026-08, the
+archive is behind the package on every file it ships, and its
+`scripts/base.min.js` is a January 2023 build missing the runtime behavior that
+governs the mobile drawer search. See
+[`references/distribution.md`](skills/ucsd-decorator/references/distribution.md).
+
 ## The problem this solves
 
 The Decorator shell is identical on every page of a site. That is the point of
@@ -70,16 +129,20 @@ regenerating the golden would hide the finding rather than resolve it.
 ## Contents
 
 ```
+bin/cli.mjs                  init / add / sync / check / drift
+rules/                       canonical rule source
 skills/ucsd-decorator/       the skill — SKILL.md plus references
 library/                     Skills Library publishing staging (see below)
-rules/                       canonical rule source
+templates/                   Dependabot config and workflow written into projects
+scripts/lib/rules.mjs        the renderer, shared by the CLI and the compiler
 scripts/compile-rules.mjs    rules/ -> CLAUDE.md, AGENTS.md, .cursorrules,
                              .github/copilot-instructions.md
 scripts/check-library.mjs    validates library/ against the sync contract
-scripts/pin-decorator.mjs    dependency-free template bootstrap
+scripts/pin-decorator.mjs    dependency-free Decorator pinning, npm only
 contracts/                   portable chrome selector rules and styling policy,
                              each with a JSON schema
 checks/                      how to adopt the gate
+test/                        including the AGENTS.md refusal
 ```
 
 `CLAUDE.md`, `AGENTS.md`, `.cursorrules`, and `.github/copilot-instructions.md`
@@ -89,15 +152,21 @@ are **generated**. Edit `rules/` and run:
 node scripts/compile-rules.mjs
 ```
 
-`--check` verifies the committed output is current; wire it into CI.
+`--check` verifies the committed output is current; `npm test` runs it along with
+the library contract and the CLI tests.
 
-## Using the skill
+## Using the skill without the CLI
 
-**Claude Code** — install as a plugin, or copy `skills/ucsd-decorator/` into a
-project's `.claude/skills/`.
+**Claude Code** — install as a plugin (`/plugin marketplace add UCSD/decorator-kit`),
+or copy `skills/ucsd-decorator/` into a project's `.claude/skills/`.
 
 **Cursor, Copilot, Antigravity** — the compiled instruction files are picked up
 automatically once present at the project root.
+
+**Any tool that reads `AGENTS.md`** — read this repository's copy in place, in a
+checkout beside your project. Do not copy it in: your repository's own
+`AGENTS.md`, if it has one, is the more specific contract and the more important
+of the two. `add` will not write that file for the same reason.
 
 ## Publishing to the TritonAI Skills Library
 
