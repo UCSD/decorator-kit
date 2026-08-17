@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/chorta/ucsd-decorator-kit/contracts/chrome-styling.schema.json",
+  "$id": "https://github.com/UCSD/decorator-kit/contracts/chrome-styling.schema.json",
   "title": "UCSD Decorator chrome styling policy",
   "description": "Configuration for tier 4 of the chrome integrity gate: site-authored CSS and JavaScript may not target the Decorator shell. The protected token set is derived per run from the built pages, so this file carries only the parts that cannot be derived — campus-widget ids, and reviewed exceptions.",
   "type": "object",

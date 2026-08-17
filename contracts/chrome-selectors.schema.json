@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/chorta/ucsd-decorator-kit/contracts/chrome-selectors.schema.json",
+  "$id": "https://github.com/UCSD/decorator-kit/contracts/chrome-selectors.schema.json",
   "title": "UCSD Decorator chrome selector contract",
   "description": "Declarative require/forbid rules evaluated against the protected chrome regions of a rendered Decorator page. This is the tier that encodes what the chrome is FOR, so it must not be satisfiable by regenerating a golden fingerprint.",
   "type": "object",

@@ -44,4 +44,4 @@ adds what was missing:
 - A three-tier chrome contract that CI can enforce.
 
 Source and full documentation:
-<https://github.com/chorta/ucsd-decorator-kit>
+<https://github.com/UCSD/decorator-kit>

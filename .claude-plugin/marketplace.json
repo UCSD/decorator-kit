@@ -6,7 +6,7 @@
   "metadata": {
     "description": "The official agent-facing contract for building on the UC San Diego Decorator 5 design system.",
     "version": "1.0.0",
-    "repository": "https://github.com/chorta/ucsd-decorator-kit"
+    "repository": "https://github.com/UCSD/decorator-kit"
   },
   "plugins": [
     {
