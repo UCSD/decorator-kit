@@ -148,6 +148,28 @@ ask. Present the options:
 Copy the whole template to the project root under a new name, then work only
 inside its canvas. Do not overwrite `index.html` unless asked.
 
+**Then rewrite its `<link>`/`<script>` paths before touching anything else.**
+The template ships pointed at its own location inside the package —
+`../css/base.min.css`, `../scripts/base.min.js`, and so on — and those paths
+keep resolving once the file is copied to the project root, because the same
+`node_modules/` tree is sitting right there. That is exactly what makes it
+easy to ship by accident: the page loads and looks almost right. Point every
+one at the CDN instead — see "Asset stack" in `references/chrome-anatomy.md`
+for the exact URLs — and never leave a page linking
+`node_modules/ucsd-decorator-v5/…` for its CSS or JS. The vendored copy is for
+reading. Its compiled `base.min.css` also has a live color defect the CDN copy
+does not (see "The rest of the styling rules" below), so serving it doesn't
+just break the rule, it visibly breaks the active nav state.
+
+**`two-column.html` and `three-column.html` order their columns with
+`pull-right`, not markup order.** Both put the wide canvas section first in the
+file and the narrower nav/info section second, then push the first one to the
+far side with `class="… pull-right"`. Nothing pulls the nav/info section — it
+lands on the remaining side because the wide one no longer occupies it. Trim
+the template's demo content down to real content and leave that class alone;
+dropping it while cleaning up the wrapper is the single easiest way to
+silently swap which side the canvas and the sub-nav render on.
+
 ## Components, widgets, and modules
 
 **Components** (`kitchen-sink/*.html`) are galleries. Locate the one variation
@@ -327,7 +349,14 @@ region, and its next release moves out from under the override either way.
   the minified build from the CDN.
 - Keep Decorator CSS and JS pointed at `cdn.ucsd.edu`. Do not vendor them for
   serving. Pinning a copy for reference and contract derivation is a different
-  thing and is fine.
+  thing and is fine. This is not only policy: measured 2026-08, the pinned
+  `ucsd-decorator-v5@5.0.4` package's compiled `base.min.css` has eleven
+  declarations where the minifier turned a valid percentage `rgb()` color
+  invalid by stripping the unit off a zero channel, and browsers silently drop
+  an invalid declaration. The active-nav background is one of them — a page
+  serving this file instead of the CDN gets Bootstrap's default gray `#e7e7e7`
+  instead of `#004268`. The live CDN copy has zero `rgb()` functions in it;
+  every color ships as hex.
 - Icons are Bootstrap 3 Glyphicons plus the Decorator social icons. Font Awesome
   is not part of the current surface.
 

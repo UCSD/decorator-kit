@@ -75,6 +75,25 @@ name, and that is the trap: measured 2026-08 it is an 8,024-byte build stamped
 and concluding this behavior does not exist is the wrong answer arrived at
 honestly.
 
+## The vendored npm package's CSS has a live color defect
+
+Measured 2026-08 against `ucsd-decorator-v5@5.0.4`: `dist/css/base.min.css`
+re-expresses some of the Decorator's hex colors as percentage `rgb()` — the
+active-nav dark blue is `rgb(0%, 25.7862112587%, 40.7843137255%)` in the
+unminified `base.css` — and the package's own minifier then strips the unit
+off a bare-zero channel, producing `rgb(0,25.7862112587%,40.7843137255%)`.
+Mixing a number and percentages in one legacy `rgb()` is invalid CSS, so a
+standards-compliant browser drops the whole declaration and falls through to
+whatever rule is next in the cascade. Eleven declarations in the file are
+corrupted this way; the active-nav background is the one that gets noticed,
+because it falls back to Bootstrap's default `#e7e7e7` instead of `#004268`.
+
+The live `https://cdn.ucsd.edu/cms/decorator-5/styles/base.min.css` has none
+of this — every color in it ships as plain hex, zero `rgb()` functions in the
+whole file. This is why "Keep Decorator CSS and JS pointed at `cdn.ucsd.edu`"
+above is a hard requirement, not a style preference: a page that links the
+vendored copy instead of the CDN inherits this defect.
+
 ## Verified chrome facts
 
 Agents get these wrong from memory. They are verified against live production.
@@ -84,7 +103,10 @@ Agents get these wrong from memory. They are verified against live production.
 - There is no gold rule on the white title band.
 - The `.navbar-default` active item is dark blue `#004268`, not a gold
   underline. Do not apply the `.layout-navbar .navbar-list` underline pattern to
-  Bootstrap `.navbar-default .navbar-nav` tabs.
+  Bootstrap `.navbar-default .navbar-nav` tabs. If it renders gray instead, the
+  page is almost certainly linking Decorator CSS from `node_modules` instead of
+  `cdn.ucsd.edu` — see "The vendored npm package's CSS has a live color defect"
+  above.
 - The mobile `MENU` label lives **inside** `button.navbar-toggle`, in
   `.mobile-nav-icon`, alongside `.mobile-nav-bars` (exactly three
   `span.icon-bar`).

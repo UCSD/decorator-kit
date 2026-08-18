@@ -81,3 +81,46 @@ pause, present the options, and wait:
 
 Once chosen, copy the whole template to the project root under a new name and
 work only inside its canvas. Do not overwrite `index.html` unless asked.
+
+## Rewrite the copied template's asset paths before anything else
+
+The reference template's `<head>` and script block point at its own location
+inside the package — `../css/bootstrap.min.css`, `../css/base.min.css`,
+`../scripts/*.min.js` — because that is where the file sits inside
+`node_modules/ucsd-decorator-v5/dist/templates/`. Those paths keep resolving
+after the copy, since the same `node_modules/` tree is still there from the
+project root. That is what makes this easy to miss: the page loads and looks
+almost right.
+
+Rewrite every one of them to the CDN instead:
+
+| Ships as | Rewrite to |
+|---|---|
+| `../css/bootstrap.min.css` | `https://cdn.ucsd.edu/cms/decorator-5/styles/bootstrap.min.css` |
+| `../css/base.min.css` | `https://cdn.ucsd.edu/cms/decorator-5/styles/base.min.css` |
+| `../scripts/modernizr.min.js` | `https://cdn.ucsd.edu/cms/decorator-5/scripts/modernizr.min.js` |
+| `../scripts/jquery.min.js` | `https://cdn.ucsd.edu/cms/decorator-5/scripts/jquery.min.js` |
+| `../scripts/bootstrap.min.js` | `https://cdn.ucsd.edu/cms/decorator-5/scripts/bootstrap.min.js` |
+| `../scripts/vendor.min.js` | `https://cdn.ucsd.edu/cms/decorator-5/scripts/vendor.min.js` |
+| `../scripts/base.min.js` | `https://cdn.ucsd.edu/cms/decorator-5/scripts/base.min.js` |
+
+Never leave a shipped page loading `node_modules/ucsd-decorator-v5/…` for its
+CSS or JS. That is not only the rule in "Brand integrity" — the package's own
+compiled `base.min.css` has a live color defect the CDN copy does not (see
+"Verified chrome facts" there), so serving the vendored copy doesn't just
+break policy, it visibly breaks the active nav state.
+
+## The two- and three-column split is a float order, not a markup order
+
+Both templates put the wider canvas section first in the file and the
+narrower nav/info section second, then push the first one to the far side with
+`pull-right` — `two-column.html`'s canvas section is
+`class="col-xs-12 col-md-9 main-section pull-right"`. Nothing pulls the
+nav/info section; it renders on the remaining side because the wide section no
+longer occupies it.
+
+Drop `pull-right` while trimming the template's demo modules down to real
+content — it reads as decorative on a section that is about to be rewritten
+anyway — and both columns fall back to plain source order: canvas on the left,
+nav on the right. Keep the class and the DOM order exactly as shipped; replace
+only what is inside each `<section>`.

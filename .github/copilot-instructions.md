@@ -86,6 +86,49 @@ pause, present the options, and wait:
 Once chosen, copy the whole template to the project root under a new name and
 work only inside its canvas. Do not overwrite `index.html` unless asked.
 
+### Rewrite the copied template's asset paths before anything else
+
+The reference template's `<head>` and script block point at its own location
+inside the package — `../css/bootstrap.min.css`, `../css/base.min.css`,
+`../scripts/*.min.js` — because that is where the file sits inside
+`node_modules/ucsd-decorator-v5/dist/templates/`. Those paths keep resolving
+after the copy, since the same `node_modules/` tree is still there from the
+project root. That is what makes this easy to miss: the page loads and looks
+almost right.
+
+Rewrite every one of them to the CDN instead:
+
+| Ships as | Rewrite to |
+|---|---|
+| `../css/bootstrap.min.css` | `https://cdn.ucsd.edu/cms/decorator-5/styles/bootstrap.min.css` |
+| `../css/base.min.css` | `https://cdn.ucsd.edu/cms/decorator-5/styles/base.min.css` |
+| `../scripts/modernizr.min.js` | `https://cdn.ucsd.edu/cms/decorator-5/scripts/modernizr.min.js` |
+| `../scripts/jquery.min.js` | `https://cdn.ucsd.edu/cms/decorator-5/scripts/jquery.min.js` |
+| `../scripts/bootstrap.min.js` | `https://cdn.ucsd.edu/cms/decorator-5/scripts/bootstrap.min.js` |
+| `../scripts/vendor.min.js` | `https://cdn.ucsd.edu/cms/decorator-5/scripts/vendor.min.js` |
+| `../scripts/base.min.js` | `https://cdn.ucsd.edu/cms/decorator-5/scripts/base.min.js` |
+
+Never leave a shipped page loading `node_modules/ucsd-decorator-v5/…` for its
+CSS or JS. That is not only the rule in "Brand integrity" — the package's own
+compiled `base.min.css` has a live color defect the CDN copy does not (see
+"Verified chrome facts" there), so serving the vendored copy doesn't just
+break policy, it visibly breaks the active nav state.
+
+### The two- and three-column split is a float order, not a markup order
+
+Both templates put the wider canvas section first in the file and the
+narrower nav/info section second, then push the first one to the far side with
+`pull-right` — `two-column.html`'s canvas section is
+`class="col-xs-12 col-md-9 main-section pull-right"`. Nothing pulls the
+nav/info section; it renders on the remaining side because the wide section no
+longer occupies it.
+
+Drop `pull-right` while trimming the template's demo modules down to real
+content — it reads as decorative on a section that is about to be rewritten
+anyway — and both columns fall back to plain source order: canvas on the left,
+nav on the right. Keep the class and the DOM order exactly as shipped; replace
+only what is inside each `<section>`.
+
 ---
 
 ## Brand integrity
@@ -161,6 +204,25 @@ name, and that is the trap: measured 2026-08 it is an 8,024-byte build stamped
 and concluding this behavior does not exist is the wrong answer arrived at
 honestly.
 
+### The vendored npm package's CSS has a live color defect
+
+Measured 2026-08 against `ucsd-decorator-v5@5.0.4`: `dist/css/base.min.css`
+re-expresses some of the Decorator's hex colors as percentage `rgb()` — the
+active-nav dark blue is `rgb(0%, 25.7862112587%, 40.7843137255%)` in the
+unminified `base.css` — and the package's own minifier then strips the unit
+off a bare-zero channel, producing `rgb(0,25.7862112587%,40.7843137255%)`.
+Mixing a number and percentages in one legacy `rgb()` is invalid CSS, so a
+standards-compliant browser drops the whole declaration and falls through to
+whatever rule is next in the cascade. Eleven declarations in the file are
+corrupted this way; the active-nav background is the one that gets noticed,
+because it falls back to Bootstrap's default `#e7e7e7` instead of `#004268`.
+
+The live `https://cdn.ucsd.edu/cms/decorator-5/styles/base.min.css` has none
+of this — every color in it ships as plain hex, zero `rgb()` functions in the
+whole file. This is why "Keep Decorator CSS and JS pointed at `cdn.ucsd.edu`"
+above is a hard requirement, not a style preference: a page that links the
+vendored copy instead of the CDN inherits this defect.
+
 ### Verified chrome facts
 
 Agents get these wrong from memory. They are verified against live production.
@@ -170,7 +232,10 @@ Agents get these wrong from memory. They are verified against live production.
 - There is no gold rule on the white title band.
 - The `.navbar-default` active item is dark blue `#004268`, not a gold
   underline. Do not apply the `.layout-navbar .navbar-list` underline pattern to
-  Bootstrap `.navbar-default .navbar-nav` tabs.
+  Bootstrap `.navbar-default .navbar-nav` tabs. If it renders gray instead, the
+  page is almost certainly linking Decorator CSS from `node_modules` instead of
+  `cdn.ucsd.edu` — see "The vendored npm package's CSS has a live color defect"
+  above.
 - The mobile `MENU` label lives **inside** `button.navbar-toggle`, in
   `.mobile-nav-icon`, alongside `.mobile-nav-bars` (exactly three
   `span.icon-bar`).
