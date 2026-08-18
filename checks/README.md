@@ -82,16 +82,22 @@ optional and absent by default.
 ## Why this used to say something different
 
 Earlier versions of this file told you to go copy an implementation out of
-`TritonAI/tritonai-website` and adapt it — on the reasoning that shipping one
-copy here and letting every consuming project fork it would "recreate exactly
-the drift problem the gate exists to prevent." That reasoning has it
-backwards: N hand-ported copies, each starting from a fork of one downstream
-site's version, is *how* you get drift, not how you avoid it. A shared
-implementation that every project imports is the fix, the same reason
-`scripts/lib/rules.mjs` exists in this kit instead of four copies of the rule
-renderer. `TritonAI/tritonai-website` runs this exact gate against 54 routes —
-it is a real, large-scale example of a project *using* this, not the place
-this lives.
+`tritonai-website` and adapt it — on the reasoning that shipping one copy
+here and letting every consuming project fork it would "recreate exactly the
+drift problem the gate exists to prevent." That reasoning has it backwards: N
+hand-ported copies, each starting from a fork of one downstream site's
+version, is *how* you get drift, not how you avoid it. A shared implementation
+that every project imports is the fix, the same reason `scripts/lib/rules.mjs`
+exists in this kit instead of four copies of the rule renderer.
+
+`tritonai-website` still runs its own, separately maintained
+`scripts/chrome-contract.mjs` against 54 routes, with the same
+`chrome:check`/`chrome:accept`/`chrome:explain` shape this section used to
+send people to go copy — it is the design this engine was modeled on, not a
+consumer of it. The two are unrelated in code: that project does not depend
+on this package, and nothing here reads from or writes to its repository.
+Adopting this engine there instead of its own would be that project's call to
+make, not a side effect of anything shipped from here.
 
 ## Tier 4: site CSS and JS may not reach into the shell
 

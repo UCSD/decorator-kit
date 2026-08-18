@@ -240,9 +240,10 @@ described above, reading nothing but files on disk. It needs no CLI, either:
 [`checks/README.md`](checks/README.md) for the full design, what's portable
 versus project-owned, and tier 4's CSS/JS scanning in detail.
 
-`TritonAI/tritonai-website` runs this exact gate against 54 routes in two
-deployment modes — a real example of a project using it, not the place it
-lives.
+`tritonai-website` runs its own, separately maintained implementation of this
+same four-tier design at 54-route scale — the project this engine was modeled
+on, not a consumer of it. It does not depend on this package; nothing here
+reads from or writes to that repository.
 
 ## Related
 
