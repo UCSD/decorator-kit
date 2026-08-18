@@ -13,8 +13,11 @@ npx ucsd-decorator-kit@latest init
 ```
 
 That installs `ucsd-decorator-v5` — the Decorator itself — plus this kit, writes
-the rules in the format each AI tool reads, installs the skill, and wires
-Dependabot.
+the rules in the format each AI tool reads, installs the skill, wires
+Dependabot and a CI workflow, and — for Claude Code — adds a `Stop` hook that
+runs the chrome integrity gate after every turn. It runs in the background and
+only speaks up if it finds a regression: see
+["Running it automatically"](checks/README.md#running-it-automatically).
 
 Then open Claude Code, Cursor, Copilot or Antigravity in that directory and
 describe the site you want. There is nothing to point the tool at: the rule files
@@ -35,7 +38,10 @@ npx ucsd-decorator-kit add
 modify `package.json`, does not add CI, and **never writes `AGENTS.md`** — that
 filename is also the convention for a repository's own agent contract, and yours
 is the more specific document. Pass `--with-decorator` to add the Decorator
-dependency, `--with-ci` for the Dependabot config and workflow.
+dependency, `--with-ci` for the Dependabot config and workflow, `--with-hook`
+for the Claude Code Stop hook. The last one merges into an existing
+`.claude/settings.json` rather than overwriting it, so a project's own hooks
+and permissions survive.
 
 ### Staying current
 
@@ -44,6 +50,7 @@ dependency, `--with-ci` for the Dependabot config and workflow.
 | `npx ucsd-decorator-kit sync` | rewrite the generated files after a kit upgrade |
 | `npx ucsd-decorator-kit check` | fail if they are stale — wire this into CI |
 | `npx ucsd-decorator-kit drift` | report whether the Decorator moved upstream |
+| `npx ucsd-decorator-kit verify` | run the chrome integrity gate against this project's actual markup — wire this into CI too |
 
 Both `ucsd-decorator-v5` and `ucsd-decorator-kit` are devDependencies, so
 Dependabot opens a pull request when either moves: the Decorator and the rules
@@ -52,6 +59,13 @@ without a `sync`, so a project cannot quietly run last year's rules.
 
 `drift` covers the gap Dependabot cannot see — a push to `UCSD/Decorator` or a
 `cdn.ucsd.edu` deploy with no npm release.
+
+`check` and `verify` answer different questions and are easy to conflate: `check`
+is about whether *this kit's generated rule files* are current, `verify` is
+about whether *the project's built chrome* is still correct. `verify` needs
+nothing this CLI doesn't already give it — `node checks/chrome-contract.mjs
+--check` works standalone, with `--accept` and `--explain` alongside it. See
+[`checks/README.md`](checks/README.md).
 
 ### Where markup comes from
 
@@ -108,28 +122,31 @@ against can delete them too.
 | Tier | Asks | Escape hatch |
 |---|---|---|
 | `chrome/consistent/*` | do all routes agree? | none needed |
-| `chrome/golden/*` | does chrome match the recorded contract? | `chrome:accept`, after a human reads the diff |
+| `chrome/golden/*` | does chrome match the recorded contract? | `--accept`, after a human reads the diff |
 | `chrome/structure/*` | is it still a search form? | **none** |
 | `chrome/styling/*` | does site CSS or JS reach into the shell? | **none** — a reviewed exception with an expiry date |
+
+This is not a design to go implement — it ships, as `checks/chrome-contract.mjs`
+and `checks/lib/`, reading `contracts/`. `npx ucsd-decorator-kit verify` runs it.
 
 Tier 3 is the load-bearing one. When one shell feeds every route, a shell edit
 is *perfectly consistent* drift — tier 1 stays green. Tier 2 fails, but its
 remedy says "accept if intentional," and an agent that believes its own change
 is intentional will do exactly that, rebaselining the regression. So
-`chrome:accept` must **refuse to write while tier 3 fails**. That refusal is the
+`--accept` **refuses to write while tier 3 fails**. That refusal is the
 design.
 
 Tier 4 exists because tiers 1–3 all read markup, and the shell can be wrecked
 without touching any. Its protected token set is derived per run — every class
 and id inside a chrome region and nowhere inside the canvas — so it tracks the
-Decorator instead of a list someone has to remember to update. `chrome:accept`
-must refuse while it fails too, for a different reason: the markup is intact, so
+Decorator instead of a list someone has to remember to update. `--accept`
+refuses while it fails too, for a different reason: the markup is intact, so
 regenerating the golden would hide the finding rather than resolve it.
 
 ## Contents
 
 ```
-bin/cli.mjs                  init / add / sync / check / drift
+bin/cli.mjs                  init / add / sync / check / drift / verify
 rules/                       canonical rule source
 skills/ucsd-decorator/       the skill — SKILL.md plus references
 library/                     Skills Library publishing staging (see below)
@@ -139,10 +156,13 @@ scripts/compile-rules.mjs    rules/ -> CLAUDE.md, AGENTS.md, .cursorrules,
                              .github/copilot-instructions.md
 scripts/check-library.mjs    validates library/ against the sync contract
 scripts/pin-decorator.mjs    dependency-free Decorator pinning, npm only
-contracts/                   portable chrome selector rules and styling policy,
-                             each with a JSON schema
-checks/                      how to adopt the gate
-test/                        including the AGENTS.md refusal
+contracts/                   portable chrome regions, selector rules, and
+                             styling policy — each with a JSON schema
+checks/                      the chrome integrity gate: chrome-contract.mjs
+                             (CLI) and lib/ (tiers 1-4) — runs standalone,
+                             `bin/cli.mjs verify` is a thin wrapper around it
+test/                        including the AGENTS.md refusal and the replayed
+                             chrome-regression incidents
 ```
 
 `CLAUDE.md`, `AGENTS.md`, `.cursorrules`, and `.github/copilot-instructions.md`
@@ -211,10 +231,18 @@ ignored.
 
 Copy `library/tritonai/*` into the Skills Library repository to publish.
 
-## Reference implementation
+## The chrome integrity gate
 
-`TritonAI/tritonai-website` runs the full gate against 54 routes in two
-deployment modes. See `checks/README.md` for what to copy and what to adapt.
+`npx ucsd-decorator-kit verify` runs it against this project — four tiers,
+described above, reading nothing but files on disk. It needs no CLI, either:
+`node checks/chrome-contract.mjs --check` is the same thing, standalone, and
+`checks/` ships inside the installed package. See
+[`checks/README.md`](checks/README.md) for the full design, what's portable
+versus project-owned, and tier 4's CSS/JS scanning in detail.
+
+`TritonAI/tritonai-website` runs this exact gate against 54 routes in two
+deployment modes — a real example of a project using it, not the place it
+lives.
 
 ## Related
 

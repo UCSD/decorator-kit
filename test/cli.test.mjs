@@ -6,6 +6,7 @@ import path from "node:path";
 import { after, before, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
+import { decoratorPage } from "./fixtures/decorator-page.mjs";
 
 const execFileAsync = promisify(execFile);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -128,6 +129,75 @@ describe("add", () => {
     assert.equal(await readFile(path.join(project, "package.json"), "utf8"), original);
     assert.equal(await exists(path.join(project, ".github/dependabot.yml")), false);
     assert.equal(await exists(path.join(project, ".github/workflows/decorator.yml")), false);
+    assert.equal(await exists(path.join(project, ".claude/settings.json")), false);
+  });
+});
+
+describe("add --with-hook", () => {
+  it("writes a fresh .claude/settings.json with the Stop hook", async () => {
+    const project = path.join(workdir, "hook-fresh");
+    await mkdir(project, { recursive: true });
+
+    const result = await run(["add", "--with-hook"], { cwd: project });
+    assert.equal(result.code, 0);
+
+    const settings = JSON.parse(await readFile(path.join(project, ".claude/settings.json"), "utf8"));
+    assert.equal(settings.hooks.Stop.length, 1);
+    const command = settings.hooks.Stop[0].hooks[0].command;
+    assert.match(command, /ucsd-decorator-kit verify/);
+    assert.equal(settings.hooks.Stop[0].hooks[0].asyncRewake, true, "must background, not block the turn");
+  });
+
+  it("merges into an existing settings.json without disturbing unrelated content", async () => {
+    const project = path.join(workdir, "hook-merge");
+    await mkdir(path.join(project, ".claude"), { recursive: true });
+    const original = {
+      permissions: { allow: ["Bash(npm *)"] },
+      hooks: { PostToolUse: [{ matcher: "Write|Edit", hooks: [{ type: "command", command: "prettier --write" }] }] },
+    };
+    await writeFile(path.join(project, ".claude/settings.json"), JSON.stringify(original, null, 2));
+
+    const result = await run(["add", "--with-hook"], { cwd: project });
+    assert.equal(result.code, 0);
+
+    const settings = JSON.parse(await readFile(path.join(project, ".claude/settings.json"), "utf8"));
+    assert.deepEqual(settings.permissions, original.permissions, "unrelated permissions preserved");
+    assert.deepEqual(settings.hooks.PostToolUse, original.hooks.PostToolUse, "unrelated hook preserved");
+    assert.equal(settings.hooks.Stop.length, 1, "the chrome gate hook was added alongside it");
+  });
+
+  it("is idempotent — running it twice does not duplicate the hook", async () => {
+    const project = path.join(workdir, "hook-idempotent");
+    await mkdir(project, { recursive: true });
+
+    await run(["add", "--with-hook"], { cwd: project });
+    const second = await run(["add", "--with-hook"], { cwd: project });
+    assert.equal(second.code, 0);
+    assert.match(second.stdout, /already present/);
+
+    const settings = JSON.parse(await readFile(path.join(project, ".claude/settings.json"), "utf8"));
+    assert.equal(settings.hooks.Stop.length, 1);
+  });
+
+  it("is not installed by plain `add`, only under the flag", async () => {
+    const project = path.join(workdir, "hook-opt-in");
+    await mkdir(project, { recursive: true });
+
+    const result = await run(["add"], { cwd: project });
+    assert.equal(result.code, 0);
+    assert.equal(await exists(path.join(project, ".claude/settings.json")), false);
+    assert.match(result.stdout, /add --with-hook/);
+  });
+
+  it("fails clearly on a malformed existing settings.json rather than overwriting it", async () => {
+    const project = path.join(workdir, "hook-malformed");
+    await mkdir(path.join(project, ".claude"), { recursive: true });
+    await writeFile(path.join(project, ".claude/settings.json"), "{ not valid json");
+
+    const result = await run(["add", "--with-hook"], { cwd: project });
+    assert.equal(result.code, 1);
+    assert.match(result.stderr, /settings\.json is not valid JSON/);
+    assert.equal(await readFile(path.join(project, ".claude/settings.json"), "utf8"), "{ not valid json");
   });
 });
 
@@ -184,5 +254,48 @@ describe("check", () => {
     const result = await run(["check"], { cwd: project });
     assert.equal(result.code, 1);
     assert.match(result.stderr, /decorator-kit\.json/);
+  });
+});
+
+// `verify` is a thin execFileSync wrapper around checks/chrome-contract.mjs —
+// exercised directly and thoroughly in test/chrome-contract.test.mjs. These
+// tests are about the wrapper itself: flag passthrough, exit-code
+// propagation, and that it stays a distinct command from `check` (rule-file
+// staleness) rather than colliding with it.
+describe("verify", () => {
+  it("passes flags through to checks/chrome-contract.mjs and propagates its exit code", async () => {
+    const project = path.join(workdir, "verify-flow");
+    await mkdir(project, { recursive: true });
+    await writeFile(path.join(project, "index.html"), decoratorPage("Home"));
+    await writeFile(path.join(project, "about.html"), decoratorPage("About"));
+
+    const explained = await run(["verify", "--explain"], { cwd: project });
+    assert.equal(explained.code, 0);
+    assert.match(explained.stdout, /canvas: main#main-content/);
+
+    const before = await run(["verify"], { cwd: project }); // default: --check
+    assert.equal(before.code, 1);
+    assert.match(before.stderr, /chrome\/golden/);
+
+    const accepted = await run(["verify", "--accept"], { cwd: project });
+    assert.equal(accepted.code, 0);
+    assert.equal(await exists(path.join(project, "chrome-contract.local.json")), true);
+
+    const after = await run(["verify"], { cwd: project });
+    assert.equal(after.code, 0);
+    assert.match(after.stdout, /all four tiers pass/);
+  });
+
+  it("is a different command from `check` — one is rule-file staleness, the other is this project's own chrome", async () => {
+    const project = path.join(workdir, "verify-vs-check");
+    await mkdir(project, { recursive: true });
+    await run(["add"], { cwd: project }); // makes `check` (rule-file staleness) pass
+    await writeFile(path.join(project, "index.html"), decoratorPage("Home"));
+
+    const checked = await run(["check"], { cwd: project });
+    assert.equal(checked.code, 0, "rule files are current — check has nothing to do with page markup");
+
+    const verified = await run(["verify"], { cwd: project });
+    assert.equal(verified.code, 1, "the page's chrome has never been accepted — verify is a different question");
   });
 });

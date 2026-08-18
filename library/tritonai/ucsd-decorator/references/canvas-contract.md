@@ -16,29 +16,49 @@ footer." What works is a boundary that is *named*, *machine-checkable*, and
 
 ## Declaring the canvas
 
-A project declares its canvas and its chrome regions in one config. The
-reference implementation is `checks/chrome-contract.mjs` in this kit.
+The reference implementation is `checks/chrome-contract.mjs` in this kit —
+runnable on its own (`node checks/chrome-contract.mjs --check`), with no
+dependency on any other project. It reads the canvas and the chrome regions
+from two different places, deliberately: the canvas selector varies by project
+shape, the chrome regions do not.
 
-```js
-export const CANVAS_SELECTOR = "main#main-content";
-
-export const CHROME_REGIONS = [
-  { id: "skip-link",     selector: "header.layout-header > a.skip-to-main" },
-  { id: "emergency",     selector: "header.layout-header > #uc-emergency" },
-  { id: "site-title",    selector: "header.layout-header > section.layout-title" },
-  { id: "mobile-drawer", selector: ".navmenu.navmenu-default.navmenu-fixed-left.offcanvas:not(.offcanvas-clone)" },
-  { id: "navbar",        selector: "nav.navbar.navbar-default.navbar-static-top" },
-  { id: "footer",        selector: "footer.footer > div.container" },
-];
-```
-
-Known canvases:
+The canvas comes from `decorator-kit.json`'s `canvas` field, written by
+`ucsd-decorator-kit init`/`add` and defaulting to `main#main-content` if that
+file is absent:
 
 | Project | Canvas |
 |---|---|
 | Plain Decorator template | `main#main-content` |
 | TritonAI site | `main#main-content` |
 | Antigravity Code Kit | `div#ag-app-canvas` |
+
+The chrome regions ship as a portable default, `contracts/chrome-regions.json`,
+since — unlike the canvas — they hold for any Decorator site without change:
+
+```json
+{
+  "regions": [
+    { "id": "skip-link",     "selector": "header.layout-header > a.skip-to-main" },
+    { "id": "emergency",     "selector": "header.layout-header > #uc-emergency" },
+    { "id": "site-title",    "selector": "header.layout-header > section.layout-title" },
+    { "id": "mobile-drawer", "selector": ".navmenu.navmenu-default.navmenu-fixed-left.offcanvas:not(.offcanvas-clone)",
+      "ignoreChildrenOf": ["ul.navmenu-nav"] },
+    { "id": "navbar",        "selector": "nav.navbar.navbar-default.navbar-static-top",
+      "ignoreChildrenOf": ["ul.nav.navbar-nav:not(.navbar-right)"] },
+    { "id": "footer",        "selector": "footer.footer > div.container" }
+  ]
+}
+```
+
+`ignoreChildrenOf` is why tier 2 (below) does not fail the moment a project
+adds its first nav link: the drawer's and navbar's page-navigation `<ul>` are
+chrome, but every project's own `<li>` links inside them are not, so their
+children are emptied before hashing.
+
+A project whose chrome genuinely differs from this — an extra region, a
+different selector — adds `chrome-regions.local.json` at its root, same
+shape, entries merged in by matching `id`. This should be rare: these six
+selectors are the Decorator's own anatomy, not anything project-specific.
 
 ## Do not use in-markup markers
 
@@ -80,10 +100,11 @@ target the shell. Catches the regressions that leave the markup untouched.
 Tier 3 is the one that cannot be dropped. Replay the actual incident: an agent
 replaces the drawer search form with a link, in the one shell that feeds every
 route. Tier 1 stays **green** — every page changed identically, so they are
-perfectly consistent. Tier 2 fails, and its remedy line says "run
-`chrome:accept` if this is intentional." The agent believes its own change is
-intentional and runs it. The golden regenerates with the form gone, and the gate
-has laundered the exact regression it was built to stop.
+perfectly consistent. Tier 2 fails, and its remedy line says "run `--accept`
+if this is intentional." The agent believes its own change is intentional and
+runs it. The golden regenerates with the form gone, and the gate has
+laundered the exact regression it was built to stop — which is exactly why
+`--accept` refuses to run while tier 3 is failing, checked next.
 
 Tier 3 encodes what the chrome is *for*, independent of what it currently is,
 and the accept command must **refuse to write while tier 3 is failing**. That

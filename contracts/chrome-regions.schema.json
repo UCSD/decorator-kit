@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/UCSD/decorator-kit/contracts/chrome-regions.schema.json",
+  "title": "UCSD Decorator chrome region list",
+  "description": "The protected chrome regions tiers 1, 2, 3 and (for token derivation) 4 all operate on. `canvas` is deliberately not declared here — it is read from decorator-kit.json's `canvas` field, since it varies by project shape (main#main-content vs div#ag-app-canvas) while the regions below do not.",
+  "type": "object",
+  "required": ["schemaVersion", "regions"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "note": { "type": "string" },
+    "regions": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/region" }
+    }
+  },
+  "definitions": {
+    "region": {
+      "type": "object",
+      "required": ["id", "selector"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable identifier. Tier 3 rules reference regions by this id.",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "selector": {
+          "type": "string",
+          "description": "CSS selector locating this region's root element, matched once per route."
+        },
+        "ignoreChildrenOf": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Selectors (relative to this region) whose children are emptied before tier 2 hashing. For content rendered from a data file — e.g. the page-navigation <ul> inside the drawer and navbar — the wrapper is chrome but its per-project contents are not, so hashing them would make every project's golden fail on its own nav links."
+        }
+      }
+    }
+  }
+}
