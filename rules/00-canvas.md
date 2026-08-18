@@ -124,3 +124,24 @@ content — it reads as decorative on a section that is about to be rewritten
 anyway — and both columns fall back to plain source order: canvas on the left,
 nav on the right. Keep the class and the DOM order exactly as shipped; replace
 only what is inside each `<section>`.
+
+## The chrome ships two independent search blocks
+
+The offcanvas drawer and the desktop navbar each carry their own search
+button and form — `<ul class="nav navbar-nav navbar-right">` wrapping a
+`.search-toggle` button and a `<form>`, once inside `.navmenu.offcanvas`, once
+inside `nav.navbar-default`'s `#navbar .navbar-collapse`. In the template as
+shipped, the two copies are identical: same ids, same `name` attributes, just
+in two different containers. Nothing relocates one into the other — Bootstrap's
+own collapse/offcanvas behavior is what shows only one of them at a time,
+matching the viewport. (The id-renaming behavior in "The shell is scripted,
+not just styled" is a Cascade-CMS shape that this template does not use.)
+
+Copying only the drawer's search and treating it as covering both surfaces —
+easy to do, since the two blocks look redundant — drops the desktop navbar's
+search button entirely, with nothing in the console to say so. When trimming a
+template's nav down to real content, only the nav-link `<ul>` in each
+container changes (`ul.navmenu-nav` in the drawer, the plain
+`ul.nav.navbar-nav` in the navbar — not the one carrying `navbar-right`). Both
+`ul.navbar-nav.navbar-right` search blocks are chrome: copy them verbatim,
+once per container.

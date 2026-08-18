@@ -109,13 +109,21 @@ template, never from recall.
   not a link. Replacing it with an anchor to the search page is the single most
   common regression: it looks equivalent, and it silently drops the scope
   selector and the typed query. Sites customize the `action` and the scope
-  options; the form itself is not customizable. Its ids, term-input class, and
-  term-input `name` are **rewritten at runtime across 768px** — see the worked
-  example under Styling and scripting, and the breakpoint contract in
-  `references/protected-regions.md`.
-- **Desktop navbar search.** Same shape, in `nav.navbar`. Note the input `name`
-  usually differs between the two forms (`search-term` desktop,
-  `search-term-m` mobile). Changing either breaks the hosted search API with
+  options; the form itself is not customizable. On a live Cascade CMS page its
+  ids, term-input class, and term-input `name` are **rewritten at runtime
+  across 768px** — see the worked example under Styling and scripting, and the
+  breakpoint contract in `references/protected-regions.md`. The npm package's
+  own template does not do this; see the next bullet.
+- **Desktop navbar search.** A second, independent copy of the same block —
+  not the drawer's search relocated by JS — inside `nav.navbar`'s
+  `#navbar .navbar-collapse`. In the package template the two copies are
+  identical (same ids, same `search-term` name); only Bootstrap's own
+  collapse/offcanvas behavior decides which one is visible. Building the
+  drawer's copy and treating it as covering both surfaces — easy to do, since
+  the two blocks look redundant — removes the search button on every viewport
+  above 768px, with nothing in the console to say so. On a live Cascade page
+  the two forms' `name`s diverge instead (`search-term` desktop,
+  `search-term-m` mobile) — changing either breaks the hosted search API with
   nothing visible on the page.
 - **Mobile toggle.** `.mobile-nav-bars` (three `span.icon-bar`) and
   `.mobile-nav-icon` ("MENU") both live *inside* `button.navbar-toggle`. The

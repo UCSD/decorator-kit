@@ -62,6 +62,18 @@ That id swap is the only thing that makes the drawer search render on phones:
   `input[name="search-term"]` and `select[name="search-scope"]`, never ids.
   Changing the input `name` breaks search with nothing visible on the page.
 
+**This is a Cascade-CMS shape, not the template's own shape.** The npm
+package's own `dist/templates/two-column.html` — the file this kit tells you
+to copy — never emits `ul.msearch` at all. It ships two independent, static
+search blocks instead: one inside `.navmenu.offcanvas`, one inside
+`nav.navbar-default`'s `#navbar .navbar-collapse`, both wrapped in
+`<ul class="nav navbar-nav navbar-right">`, both using the same ids and the
+same `search-term` name. Nothing relocates either one; Bootstrap's ordinary
+collapse/offcanvas behavior is what shows only one at a time. A page built
+from the template needs both blocks copied verbatim — dropping the desktop one
+because "the drawer already has search" removes the search button on every
+viewport above 768px, with nothing in the console to say so.
+
 Read this from `node_modules/ucsd-decorator-v5/dist/scripts/base.min.js` (or
 `vendor/decorator-5/scripts/base.min.js` if the project pins). That build differs
 from the live `cdn.ucsd.edu` copy only in minifier output style, with identical
