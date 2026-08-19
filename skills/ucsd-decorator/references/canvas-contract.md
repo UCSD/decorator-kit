@@ -38,7 +38,7 @@ since — unlike the canvas — they hold for any Decorator site without change:
 ```json
 {
   "regions": [
-    { "id": "skip-link",     "selector": "header.layout-header > a.skip-to-main" },
+    { "id": "skip-link",     "selector": "header.layout-header > a.sr-only" },
     { "id": "emergency",     "selector": "header.layout-header > #uc-emergency" },
     { "id": "site-title",    "selector": "header.layout-header > section.layout-title" },
     { "id": "mobile-drawer", "selector": ".navmenu.navmenu-default.navmenu-fixed-left.offcanvas:not(.offcanvas-clone)",

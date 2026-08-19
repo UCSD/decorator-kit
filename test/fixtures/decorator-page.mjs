@@ -31,7 +31,7 @@ export function decoratorPage(title, { searchAsLink = false, logoHref = "https:/
 <head><meta charset="utf-8"><title>${title}</title></head>
 <body>
 <header class="layout-header">
-  <a class="skip-to-main" href="#main-content">Skip to main content</a>
+  <a class="sr-only" href="#main-content">Skip to main content</a>
   <div id="uc-emergency"></div>
   <section class="layout-title">
     <a href="index.html" class="title-header title-header-large">Site Name</a>

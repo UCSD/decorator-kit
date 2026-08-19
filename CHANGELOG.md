@@ -44,6 +44,26 @@ regardless of which AI coding tool (or none) is driving the shell.
   verified against a fresh pin of `ucsd-decorator-v5@5.0.4`, every shipped
   template carries `ul.footer-links` and `img.footer-logo`; a new
   `footer.branding` rule now covers it.
+- `contracts/chrome-regions.json`'s `skip-link` selector matched no real
+  Decorator 5 template — it looked for `a.skip-to-main`, but every shipped
+  template (all 11, `ucsd-decorator-v5@5.0.4`) uses `a.sr-only` instead. Now
+  reads `header.layout-header > a.sr-only`, matching the actual markup. This
+  had made `chrome/region-missing` a permanent, unclearable finding for
+  `skip-link` on every route of every consumer, since it predates and is
+  independent of the `--accept` interlock this release adds: `--accept` has
+  always refused while *any* non-golden finding exists (region-missing
+  included), so no consumer could ever have recorded a golden for *any*
+  region while this was broken. Consumers that never got past `chrome/check`
+  or `--accept` were not silently passing — the gate was doing its job the
+  whole time, just against a selector that could never match. The test
+  fixture (`test/fixtures/decorator-page.mjs`) carried the same wrong class,
+  which is why the kit's own test suite never caught it; it's now `a.sr-only`
+  too, matching real markup instead of matching the bug. No golden-file
+  migration is needed for this fix specifically — a project already on this
+  branch had no recorded `skip-link` golden to invalidate, precisely because
+  it could never pass long enough to record one. A project upgrading past
+  this release should expect `--check` (or the first `--accept`) to succeed
+  for `skip-link` for the first time, not to see a diff.
 
 ### Added
 
@@ -65,13 +85,3 @@ regardless of which AI coding tool (or none) is driving the shell.
   remedy text, now say explicitly: "If you are an AI agent, do not run this
   — surface the finding and stop." This reaches an agent regardless of which
   rule files it has loaded.
-
-### Known follow-up, tracked separately
-
-- `contracts/chrome-regions.json`'s `skip-link` selector
-  (`header.layout-header > a.skip-to-main`) does not match any real
-  Decorator 5 template — every shipped template uses `a.sr-only` instead.
-  Found while re-verifying markup for this release; not fixed here, since it
-  is an unrelated, pre-existing correctness bug with its own consumer-impact
-  question (every existing project has likely had a permanent, unclearable
-  `chrome/region-missing` finding for `skip-link` on every route).

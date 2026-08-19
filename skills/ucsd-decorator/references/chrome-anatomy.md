@@ -24,7 +24,7 @@ Order matters. `modernizr` goes in `<head>`; the rest go at the end of `<body>`.
 
 ```text
 .layout-header        bg: #2b92b9
-  a.skip-to-main      first focusable element on the page
+  a.sr-only           skip link, first focusable element on the page
   #uc-emergency       campus emergency broadcast target, empty in source
   .layout-title       bg: #fff, height 92px
     .title-header     black uppercase site title, 1.35rem, 1px letter spacing

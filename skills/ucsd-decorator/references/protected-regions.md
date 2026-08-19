@@ -315,7 +315,7 @@ UC San Diego logo.
 
 ```html
 <header class="layout-header">
-    <a class="skip-to-main" href="#main-content">Skip to main content</a>
+    <a class="sr-only" href="#main-content">Skip to main content</a>
     <div id="uc-emergency"></div>
     <section class="layout-title">
         <a href="index.html" class="title-header title-header-large">Site Name</a>
@@ -327,6 +327,15 @@ UC San Diego logo.
 
 `#uc-emergency` is populated by the campus emergency broadcast. It is empty in
 source and must stay in the document.
+
+> **Known upstream inconsistency.** `base.css` still carries a
+> `.skip-to-main:focus, .skip-to-main:active` rule, but no shipped template
+> applies that class — the skip link is `a.sr-only` in every one of the 11
+> templates in `ucsd-decorator-v5@5.0.4`. That CSS rule is dead code, and it
+> also means the skip link inherits `.sr-only`'s *always*-hidden styling
+> rather than becoming visible on keyboard focus, which reads as a WCAG 2.1
+> defect in the vendor package. Worth flagging to UCSD separately; not
+> something this kit can fix, since the template markup is what it is.
 
 ---
 

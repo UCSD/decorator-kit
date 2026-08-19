@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "note": "Portable default protected chrome regions for UC San Diego Decorator 5. Selectors only — no ids or content specific to any one site — so this holds for any Decorator project. The canvas selector is not here: it is read from decorator-kit.json, since it varies by project shape (main#main-content vs div#ag-app-canvas per the Antigravity Code Kit) while these regions do not. Add project-specific regions in chrome-regions.local.json (same shape, entries merge by id). Validate against contracts/chrome-regions.schema.json. Derived from skills/ucsd-decorator/references/canvas-contract.md and protected-regions.md.",
   "regions": [
-    { "id": "skip-link", "selector": "header.layout-header > a.skip-to-main" },
+    { "id": "skip-link", "selector": "header.layout-header > a.sr-only" },
     { "id": "emergency", "selector": "header.layout-header > #uc-emergency" },
     { "id": "site-title", "selector": "header.layout-header > section.layout-title" },
     {
