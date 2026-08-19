@@ -26,7 +26,7 @@
   "definitions": {
     "exception": {
       "type": "object",
-      "required": ["file", "selector", "reason", "reviewOn"],
+      "required": ["file", "selector", "reason", "reviewOn", "approvedBy"],
       "additionalProperties": false,
       "properties": {
         "file": {
@@ -47,6 +47,11 @@
           "format": "date",
           "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
           "description": "Once this date passes the exception stops applying and reports itself as chrome/styling/expired-exception. A one-time judgement call must not quietly become permanent."
+        },
+        "approvedBy": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name or identifier of the human who reviewed and approved this exception. This file has no identity system beyond free text, but it must name a person — never an agent, tool, or automated process."
         }
       }
     }

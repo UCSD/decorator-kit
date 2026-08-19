@@ -10,7 +10,15 @@
 #             search forms, footer — still correct? The chrome integrity gate,
 #             all four tiers: cross-page consistency, the recorded golden, the
 #             structural contract, and the styling/script scan. No escape
-#             hatch on tiers 1, 3, or 4 — see checks/README.md.
+#             hatch on tiers 1, 3, or 4 — see checks/README.md. On a pull
+#             request, this job also flags (not fails — a reviewed --accept
+#             legitimately touches these files) any change to
+#             chrome-contract.local.json, chrome-styling.local.json, or
+#             chrome-regions.local.json, and surfaces the recorded
+#             acceptedReason/acceptedAt as a check annotation. This is the one
+#             layer that catches a self-accepted chrome change no matter which
+#             AI tool — or human — produced the commit, because it runs here,
+#             not inside whatever session made the change.
 #
 #   drift     Has the Decorator moved upstream without an npm release? Dependabot
 #             watches the registry; nothing watches a push to UCSD/Decorator or a
@@ -48,6 +56,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: ${{ github.event_name == 'pull_request' && 0 || 1 }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -55,6 +65,35 @@ jobs:
       - run: npm ci
       - name: Chrome integrity gate
         run: npm run decorator:verify
+      - name: Flag PRs that change the chrome golden or exception files
+        if: github.event_name == 'pull_request'
+        run: |
+          changed=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}" -- \
+            chrome-contract.local.json chrome-styling.local.json chrome-regions.local.json)
+          if [ -z "$changed" ]; then
+            echo "No chrome golden/exception files changed in this PR."
+            exit 0
+          fi
+          echo "::notice::This PR changes a chrome golden/exception file — review the accompanying markup diff, not just the JSON. Files: $changed"
+          for f in $changed; do
+            echo "--- $f ---"
+            git diff "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}" -- "$f" || true
+          done
+          if [ -f chrome-contract.local.json ]; then
+            node -e '
+              const fs = require("node:fs");
+              try {
+                const golden = JSON.parse(fs.readFileSync("chrome-contract.local.json", "utf8"));
+                if (golden.acceptedReason) {
+                  console.log(`::notice::chrome-contract.local.json acceptedReason: "${golden.acceptedReason}" (acceptedAt: ${golden.acceptedAt})`);
+                } else {
+                  console.log("::warning::chrome-contract.local.json changed but carries no acceptedReason/acceptedAt — confirm it was written by a human running --accept --reason, not hand-edited.");
+                }
+              } catch (error) {
+                console.log(`::warning::could not read chrome-contract.local.json: ${error.message}`);
+              }
+            '
+          fi
 
   drift:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'

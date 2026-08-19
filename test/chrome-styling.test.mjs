@@ -121,6 +121,20 @@ describe("scanCssFile — shipped regression 1: site CSS rebuilding the drawer s
     assert.equal(findings.length, 1);
     assert.equal(findings[0].kind, "chrome/styling/expired-exception");
   });
+
+  it("a missing or malformed reviewOn is treated as expired, not permanent — fails closed", () => {
+    const tokens = new Set(["#search"]);
+    const css = `#search { padding: 4px; }`;
+    const missing = [{ file: "css/site.css", selector: "#search", reason: "x" }];
+    const missingFindings = scanCssFile("css/site.css", css, tokens, { exceptions: missing });
+    assert.equal(missingFindings.length, 1);
+    assert.equal(missingFindings[0].kind, "chrome/styling/expired-exception");
+
+    const malformed = [{ file: "css/site.css", selector: "#search", reason: "x", reviewOn: "not-a-date" }];
+    const malformedFindings = scanCssFile("css/site.css", css, tokens, { exceptions: malformed });
+    assert.equal(malformedFindings.length, 1);
+    assert.equal(malformedFindings[0].kind, "chrome/styling/expired-exception");
+  });
 });
 
 describe("scanCssFile — shipped regression 2: a widget id restyled even though it is in no page's markup", () => {
@@ -181,6 +195,62 @@ function dedupeIds() {
     const findings = scanJsFile("js/site.js", js, tokens, { exceptions: expired });
     assert.equal(findings.length, 1);
     assert.equal(findings[0].kind, "chrome/styling/expired-exception");
+  });
+});
+
+describe("loadStylingConfig: exception validation", () => {
+  it("rejects an allow entry missing approvedBy — the human who reviewed it", async () => {
+    const dir = await project();
+    await writeFile(
+      path.join(dir, "chrome-styling.local.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        allow: [{ file: "css/site.css", selector: "#search", reason: "repairs layout", reviewOn: "2099-01-01" }],
+      }),
+    );
+    await assert.rejects(loadStylingConfig(dir), /approvedBy/);
+  });
+
+  it("rejects an allow entry with a malformed reviewOn", async () => {
+    const dir = await project();
+    await writeFile(
+      path.join(dir, "chrome-styling.local.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        allow: [
+          {
+            file: "css/site.css",
+            selector: "#search",
+            reason: "repairs layout",
+            reviewOn: "not-a-date",
+            approvedBy: "jsmith",
+          },
+        ],
+      }),
+    );
+    await assert.rejects(loadStylingConfig(dir), /reviewOn/);
+  });
+
+  it("accepts a complete, valid exception", async () => {
+    const dir = await project();
+    await writeFile(
+      path.join(dir, "chrome-styling.local.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        allow: [
+          {
+            file: "css/site.css",
+            selector: "#search",
+            reason: "repairs layout around a canvas form",
+            reviewOn: "2099-01-01",
+            approvedBy: "jsmith",
+          },
+        ],
+      }),
+    );
+    const config = await loadStylingConfig(dir);
+    assert.equal(config.allow.length, 1);
+    assert.equal(config.allow[0].approvedBy, "jsmith");
   });
 });
 

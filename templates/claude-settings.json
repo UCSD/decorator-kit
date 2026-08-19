@@ -1,4 +1,17 @@
 {
+  "permissions": {
+    "deny": [
+      "Edit(chrome-styling.local.json)",
+      "Write(chrome-styling.local.json)",
+      "Edit(chrome-regions.local.json)",
+      "Write(chrome-regions.local.json)",
+      "Edit(chrome-contract.local.json)",
+      "Write(chrome-contract.local.json)"
+    ],
+    "ask": [
+      "Bash(*--accept*)"
+    ]
+  },
   "hooks": {
     "Stop": [
       {
@@ -7,7 +20,7 @@
             "type": "command",
             "command": "npx ucsd-decorator-kit verify || exit 2",
             "asyncRewake": true,
-            "rewakeSummary": "Chrome integrity gate found a regression",
+            "rewakeSummary": "Chrome integrity gate found a regression — do not run verify --accept yourself; surface this to the user and stop.",
             "timeout": 120
           }
         ]

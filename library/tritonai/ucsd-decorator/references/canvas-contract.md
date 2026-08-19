@@ -113,6 +113,16 @@ interlock is the design.
 The split is: tier 2 governs presentation, where "a human read the diff" is a
 sufficient control. Tier 3 governs function, where it is not.
 
+That interlock stops an agent from laundering a *functional* regression. It
+says nothing about who is allowed to type `--accept` for a purely
+presentational one — which is what closed the remaining gap: `--accept`
+itself now requires `--reason "<text>"` and refuses to run non-interactively
+without an explicit `--yes` (documented, everywhere it's mentioned, as for a
+human-triggered non-interactive context only — an agent must never pass it).
+A real terminal gets prompted for a typed confirmation instead. See
+`checks/chrome-contract.mjs` and `rules/00-canvas.md`'s "The chrome integrity
+gate is not yours to satisfy."
+
 Tier 4 is outside that split entirely, and this is why it had to be added.
 Tiers 1–3 all read markup, and the three chrome regressions that reached
 production after the gate was live changed no markup at all — they were CSS

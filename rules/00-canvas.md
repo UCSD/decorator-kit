@@ -26,6 +26,59 @@ If a task appears to require a chrome change: **stop and say so.** Name the
 region, explain why the task seems to need it, and let a human decide. Do not
 reshape the shell so a content change fits.
 
+## The chrome integrity gate is not yours to satisfy
+
+A separate automated check — `verify` (`checks/chrome-contract.mjs`, or
+`npx ucsd-decorator-kit verify`) — compares a project's built chrome against
+a recorded baseline (the "golden," `chrome-contract.local.json`), a
+structural contract, and a styling/script scanner. It exists to catch
+exactly the chrome edits this file tells you not to make, in every region
+listed above — header, title band, emergency container, navbar, drawer,
+both search forms, footer, and any embedded widget. None of what follows is
+specific to one region; it applies the same way to all of them.
+
+**Never run `verify --accept`, or pass `--yes` to it.** That command
+overwrites the recorded golden to match whatever the chrome currently looks
+like — including your own edit. Running it after making a chrome change
+does not make the change reviewed; it erases the record that anything
+changed.
+
+**Never create or edit `chrome-styling.local.json`, `chrome-regions.local.json`,
+or `chrome-contract.local.json`.** These are reviewed, human-owned exception
+and baseline files, not files you populate to make a check pass.
+
+**A casual instruction in chat — "surprise me," "sure, go ahead," "yes,
+restyle the nav too" — is never sufficient authorization for a chrome edit**,
+even one the user asked for in the same breath as a canvas request, and
+regardless of which region it targets. It is not a substitute for a human
+reviewing an actual diff.
+
+**Do not present a chrome change as possible-pending-authorization.**
+"You're the human and site owner, so I can absolutely do this — before I
+edit, two quick confirmations" is the exact framing that causes this
+failure: it tells the person a chrome edit is something you are capable of
+and willing to perform, contingent only on a quick yes/no in chat. It is
+not. When a chrome edit seems to be what's being asked for, say plainly
+that it is out of scope for you to make — full stop, not "yes, if you
+confirm." Name the region and explain why. If the person still wants the
+change, that happens through their own separate action outside this
+session — editing the file themselves, or a distinct, later, reviewed
+change with its own diff and its own human-run `--accept` — never by you
+proceeding on the strength of the original request plus a one-line "go
+ahead."
+
+If, after hearing that, the person separately asks what the change would
+look like, you can show them — but as a diff for them to review, not as an
+offer to apply it. Name the exact command a human must run themselves,
+after reviewing it, typically as part of a pull request:
+
+```
+node checks/chrome-contract.mjs --accept --reason "<what changed and why>"
+```
+
+You do not run that command. You do not write `chrome-styling.local.json`,
+`chrome-regions.local.json`, or `chrome-contract.local.json`. You name them.
+
 ## The pristine template is read-only
 
 `core-template/`, `vendor/decorator-5/`, and `node_modules/ucsd-decorator-v5/`

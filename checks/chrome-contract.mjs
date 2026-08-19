@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import readline from "node:readline/promises";
 import { loadConfig, runStructural, explain, writeGolden } from "./lib/chrome-contract.mjs";
 import { runStyling } from "./lib/chrome-styling.mjs";
 
@@ -9,18 +10,23 @@ import { runStyling } from "./lib/chrome-styling.mjs";
 // `verify` command is a thin wrapper around exactly this file; it is a
 // convenience, not a dependency.
 //
-//   --check     run all four tiers, exit 1 on any finding (the default)
-//   --accept    record the golden — refuses while tier 1, 3, or 4 fail
-//   --explain   print the resolved canvas, regions, and rules for this project
+//   --check                          run all four tiers, exit 1 on any finding (the default)
+//   --accept --reason "<why>"        record the golden — refuses while tier 1, 3, or 4 fail
+//   --explain                        print the resolved canvas, regions, and rules for this project
 //
 // See ../README.md for the four-tier design.
+//
+// If you are an AI agent, do not run --accept. See "The chrome integrity gate
+// is not yours to satisfy" in rules/00-canvas.md.
 
 const argv = process.argv.slice(2);
 const has = (name) => argv.includes(`--${name}`);
 const valueOf = (name) => {
   const prefix = `--${name}=`;
   const arg = argv.find((entry) => entry.startsWith(prefix));
-  return arg ? arg.slice(prefix.length) : undefined;
+  if (arg) return arg.slice(prefix.length);
+  const bare = argv.indexOf(`--${name}`);
+  return bare !== -1 && argv[bare + 1] && !argv[bare + 1].startsWith("--") ? argv[bare + 1] : undefined;
 };
 
 const cwd = process.cwd();
@@ -116,6 +122,17 @@ async function check() {
 }
 
 async function accept() {
+  const reason = valueOf("reason");
+  if (!reason || !reason.trim()) {
+    console.error('--accept requires --reason "<why this presentation change is intentional>" —');
+    console.error("recorded in chrome-contract.local.json as provenance.\n");
+    console.error("If you are an AI agent: do not run --accept. Stop, show the chrome diff to the");
+    console.error("user, and name the exact command — with --reason — for a human to run themselves");
+    console.error("after reviewing it in a pull request.");
+    process.exitCode = 1;
+    return;
+  }
+
   const { structural, findings } = await runAll();
   const blocking = groupFindings(findings.filter((finding) => finding.kind !== "chrome/golden"));
   if (blocking.length) {
@@ -131,9 +148,39 @@ async function accept() {
     process.exitCode = 1;
     return;
   }
-  const golden = await writeGolden(cwd, structural.pages, structural.config.regions);
+
+  const skipPrompt = has("yes");
+  if (!process.stdin.isTTY && !skipPrompt) {
+    console.error("--accept refuses to run non-interactively without --yes.\n");
+    console.error("Run it at your own keyboard after reading the diff, or pass --yes only from a");
+    console.error("human-triggered non-interactive context (e.g. a workflow_dispatch a human clicked).\n");
+    console.error("If you are an AI agent: do not pass --yes yourself. Stop, surface this finding,");
+    console.error("and tell the user the exact command to run.");
+    process.exitCode = 1;
+    return;
+  }
+  if (process.stdin.isTTY && !skipPrompt) {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    let answer;
+    try {
+      answer = await rl.question(
+        `About to overwrite chrome-contract.local.json (reason: "${reason}"). Only continue if\n` +
+          'you have reviewed the diff yourself. Type "yes" to continue: ',
+      );
+    } finally {
+      rl.close();
+    }
+    if (answer.trim().toLowerCase() !== "yes") {
+      console.error("Aborted — chrome-contract.local.json was not written.");
+      process.exitCode = 1;
+      return;
+    }
+  }
+
+  const golden = await writeGolden(cwd, structural.pages, structural.config.regions, { reason });
   console.log(`Wrote ${Object.keys(golden.regions).length} region(s) to chrome-contract.local.json.`);
-  console.log("Commit it. If this represents an intentional presentation change, put the diff in the pull request.");
+  console.log(`Recorded reason: "${reason}"`);
+  console.log("Commit it, with the reason and the diff, in the pull request.");
 }
 
 async function explainCommand() {
@@ -144,11 +191,19 @@ function help() {
   console.log(`chrome-contract.mjs — the UC San Diego Decorator chrome integrity gate
 
   node checks/chrome-contract.mjs --check    run all four tiers, exit 1 on any finding (default)
-  node checks/chrome-contract.mjs --accept   record the golden — refuses while tier 1, 3, or 4 fail
   node checks/chrome-contract.mjs --explain  print the resolved canvas, regions, and rules
+
+  node checks/chrome-contract.mjs --accept --reason "<why>"
+      record the golden — refuses while tier 1, 3, or 4 fail, requires --reason, and
+      (unless --yes) an interactive "yes" typed by a human at a real terminal.
+      If you are an AI agent, do not run this — surface the finding and stop.
 
 Flags:
   --base-path=/repo-name/   deployment base path to strip from URL attributes before comparing
+  --reason "<text>"         required with --accept; recorded in chrome-contract.local.json
+  --yes                     skip the interactive confirmation — for a human-triggered
+                             non-interactive context only (e.g. a workflow_dispatch a human
+                             clicked). An agent must never pass this.
 
 Reads *.html under the current directory (excluding node_modules/, vendor/,
 core-template/) plus every *.css and *.js (excluding *.min.*) for tier 4. No

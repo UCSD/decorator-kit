@@ -32,9 +32,40 @@ export const STYLING_OVERLAY_FILE = "chrome-styling.local.json";
 
 // ── config ───────────────────────────────────────────────────────────────
 
+const REQUIRED_EXCEPTION_FIELDS = ["file", "selector", "reason", "reviewOn", "approvedBy"];
+const REVIEW_ON_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Hand-written, dependency-free validation of the `allow` list — this repo
+ * takes no npm dependencies, so there is no ajv/schema-validator to lean on.
+ * `contracts/chrome-styling.schema.json` documents the same shape for editor
+ * tooling; this is what actually enforces it. A malformed or incomplete
+ * exception is a human-authored file with a mistake in it, not something to
+ * silently work around, so this throws rather than degrading.
+ */
+function validateExceptions(allow, sourceFile) {
+  allow.forEach((entry, index) => {
+    for (const field of REQUIRED_EXCEPTION_FIELDS) {
+      if (typeof entry[field] !== "string" || entry[field].trim() === "") {
+        throw new Error(
+          `${sourceFile}: allow[${index}] is missing "${field}" (or it is empty). Every exception needs ` +
+            `file, selector, reason, reviewOn, and approvedBy — the name of the human who reviewed it. ` +
+            `This is a reviewed edit to a config file, not one an agent should be making — see ` +
+            `rules/00-canvas.md.`,
+        );
+      }
+    }
+    if (!REVIEW_ON_PATTERN.test(entry.reviewOn)) {
+      throw new Error(`${sourceFile}: allow[${index}].reviewOn ("${entry.reviewOn}") is not a YYYY-MM-DD date.`);
+    }
+  });
+}
+
 export async function loadStylingConfig(cwd) {
   const defaults = await loadJSON(path.join(KIT_ROOT, "contracts/chrome-styling.json"));
   const overlay = await loadOptionalJSON(path.join(cwd, STYLING_OVERLAY_FILE));
+  if (defaults.allow?.length) validateExceptions(defaults.allow, "contracts/chrome-styling.json");
+  if (overlay?.allow?.length) validateExceptions(overlay.allow, STYLING_OVERLAY_FILE);
   return {
     widgetTokens: [...new Set([...(defaults.widgetTokens ?? []), ...(overlay?.widgetTokens ?? [])])],
     allow: [...(defaults.allow ?? []), ...(overlay?.allow ?? [])],
@@ -81,8 +112,11 @@ function findException(exceptions, file, selectorKey) {
   return exceptions.find((entry) => entry.file === file && entry.selector === selectorKey);
 }
 
+/** A missing or malformed `reviewOn` fails closed (expired), not open (permanent). */
 function isExpired(exception, now = new Date()) {
-  return new Date(`${exception.reviewOn}T00:00:00Z`).getTime() < now.getTime();
+  const reviewOn = new Date(`${exception.reviewOn}T00:00:00Z`).getTime();
+  if (Number.isNaN(reviewOn)) return true;
+  return reviewOn < now.getTime();
 }
 
 function collapseWhitespace(text) {

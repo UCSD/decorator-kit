@@ -18,8 +18,11 @@ step, and — despite the name of the CLI that wraps it — no dependency on the
 # node_modules/ucsd-decorator-kit/ as a devDependency, or this repository
 # checked out beside a project — this runs the same way:
 node checks/chrome-contract.mjs --check     # exit 1 on any finding; wire into CI
-node checks/chrome-contract.mjs --accept    # record the golden — refuses while tier 1, 3, or 4 fail
 node checks/chrome-contract.mjs --explain   # print the resolved canvas, regions, and rules
+
+# --accept requires --reason, and a human's interactive "yes" (or --yes, for a
+# human-triggered non-interactive context only — never an agent):
+node checks/chrome-contract.mjs --accept --reason "<why this is intentional>"
 
 # or, equivalently, through the kit's own CLI:
 npx ucsd-decorator-kit verify
@@ -32,21 +35,33 @@ Two ways, and they answer different questions.
 **CI** — `init`, or `add --with-ci`, writes a `verify` job into
 `.github/workflows/decorator.yml` (see the root README's "Staying current").
 Catches a regression on push or pull request. Cannot catch it before it ships
-to a branch.
+to a branch. On a pull request, this job also flags — as a check annotation,
+not a failure, since a reviewed `--accept` legitimately touches these files —
+any change to `chrome-contract.local.json`, `chrome-styling.local.json`, or
+`chrome-regions.local.json`, printing the golden's recorded `acceptedReason`
+so the reviewer sees it without opening the JSON diff. This is the layer that
+catches a self-accepted chrome change no matter which AI tool — or human —
+produced the commit, since it runs on GitHub's infrastructure, not inside
+whatever session made the change.
 
-**A Claude Code Stop hook** — `init`, or `add --with-hook`, merges a `Stop`
-hook into `.claude/settings.json` (see `templates/claude-settings.json`) that
-runs `npx ucsd-decorator-kit verify` after every turn. It runs in the
-background — `asyncRewake: true` — so it never blocks the turn from ending;
-if it finds a regression, the agent is woken back up afterward with the
-findings fed back as context, in the same turn that broke it, rather than
-waiting for CI or a human to notice. The trigger is exit code 2, not
-`verify`'s own exit code 1, hence the hook command being
-`npx ucsd-decorator-kit verify || exit 2`.
+**A Claude Code Stop hook, plus permission guards** — `init`, or
+`add --with-hook`, merges a `Stop` hook into `.claude/settings.json` (see
+`templates/claude-settings.json`) that runs `npx ucsd-decorator-kit verify`
+after every turn. It runs in the background — `asyncRewake: true` — so it
+never blocks the turn from ending; if it finds a regression, the agent is
+woken back up afterward with the findings fed back as context, in the same
+turn that broke it, rather than waiting for CI or a human to notice. The
+trigger is exit code 2, not `verify`'s own exit code 1, hence the hook
+command being `npx ucsd-decorator-kit verify || exit 2`. The same template
+also adds a `permissions` block: `deny` on editing the three chrome
+`*.local.json` files, and `ask` on any Bash command matching `--accept` —
+this only protects a project when the person working on it is using Claude
+Code with this template installed; the CLI-level gate above is what has to
+hold for everyone else.
 
 `add --with-hook` merges into an existing `.claude/settings.json` rather than
 overwriting it — a project may already have its own hooks or permissions in
-that file — matching by the hook's own command string so re-running `add` is
+that file — matching each entry by its own content so re-running `add` is
 idempotent. It is not tracked in `decorator-kit.json`'s `manages` list, the
 same as the CI workflow: install-once, not something `sync` reconciles.
 
@@ -215,6 +230,24 @@ outside that walk, or a region-missing finding is expected and correct for it.
 **`--accept` refuses while tier 1, 3, or 4 fails.** This is the load-bearing
 part. Without it, an agent that trips tier 2 would regenerate the golden and
 record its own regression as the new baseline.
+
+**That interlock alone is necessary but not sufficient — it says nothing
+about *who* is allowed to run `--accept` once it clears.** A presentation-only
+chrome edit (a restyled header, a different logo, a swapped footer link) can
+leave tiers 1, 3, and 4 all green while still being exactly the unauthorized
+chrome edit the rules forbid. `--accept` closes that gap itself: it requires
+`--reason "<text>"` (recorded as provenance in the golden), and it refuses to
+run non-interactively unless `--yes` is passed — which is documented, in both
+`--help` and `rules/00-canvas.md`, as being for a human-triggered
+non-interactive context only, never for an agent to pass itself. A project
+that installs the Claude Code template (`add --with-hook`) also gets a
+`permissions` block denying edits to the three chrome `*.local.json` files
+outright, and requiring explicit approval before any Bash command matching
+`--accept` — on top of, not instead of, the CLI-level gate above, which holds
+for any caller regardless of which AI tool (or none) is involved. A PR that
+still changes one of those files gets flagged (not blocked) by the `verify`
+CI job, which prints the recorded `acceptedReason`/`acceptedAt` as a check
+annotation for the reviewer.
 
 See `skills/ucsd-decorator/references/canvas-contract.md` for the full
 rationale and the four-tier design.

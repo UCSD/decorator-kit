@@ -3,8 +3,18 @@
 // skills/ucsd-decorator/references/protected-regions.md and
 // contracts/ucsd-decorator-5.json — not an approximation invented for the
 // test, the same markup those documents transcribe from the vendor template.
+//
+// `logoHref` and `footerBroken` exist to exercise the tier-3 rules added to
+// close the "only the header was checked" gap: `logoHref` swaps a.title-logo's
+// href without touching its count, and `footerBroken` drops the footer-links
+// list and the wordmark image entirely. Both defaults match the real markup
+// pinned into vendor/decorator-5/templates/two-column.html on 2026-08-19.
 
-export function decoratorPage(title, { searchAsLink = false } = {}) {
+export function decoratorPage(title, { searchAsLink = false, logoHref = "https://www.ucsd.edu", footerBroken = false } = {}) {
+  const footerContent = footerBroken
+    ? `<p>&copy; 2026 UC San Diego</p>`
+    : `<ul class="footer-links"><li><a href="https://www.ucsd.edu/_about/legal/index.html">Terms &amp; Conditions</a></li></ul>
+       <img src="https://cdn.ucsd.edu/developer/decorator/5.0.2/img/ucsd-footer-logo-white.png" alt="" class="img-responsive footer-logo" />`;
   const searchContent = searchAsLink
     ? `<a href="/search/">Search</a>`
     : `<form action="https://act.ucsd.edu/cwp/tools/search-redir" method="get">
@@ -26,7 +36,7 @@ export function decoratorPage(title, { searchAsLink = false } = {}) {
   <section class="layout-title">
     <a href="index.html" class="title-header title-header-large">Site Name</a>
     <a href="index.html" class="title-header title-header-short">Short</a>
-    <a href="https://www.ucsd.edu" class="title-logo">UC San Diego</a>
+    <a href="${logoHref}" class="title-logo">UC San Diego</a>
   </section>
 </header>
 <nav class="navbar navbar-default navbar-static-top">
@@ -76,7 +86,7 @@ export function decoratorPage(title, { searchAsLink = false } = {}) {
 </main>
 <footer class="footer">
   <div class="container">
-    <p>&copy; 2026 UC San Diego</p>
+    ${footerContent}
   </div>
 </footer>
 </body>

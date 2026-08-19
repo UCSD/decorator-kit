@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "note": "Portable default chrome rules for UC San Diego Decorator 5. These pin structure only — no ids, no site-specific URLs, no scope option values — so they hold for any Decorator site. Add site-specific rules in a local overlay. Validate against contracts/chrome-selectors.schema.json.",
+  "note": "Portable default chrome rules for UC San Diego Decorator 5. These pin structure only — no ids, no site-specific URLs, no scope option values — so they hold for any Decorator site. The one deliberate exception is site-title.branding's equalsUrl on the UC San Diego logo link: https://www.ucsd.edu is not a per-site value, it is the same fixed destination on every Decorator template, so pinning it does not break portability the way pinning a site's own title-header href would. Add site-specific rules in a local overlay. Validate against contracts/chrome-selectors.schema.json.",
   "derivedFrom": {
     "template": "templates/two-column.html",
     "package": "ucsd-decorator-v5",
     "registry": "https://registry.npmjs.org/ucsd-decorator-v5",
-    "pinnedAt": "2026-07-22T07:03:02Z",
-    "note": "Rules were first derived from Decorator-V5.zip (pinned 2026-07-22) and re-verified 2026-08 against ucsd-decorator-v5@5.0.4, which is now the source of truth. Every marker these rules pin — .search-content, .search-scope, button.navbar-toggle, .mobile-nav-bars, three span.icon-bar, .mobile-nav-icon, the offcanvas drawer, .layout-title — occurs the same number of times in both templates, so the rules are unchanged by the switch. The archive is no longer read: it is behind the package on every file it ships."
+    "pinnedAt": "2026-08-19T00:00:00Z",
+    "note": "Rules were first derived from Decorator-V5.zip (pinned 2026-07-22) and re-verified 2026-08 against ucsd-decorator-v5@5.0.4, which is now the source of truth. Every marker these rules pin — .search-content, .search-scope, button.navbar-toggle, .mobile-nav-bars, three span.icon-bar, .mobile-nav-icon, the offcanvas drawer, .layout-title — occurs the same number of times in both templates, so the rules are unchanged by the switch. The archive is no longer read: it is behind the package on every file it ships. Re-verified 2026-08-19 against a fresh pin of ucsd-decorator-v5@5.0.4 to add site-title.branding's href check and footer.branding: a.title-logo's href is https://www.ucsd.edu on all 11 shipped templates, and ul.footer-links / img.footer-logo appear identically in each. (In the course of that check, contracts/chrome-regions.json's skip-link selector was found not to match any shipped template — tracked separately, not fixed here.)"
   },
   "rules": [
     {
@@ -61,9 +61,20 @@
       "source": "vendor/decorator-5/templates/two-column.html",
       "require": [
         { "selector": "a.title-header", "count": 2 },
-        { "selector": "a.title-logo", "count": 1 }
+        { "selector": "a.title-logo", "count": 1 },
+        { "selector": "a.title-logo", "attribute": "href", "equalsUrl": "https://www.ucsd.edu" }
       ],
-      "remedy": "The title band carries the long and short site title links plus the UC San Diego logo link."
+      "remedy": "The title band carries the long and short site title links plus the UC San Diego logo link, which always points to https://www.ucsd.edu on every Decorator site. A different destination — including a mascot page, a custom brand, or another domain — means the logo link was swapped."
+    },
+    {
+      "id": "footer.branding",
+      "region": "footer",
+      "source": "vendor/decorator-5/templates/two-column.html",
+      "require": [
+        { "selector": "ul.footer-links", "count": 1 },
+        { "selector": "img.footer-logo", "count": 1 }
+      ],
+      "remedy": "The footer carries a footer-links list and the white UC San Diego wordmark image."
     }
   ]
 }

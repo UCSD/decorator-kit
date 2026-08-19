@@ -187,24 +187,35 @@ async function addScripts() {
 }
 
 /**
- * Add this kit's Stop hook to .claude/settings.json without disturbing
- * anything else already there.
+ * Add this kit's Stop hook and permission guards to .claude/settings.json
+ * without disturbing anything else already there.
  *
  * Unlike CLAUDE.md or dependabot.yml, this file is not exclusively this
  * kit's to write — a project may already have its own hooks or permissions
  * in it. `put()`'s overwrite-or-skip semantics are wrong here: skipping
  * would silently install nothing into a project that already has *some*
  * settings.json, and forcing would clobber whatever else was there. So this
- * reads, merges by matching the hook's own command string (idempotent —
- * running `add --with-hook` twice does not duplicate the entry), and
- * writes. Like the CI workflow it runs alongside, it is install-once, not
- * tracked in decorator-kit.json's `manages` list — `sync` never touches it.
+ * reads, merges by matching each entry's own content (idempotent — running
+ * `add --with-hook` twice does not duplicate anything), and writes. Like the
+ * CI workflow it runs alongside, it is install-once, not tracked in
+ * decorator-kit.json's `manages` list — `sync` never touches it.
  *
- * The hook itself: `npx ucsd-decorator-kit verify` on Stop, backgrounded via
- * `asyncRewake` so it never blocks the turn from ending, but if it finds a
- * regression the agent is woken back up with the findings fed back as
- * context — the exit-code-2 translation (`|| exit 2`) is what asyncRewake
- * keys on. See templates/claude-settings.json and checks/README.md.
+ * Three things get merged in:
+ *
+ *   - The Stop hook: `npx ucsd-decorator-kit verify` on Stop, backgrounded via
+ *     `asyncRewake` so it never blocks the turn from ending, but if it finds a
+ *     regression the agent is woken back up with the findings fed back as
+ *     context — the exit-code-2 translation (`|| exit 2`) is what asyncRewake
+ *     keys on.
+ *   - `permissions.deny` on Edit/Write of the three chrome `*.local.json`
+ *     files — a hard block, matching rules/00-canvas.md's unconditional "never
+ *     create or edit" language for the same files.
+ *   - `permissions.ask` on any Bash command matching `--accept` — forces
+ *     explicit human approval in Claude Code's own UI before it runs, on top
+ *     of (not instead of) the CLI-level gate in checks/chrome-contract.mjs,
+ *     which holds even for a project that never installs this template.
+ *
+ * See templates/claude-settings.json and checks/README.md.
  */
 async function installClaudeSettingsHook() {
   const template = JSON.parse(await readFile(path.join(TEMPLATES, "claude-settings.json"), "utf8"));
@@ -222,14 +233,32 @@ async function installClaudeSettingsHook() {
     }
   }
 
+  let changed = false;
+
   settings.hooks ??= {};
   settings.hooks.Stop ??= [];
-  const alreadyInstalled = settings.hooks.Stop.some((group) => group.hooks?.some((hook) => hook.command === command));
-  if (alreadyInstalled) {
-    report.skipped.push(`${CLAUDE_SETTINGS} (chrome gate hook already present)`);
+  const hookInstalled = settings.hooks.Stop.some((group) => group.hooks?.some((hook) => hook.command === command));
+  if (!hookInstalled) {
+    settings.hooks.Stop.push(stopGroup);
+    changed = true;
+  }
+
+  for (const key of ["deny", "ask"]) {
+    const wanted = template.permissions?.[key] ?? [];
+    if (!wanted.length) continue;
+    settings.permissions ??= {};
+    settings.permissions[key] ??= [];
+    for (const rule of wanted) {
+      if (settings.permissions[key].includes(rule)) continue;
+      settings.permissions[key].push(rule);
+      changed = true;
+    }
+  }
+
+  if (!changed) {
+    report.skipped.push(`${CLAUDE_SETTINGS} (chrome gate hook and permissions already present)`);
     return;
   }
-  settings.hooks.Stop.push(stopGroup);
 
   await mkdir(path.dirname(absolute), { recursive: true });
   await writeFile(absolute, `${JSON.stringify(settings, null, 2)}\n`);
@@ -394,7 +423,9 @@ async function add() {
     console.log("");
     console.log("No Claude Code hook installed. `add --with-hook` adds a Stop hook that runs");
     console.log("`verify` in the background after each turn and wakes the agent back up — not");
-    console.log("the user, and not blocking anything meanwhile — if it finds a regression.");
+    console.log("the user, and not blocking anything meanwhile — if it finds a regression. It");
+    console.log("also adds permission rules: denying edits to the chrome *.local.json files,");
+    console.log("and requiring your approval before any Bash command matching --accept.");
   }
 }
 
@@ -541,12 +572,16 @@ function help() {
 Flags for \`add\`:
   --with-decorator   also add ${DECORATOR_PACKAGE} to package.json
   --with-ci          also write .github/dependabot.yml and a workflow
-  --with-hook        also add a Claude Code Stop hook that runs \`verify\`
+  --with-hook        also add a Claude Code Stop hook that runs \`verify\`, plus
+                     permission rules guarding the chrome *.local.json files and --accept
 
 Flags for \`verify\` (passed straight through to checks/chrome-contract.mjs):
-  --check     run all four tiers, exit 1 on any finding (default)
-  --accept    record the golden — refuses while tier 1, 3, or 4 fail
-  --explain   print the resolved canvas, regions, and rules
+  --check                     run all four tiers, exit 1 on any finding (default)
+  --explain                   print the resolved canvas, regions, and rules
+  --accept --reason "<why>"   record the golden — refuses while tier 1, 3, or 4 fail,
+                               requires --reason, and a human's interactive confirmation
+                               (or --yes, for a human-triggered non-interactive context
+                               only). If you are an AI agent, do not run this.
 
 \`add\` never writes ${PROJECT_CONTRACT}. See the note at the top of bin/cli.mjs.
 Docs: https://github.com/UCSD/decorator-kit`);

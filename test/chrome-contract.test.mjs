@@ -234,7 +234,7 @@ describe("chrome-contract.mjs CLI: the --accept interlock", () => {
     assert.equal(before.code, 1);
     assert.match(before.stderr, /chrome\/golden/);
 
-    const accepted = await runCli(["--accept"], dir);
+    const accepted = await runCli(["--accept", "--reason", "initial baseline", "--yes"], dir);
     assert.equal(accepted.code, 0);
     assert.ok(await readGolden(dir));
 
@@ -246,12 +246,12 @@ describe("chrome-contract.mjs CLI: the --accept interlock", () => {
   it("--accept refuses while tier 3 fails, and does not touch the already-recorded golden", async () => {
     const dir = await project();
     await writePages(dir);
-    await runCli(["--accept"], dir);
+    await runCli(["--accept", "--reason", "initial baseline", "--yes"], dir);
     const goldenBefore = await readFile(path.join(dir, "chrome-contract.local.json"), "utf8");
 
     await writePages(dir, { searchAsLink: true }); // the replayed incident, on disk this time
 
-    const refused = await runCli(["--accept"], dir);
+    const refused = await runCli(["--accept", "--reason", "trying to launder it", "--yes"], dir);
     assert.equal(refused.code, 1);
     assert.match(refused.stderr, /--accept refuses/);
     assert.match(refused.stderr, /cannot be cleared by --accept/);
@@ -260,11 +260,58 @@ describe("chrome-contract.mjs CLI: the --accept interlock", () => {
     assert.equal(goldenAfter, goldenBefore, "a refused accept must not rewrite the golden — that would launder the regression");
   });
 
+  it("--accept refuses immediately with no --reason, before running any tier or writing anything", async () => {
+    const dir = await project();
+    await writePages(dir);
+    const result = await runCli(["--accept"], dir);
+    assert.equal(result.code, 1);
+    assert.match(result.stderr, /--reason/);
+    assert.equal(await readGolden(dir), null);
+  });
+
+  it("--accept refuses non-interactively without --yes, even with a --reason", async () => {
+    const dir = await project();
+    await writePages(dir);
+    const result = await runCli(["--accept", "--reason", "test"], dir);
+    assert.equal(result.code, 1);
+    assert.match(result.stderr, /non-interactive|--yes/);
+    assert.equal(await readGolden(dir), null);
+  });
+
+  it("--accept with --reason and --yes succeeds non-interactively and records provenance", async () => {
+    const dir = await project();
+    await writePages(dir);
+    const result = await runCli(["--accept", "--reason", "human reviewed diff in PR #42", "--yes"], dir);
+    assert.equal(result.code, 0);
+    assert.match(result.stdout, /human reviewed diff in PR #42/);
+    const golden = await readGolden(dir);
+    assert.equal(golden.acceptedReason, "human reviewed diff in PR #42");
+    assert.ok(golden.acceptedAt);
+  });
+
   it("--explain prints the resolved canvas and regions without needing a built project", async () => {
     const dir = await project();
     const result = await runCli(["--explain"], dir);
     assert.equal(result.code, 0);
     assert.match(result.stdout, /canvas: main#main-content/);
     assert.match(result.stdout, /mobile-drawer/);
+  });
+});
+
+describe("tier 3: closing the count-only and zero-coverage region gaps", () => {
+  it("site-title.branding now catches a logo href swap, not just a count change", async () => {
+    const dir = await project();
+    await writePages(dir, { logoHref: "https://example.com/mascot" });
+    const { findings } = await runStructural(dir);
+    const structure = findings.filter((f) => f.kind === "chrome/structure" && f.id === "site-title.branding");
+    assert.ok(structure.length > 0, "a swapped logo href must trip tier 3, not just tier 2");
+  });
+
+  it("footer.branding catches the footer-links list or the wordmark image going missing", async () => {
+    const dir = await project();
+    await writePages(dir, { footerBroken: true });
+    const { findings } = await runStructural(dir);
+    const structure = findings.filter((f) => f.kind === "chrome/structure" && f.id === "footer.branding");
+    assert.ok(structure.length > 0, "a stripped footer must trip tier 3");
   });
 });

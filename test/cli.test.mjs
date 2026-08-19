@@ -161,12 +161,25 @@ describe("add --with-hook", () => {
     assert.equal(result.code, 0);
 
     const settings = JSON.parse(await readFile(path.join(project, ".claude/settings.json"), "utf8"));
-    assert.deepEqual(settings.permissions, original.permissions, "unrelated permissions preserved");
+    assert.deepEqual(settings.permissions.allow, original.permissions.allow, "unrelated permissions preserved");
     assert.deepEqual(settings.hooks.PostToolUse, original.hooks.PostToolUse, "unrelated hook preserved");
     assert.equal(settings.hooks.Stop.length, 1, "the chrome gate hook was added alongside it");
   });
 
-  it("is idempotent — running it twice does not duplicate the hook", async () => {
+  it("also merges permission guards for the chrome *.local.json files and --accept", async () => {
+    const project = path.join(workdir, "hook-permissions");
+    await mkdir(project, { recursive: true });
+
+    const result = await run(["add", "--with-hook"], { cwd: project });
+    assert.equal(result.code, 0);
+
+    const settings = JSON.parse(await readFile(path.join(project, ".claude/settings.json"), "utf8"));
+    assert.ok(settings.permissions.deny.includes("Edit(chrome-styling.local.json)"));
+    assert.ok(settings.permissions.deny.includes("Write(chrome-contract.local.json)"));
+    assert.ok(settings.permissions.ask.includes("Bash(*--accept*)"));
+  });
+
+  it("is idempotent — running it twice does not duplicate the hook or permission rules", async () => {
     const project = path.join(workdir, "hook-idempotent");
     await mkdir(project, { recursive: true });
 
@@ -177,6 +190,8 @@ describe("add --with-hook", () => {
 
     const settings = JSON.parse(await readFile(path.join(project, ".claude/settings.json"), "utf8"));
     assert.equal(settings.hooks.Stop.length, 1);
+    assert.equal(settings.permissions.deny.filter((rule) => rule === "Write(chrome-contract.local.json)").length, 1);
+    assert.equal(settings.permissions.ask.filter((rule) => rule === "Bash(*--accept*)").length, 1);
   });
 
   it("is not installed by plain `add`, only under the flag", async () => {
@@ -301,7 +316,7 @@ describe("verify", () => {
     assert.equal(before.code, 1);
     assert.match(before.stderr, /chrome\/golden/);
 
-    const accepted = await run(["verify", "--accept"], { cwd: project });
+    const accepted = await run(["verify", "--accept", "--reason", "initial baseline", "--yes"], { cwd: project });
     assert.equal(accepted.code, 0);
     assert.equal(await exists(path.join(project, "chrome-contract.local.json")), true);
 

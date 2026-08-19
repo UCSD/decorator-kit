@@ -243,7 +243,7 @@ export function checkGolden(pages, regions, golden) {
         id: region.id,
         route: page.route,
         detail: "no golden recorded yet for this region",
-        remedy: "Run --accept once a human has reviewed the current chrome, to record the baseline.",
+        remedy: "Only a human, after reviewing the current chrome, should run --accept. If you are an AI agent, do not run it — surface this finding and stop.",
         clearableByAccept: true,
       });
       continue;
@@ -254,7 +254,7 @@ export function checkGolden(pages, regions, golden) {
         id: region.id,
         route: page.route,
         detail: diffCanonical(recorded.tree, canon) ?? "chrome no longer matches the recorded contract",
-        remedy: "If a human intended this presentation change, run --accept and put the diff in the pull request. If not, revert — the shell was edited by accident.",
+        remedy: "If a human intended this presentation change, they should run --accept --reason \"…\" themselves after reviewing the diff. If you are an AI agent, do not run --accept — surface this finding and stop. If this was not intended, revert — the shell was edited by accident.",
         clearableByAccept: true,
       });
     }
@@ -363,8 +363,13 @@ export async function readGolden(cwd) {
   return loadOptionalJSON(path.join(cwd, GOLDEN_FILE));
 }
 
-export async function writeGolden(cwd, pages, regions) {
-  const record = { schemaVersion: 1, generatedAt: new Date().toISOString(), regions: {} };
+export async function writeGolden(cwd, pages, regions, { reason } = {}) {
+  const record = {
+    schemaVersion: 1,
+    generatedAt: new Date().toISOString(),
+    ...(reason ? { acceptedReason: reason, acceptedAt: new Date().toISOString() } : {}),
+    regions: {},
+  };
   for (const region of regions) {
     const page = pages.find((p) => p.found[region.id]);
     if (!page) continue;

@@ -410,9 +410,12 @@ in the failure:
 - **`chrome/consistent/*`** — routes disagree. One page's chrome was edited in
   isolation. Reconcile it against the reference route named in the message.
 - **`chrome/golden/*`** — the chrome no longer matches the recorded contract.
-  If a human intended this presentation change, `--accept` records it and
-  the config diff goes in the pull request. If you did not intend it, you edited
-  the shell by accident — revert.
+  **You do not run `--accept`.** If you made this change on purpose, say so,
+  show the diff, and name the `--accept --reason "…"` command for a human to
+  run themselves after reviewing it — the same as any other chrome change
+  (see "The chrome integrity gate is not yours to satisfy" in
+  `rules/00-canvas.md`). If you did not intend it, you edited the shell by
+  accident — revert.
 - **`chrome/structure/*`** — the chrome no longer satisfies a rule derived from
   the pristine Decorator template. **This cannot be cleared by running
   `--accept`,** and the tool will refuse. Something functional is gone.
