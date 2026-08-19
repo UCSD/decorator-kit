@@ -7,11 +7,12 @@ import { renderRuleFiles } from "../scripts/lib/rules.mjs";
 
 // Installs the UC San Diego Decorator contract into a project.
 //
-//   init    scaffold a new project: Decorator dependency, rules, skill, CI
+//   init    scaffold a new project: Decorator dependency, rules, skill, CI, hook
 //   add     install into an existing project — never writes AGENTS.md
 //   sync    refresh the files this kit manages here, after a kit upgrade
 //   check   fail if those files are out of date (wire this into CI)
 //   drift   report whether the Decorator moved upstream
+//   verify  run the chrome integrity gate against this project's markup
 //
 // No dependencies: this runs via `npx` in a project that has installed nothing.
 //
@@ -41,6 +42,7 @@ const MANIFEST = "decorator-kit.json";
 const SKILL_DEST = ".claude/skills/ucsd-decorator";
 const PROJECT_CONTRACT = "AGENTS.md";
 const DECORATOR_PACKAGE = "ucsd-decorator-v5";
+const CLAUDE_SETTINGS = ".claude/settings.json";
 
 // Entries that do not make a directory "an existing project" for `init`.
 const GREENFIELD_OK = new Set([
@@ -170,6 +172,7 @@ async function addScripts() {
     "decorator:sync": "ucsd-decorator-kit sync",
     "decorator:check": "ucsd-decorator-kit check",
     "decorator:drift": "ucsd-decorator-kit drift",
+    "decorator:verify": "ucsd-decorator-kit verify",
   };
   let changed = false;
   for (const [name, value] of Object.entries(wanted)) {
@@ -181,6 +184,56 @@ async function addScripts() {
   manifest.scripts = scripts;
   await writeFile(packagePath, `${JSON.stringify(manifest, null, 2)}\n`);
   report.wrote.push("package.json (scripts)");
+}
+
+/**
+ * Add this kit's Stop hook to .claude/settings.json without disturbing
+ * anything else already there.
+ *
+ * Unlike CLAUDE.md or dependabot.yml, this file is not exclusively this
+ * kit's to write — a project may already have its own hooks or permissions
+ * in it. `put()`'s overwrite-or-skip semantics are wrong here: skipping
+ * would silently install nothing into a project that already has *some*
+ * settings.json, and forcing would clobber whatever else was there. So this
+ * reads, merges by matching the hook's own command string (idempotent —
+ * running `add --with-hook` twice does not duplicate the entry), and
+ * writes. Like the CI workflow it runs alongside, it is install-once, not
+ * tracked in decorator-kit.json's `manages` list — `sync` never touches it.
+ *
+ * The hook itself: `npx ucsd-decorator-kit verify` on Stop, backgrounded via
+ * `asyncRewake` so it never blocks the turn from ending, but if it finds a
+ * regression the agent is woken back up with the findings fed back as
+ * context — the exit-code-2 translation (`|| exit 2`) is what asyncRewake
+ * keys on. See templates/claude-settings.json and checks/README.md.
+ */
+async function installClaudeSettingsHook() {
+  const template = JSON.parse(await readFile(path.join(TEMPLATES, "claude-settings.json"), "utf8"));
+  const [stopGroup] = template.hooks.Stop;
+  const command = stopGroup.hooks[0].command;
+
+  const absolute = path.join(cwd, CLAUDE_SETTINGS);
+  const existingRaw = await readFile(absolute, "utf8").catch(() => null);
+  let settings = {};
+  if (existingRaw !== null) {
+    try {
+      settings = JSON.parse(existingRaw);
+    } catch (error) {
+      throw new Error(`${CLAUDE_SETTINGS} is not valid JSON: ${error.message}`);
+    }
+  }
+
+  settings.hooks ??= {};
+  settings.hooks.Stop ??= [];
+  const alreadyInstalled = settings.hooks.Stop.some((group) => group.hooks?.some((hook) => hook.command === command));
+  if (alreadyInstalled) {
+    report.skipped.push(`${CLAUDE_SETTINGS} (chrome gate hook already present)`);
+    return;
+  }
+  settings.hooks.Stop.push(stopGroup);
+
+  await mkdir(path.dirname(absolute), { recursive: true });
+  await writeFile(absolute, `${JSON.stringify(settings, null, 2)}\n`);
+  report[existingRaw === null ? "wrote" : "refreshed"].push(CLAUDE_SETTINGS);
 }
 
 /**
@@ -259,6 +312,7 @@ async function init() {
   await publishSkill();
   await put(".github/dependabot.yml", await readFile(path.join(TEMPLATES, "dependabot.yml"), "utf8"));
   await put(".github/workflows/decorator.yml", await readFile(path.join(TEMPLATES, "decorator.yml"), "utf8"));
+  await installClaudeSettingsHook();
   await addScripts();
   await writeManifest([...outputs.keys(), SKILL_DEST]);
   report.wrote.push(MANIFEST);
@@ -304,6 +358,9 @@ async function add() {
     await put(".github/dependabot.yml", await readFile(path.join(TEMPLATES, "dependabot.yml"), "utf8"));
     await put(".github/workflows/decorator.yml", await readFile(path.join(TEMPLATES, "decorator.yml"), "utf8"));
   }
+  if (has("with-hook")) {
+    await installClaudeSettingsHook();
+  }
   if (has("with-decorator")) {
     install([DECORATOR_PACKAGE]);
     await addScripts();
@@ -332,6 +389,12 @@ async function add() {
     console.log("");
     console.log("CI was not touched. `add --with-ci` writes a Dependabot config and a");
     console.log("workflow that runs `check` on pull requests and watches upstream weekly.");
+  }
+  if (!has("with-hook")) {
+    console.log("");
+    console.log("No Claude Code hook installed. `add --with-hook` adds a Stop hook that runs");
+    console.log("`verify` in the background after each turn and wakes the agent back up — not");
+    console.log("the user, and not blocking anything meanwhile — if it finds a regression.");
   }
 }
 
@@ -440,6 +503,31 @@ async function drift() {
   process.exitCode = 1;
 }
 
+// `check` above verifies this kit's own generated files (CLAUDE.md and
+// friends) are current — a different question from whether a project's built
+// chrome is correct, which is what `verify` answers. Same word for both would
+// be the same confusion this command exists to resolve, so it gets its own.
+//
+// This is a thin wrapper: checks/chrome-contract.mjs runs standalone, reading
+// nothing but files already on disk (contracts/, decorator-kit.json, the
+// project's own *.html/*.css/*.js). `verify` exists for symmetry with
+// sync/check/drift, not because the gate needs the CLI to function — see
+// checks/README.md.
+async function verify() {
+  const passthrough = argv.filter((entry) => entry !== "verify");
+  try {
+    execFileSync(process.execPath, [path.join(KIT_ROOT, "checks/chrome-contract.mjs"), ...passthrough], {
+      cwd,
+      stdio: "inherit",
+    });
+  } catch (error) {
+    // chrome-contract.mjs already printed everything useful via stdio:
+    // "inherit" — just propagate its exit code, not a second generic
+    // "Command failed" line on top of its own detailed findings.
+    process.exitCode = error.status ?? 1;
+  }
+}
+
 function help() {
   console.log(`ucsd-decorator-kit ${VERSION} — the UC San Diego Decorator contract for AI agents
 
@@ -448,16 +536,23 @@ function help() {
   npx ucsd-decorator-kit sync     refresh managed files after upgrading the kit
   npx ucsd-decorator-kit check    fail if managed files are stale (for CI)
   npx ucsd-decorator-kit drift    report whether the Decorator moved upstream
+  npx ucsd-decorator-kit verify   run the chrome integrity gate against this project
 
 Flags for \`add\`:
   --with-decorator   also add ${DECORATOR_PACKAGE} to package.json
   --with-ci          also write .github/dependabot.yml and a workflow
+  --with-hook        also add a Claude Code Stop hook that runs \`verify\`
+
+Flags for \`verify\` (passed straight through to checks/chrome-contract.mjs):
+  --check     run all four tiers, exit 1 on any finding (default)
+  --accept    record the golden — refuses while tier 1, 3, or 4 fail
+  --explain   print the resolved canvas, regions, and rules
 
 \`add\` never writes ${PROJECT_CONTRACT}. See the note at the top of bin/cli.mjs.
 Docs: https://github.com/UCSD/decorator-kit`);
 }
 
-const commands = { init, add, sync, check, drift, help };
+const commands = { init, add, sync, check, drift, verify, help };
 if (!commands[command]) {
   console.error(`Unknown command "${command}".`);
   help();

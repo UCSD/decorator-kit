@@ -86,8 +86,9 @@ canvas**. The header, title band, navbar, mobile offcanvas drawer, both search
 forms, the footer, and any embedded campus widget are **outside** it, and are
 not yours to edit.
 
-If the project ships `npm run chrome:explain` (or `checks/chrome-contract.mjs
---explain`), run it — it prints the exact selectors for that project.
+Run `npx ucsd-decorator-kit verify --explain` (or, without the CLI,
+`node node_modules/ucsd-decorator-kit/checks/chrome-contract.mjs --explain`)
+to print the exact canvas and chrome selectors for this project.
 
 **If a task appears to require a chrome change, stop and say so.** Name the
 region, explain why the task seems to need it, and let a human decide. Do not
@@ -402,24 +403,25 @@ credential stores, least privilege, and no sensitive values in logs.
 
 ## When the chrome gate fails
 
-Projects that adopt `checks/chrome-contract.mjs` fail the build on chrome drift.
-Read the rule name in the failure:
+`npx ucsd-decorator-kit verify` (or `node checks/chrome-contract.mjs --check`
+directly — see `checks/README.md`) fails on chrome drift. Read the rule name
+in the failure:
 
 - **`chrome/consistent/*`** — routes disagree. One page's chrome was edited in
   isolation. Reconcile it against the reference route named in the message.
 - **`chrome/golden/*`** — the chrome no longer matches the recorded contract.
-  If a human intended this presentation change, `chrome:accept` records it and
+  If a human intended this presentation change, `--accept` records it and
   the config diff goes in the pull request. If you did not intend it, you edited
   the shell by accident — revert.
 - **`chrome/structure/*`** — the chrome no longer satisfies a rule derived from
   the pristine Decorator template. **This cannot be cleared by running
-  `chrome:accept`,** and the tool will refuse. Something functional is gone.
+  `--accept`,** and the tool will refuse. Something functional is gone.
   Restore the markup from the vendor template.
 - **`chrome/styling/*`** — a site stylesheet or script reaches into the shell.
   `…/stylesheet` names the selector and the protected tokens it hits;
   `…/script` names the file and the function rewriting an element id;
   `…/expired-exception` means a recorded exception passed its `reviewOn` date
-  and stopped applying. **This cannot be cleared by running `chrome:accept`
+  and stopped applying. **This cannot be cleared by running `--accept`
   either,** and not for the same reason as `structure`: the markup is intact.
   That is the point — the golden records markup, so regenerating it cannot make
   the rule legitimate. Move the rule inside the canvas, or record a reviewed

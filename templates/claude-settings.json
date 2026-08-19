@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx ucsd-decorator-kit verify || exit 2",
+            "asyncRewake": true,
+            "rewakeSummary": "Chrome integrity gate found a regression",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}

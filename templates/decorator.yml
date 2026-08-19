@@ -1,8 +1,16 @@
-# Two jobs, answering two different questions.
+# Three jobs, answering three different questions.
 #
 #   contract  Are this project's generated instruction files current with the
 #             installed ucsd-decorator-kit? Fails the pull request if a kit
-#             upgrade landed without `npm run decorator:sync`.
+#             upgrade landed without `npm run decorator:sync`. This is about
+#             the rule files agents read — CLAUDE.md and friends — not the
+#             site's own markup.
+#
+#   verify    Is this project's actual chrome — the header, nav, drawer,
+#             search forms, footer — still correct? The chrome integrity gate,
+#             all four tiers: cross-page consistency, the recorded golden, the
+#             structural contract, and the styling/script scan. No escape
+#             hatch on tiers 1, 3, or 4 — see checks/README.md.
 #
 #   drift     Has the Decorator moved upstream without an npm release? Dependabot
 #             watches the registry; nothing watches a push to UCSD/Decorator or a
@@ -34,6 +42,19 @@ jobs:
       - run: npm ci
       - name: Generated rule files are current with the installed kit
         run: npm run decorator:check
+
+  verify:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Chrome integrity gate
+        run: npm run decorator:verify
 
   drift:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
