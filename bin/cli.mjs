@@ -69,9 +69,21 @@ const relative = (target) => path.relative(cwd, target) || ".";
 
 const report = { wrote: [], skipped: [], refused: [], refreshed: [] };
 
-/** Write one file, honoring the never-overwrite rule. */
-async function put(relativePath, contents, { force = false } = {}) {
-  if (relativePath === PROJECT_CONTRACT && command !== "init") {
+/**
+ * Write one file, honoring the never-overwrite rule.
+ *
+ * `allowContract` decides whether this call may write AGENTS.md. It defaults
+ * to `command === "init"` — right for `init` (always allowed) and for `add`
+ * (never reaches here for that filename; see below) — but `sync` overrides it
+ * per project, from that project's own manifest. A project `add` set up never
+ * put AGENTS.md in `manages`, so `renderFor` excludes it before `sync`'s loop
+ * ever calls `put`. A project `init` set up did manage it, so `sync` must be
+ * able to refresh it same as any other managed file — defaulting this to
+ * "only during init" silently made sync unable to ever fix a drifted AGENTS.md
+ * on an init'd project, no matter how many times you ran it.
+ */
+async function put(relativePath, contents, { force = false, allowContract = command === "init" } = {}) {
+  if (relativePath === PROJECT_CONTRACT && !allowContract) {
     report.refused.push(relativePath);
     return false;
   }
@@ -337,7 +349,7 @@ async function sync() {
   const outputs = await renderFor(managesContract);
   for (const [relativePath, contents] of outputs) {
     if (!manifest.manages.includes(relativePath)) continue;
-    await put(relativePath, contents, { force: true });
+    await put(relativePath, contents, { force: true, allowContract: managesContract });
   }
   if (manifest.manages.includes(SKILL_DEST)) await publishSkill();
   await writeManifest(manifest.manages);
