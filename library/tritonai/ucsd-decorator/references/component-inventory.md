@@ -62,12 +62,59 @@ Structural content blocks. Copy the wrapper, grid columns, and CSS classes
 | Rotator | `.carousel.slide.qb-carousel`, `.carousel-indicators`, `.item` | images, captions, links — keep indicator count matching slides |
 | News listings | `.jumbotron-news`, `.panel.panel-default` | cards; for the JS-driven variant, **only** the endpoint URL |
 | Event listings | `.event-listing`, `.col-md-3` / `.col-md-9` | image, title, date, blurb |
-| Callout blocks | `.jumbotron-cta-blocks`, `.flex`, `.wrapper` | background images, text links |
+| Tiles with links | `.jumbotron-tile-links`, `.flex`, `.wrapper` | background images, text links |
 | Contact and map | `.contact-module` | map `iframe`, address, phone, `mailto:` |
 | Social icons | `.social-media-module`, `.btn-social-icon` | `href` values |
 
 For JS-driven listings the population logic must not be altered — the only
 editable value is the endpoint URL.
+
+### Image size per module
+
+Modules crop and zoom their images rather than letterboxing them, so the size
+is part of the contract. Measured 2026-09 against the CMS example site's image
+library, `department.ucsd.edu/image-library/`; all 291 assets it ships match the
+size its own page documents.
+
+| Module | Image size |
+|---|---|
+| Hero — homepage, required | 1440 × 530 |
+| Intro banner — article template | 1500 × 480 |
+| Image rotator — every template but homepage | 900 × 335 |
+| Call to action | 550 × 370 |
+| Call to action — inset | 1200 × 388 |
+| Callout content | 1200 × 410 |
+| Text block | 1200 × 410 |
+| Tiles with links | 550 × 370 |
+| News with images | 388 × 246 |
+| Taller callout content or text block | 1200 × 800 |
+| Profile photo | 198 × 231 |
+
+Callout content and text block scale their background to a height driven by how
+much text sits in the module; the 1200 × 410 crops assume the homepage template,
+two or three boxes, and the recommended amount of copy. Four boxes, a long text
+block, or another template calls for the 1200 × 800 set.
+
+Hero slides, rotator slides, and the three news items must each be one
+consistent size within their own module. Images belong in `_images` — an image
+left in the module's default `_modules` folder does not publish.
+
+### Three traps in the shipped demo file
+
+Verified 2026-09 against the live `cdn.ucsd.edu/cms/decorator-5/styles/base.min.css`.
+
+- **`.jumbotron-cta-blocks`, the class `modules.html` puts on the tiles module,
+  is styled by nothing** — zero occurrences in the CDN stylesheet and zero in
+  the package's `base.css`. The real class is `.jumbotron-tile-links`, whose
+  `.background-image` rule is `width: 100%; height: 200px; object-fit: cover`.
+  Tile images crop to a 200px-tall box, so keep the subject centered.
+- **The six `<img class="background-image">` tags in that block have no `alt`
+  attribute at all.** Add one to each.
+- **`.embed-video` is `padding-bottom: 51.1%`** (≈1.96:1), not 16:9, despite the
+  comment beside it claiming 16:9. A 16:9 video letterboxes inside it.
+
+Social icons render 33px (`.social-list`), 40px (`.md-icons`), and 55px
+(`.lg-icons`). Only `.lg-icons` meets the 44 × 44 touch target minimum.
 
 ## Where these files live
 

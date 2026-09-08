@@ -20,14 +20,66 @@ into the drawer search without naming a single chrome class. Write
 the canvas.
 
 - **No new `<style>` blocks and no inline `style` attributes.**
-- Use classes that already exist in the Decorator stylesheet. Read the
-  unminified `base.css` from the pinned copy to find class names; the page loads
-  the minified build from the CDN.
+- Use classes the Decorator stylesheet actually styles — which is narrower than
+  the classes that are *available*. See "Bootstrap loads, but Bootstrap is not
+  the brand" below. Read the unminified `base.css` from the pinned copy to find
+  class names; the page loads the minified build from the CDN.
 - Keep Decorator CSS and JS pointed at `cdn.ucsd.edu`. Do not vendor them for
   serving. Pinning a copy for reference and contract derivation is a separate
   thing and is fine.
 - Typography is Roboto and Teko. Icons are Bootstrap 3 Glyphicons plus the
   Decorator social icons. Font Awesome is not part of the current surface.
+
+## Bootstrap loads, but Bootstrap is not the brand
+
+`bootstrap.min.css` is loaded on every Decorator page, so the entire Bootstrap 3
+class vocabulary resolves. Most of it was never given a UC San Diego appearance.
+When you reach for a Bootstrap class the Decorator does not style, nothing
+overrides it and nothing errors — the element simply renders in stock Bootstrap
+blue, teal, green, or red, on a UC San Diego page.
+
+**Never use a class ending `-success`, `-info`, `-warning`, or `-danger`.**
+Measured 2026-09 against the live `cdn.ucsd.edu` `base.min.css` and
+`bootstrap.min.css`: across all eight contextual families — `alert-*`, `btn-*`,
+`text-*`, `bg-*`, `label-*`, `panel-*`, `progress-bar-*`, `list-group-item-*` —
+the Decorator restyles exactly two suffixes, `-primary` and `-default`, and only
+on `btn` and `panel`:
+
+| Class | Decorator restyles it? |
+|---|---|
+| `.btn-primary`, `.btn-default` | yes — `#00629b`, hover `#004268` |
+| `.panel-primary`, `.panel-default` | yes, inside a callout module |
+| every `-success`, `-info`, `-warning`, `-danger` in every family | **no** |
+
+So `alert alert-info` — valid Bootstrap, and demonstrated in the kitchen sink —
+paints `background:#d9edf7` with a `#bce8f1` teal border, because `.alert-info`
+has zero rules in `base.min.css`. The Decorator's own alert pattern is a
+different class entirely: `.msg.alert`, a yellow `rgba(255,205,0,.84)` panel with
+a `warning.svg` icon on its heading. The bare table-row classes `.success`,
+`.info`, `.warning`, `.danger` fall through the same way.
+
+**The test to apply before using any class:** does `base.css` contain a rule for
+it? If only `bootstrap.min.css` does, it carries no brand opinion. That is fine
+for layout and utility classes that set no color — `.row`, `.col-md-4`,
+`.img-responsive`, `.sr-only`, `.text-center`, `.pull-right`, glyphicons — and
+wrong for anything that paints one.
+
+**Prefer the module wrapper over a hand-built card.** Do not assemble a card out
+of generic Bootstrap pieces and then tune it. The sanctioned containers are the
+module wrappers — `.jumbotron-sand`, `.jumbotron.side-image-white`,
+`.jumbotron-callout-content-*`, `.jumbotron-tile-links`, `.panel.panel-default`
+inside `.jumbotron-news`. A hand-built card is how off-brand classes get in.
+
+**`h3` through `h6` have no brand typography outside a module wrapper.** The
+Decorator gives `h1` and `h2` Teko-SemiBold with a brand color and size, but its
+only unscoped rule for the rest is `h3,h4,h5,h6 { color:#333; font-weight:400;
+line-height:1.5 }` — no family, no size. Everything that makes a lower heading
+look like the Decorator is scoped to a module: `.jumbotron-tile-links .tiles h3`,
+`.jumbotron-callout-content-two h3`, `.qb-carousel .carousel-caption h3`,
+`div.styled h3`. An `h3` in a container the Decorator does not recognize falls
+back to Bootstrap's 24px default, which is why it will not match a heading
+sample rendered inside a real module. Put the heading in the module wrapper
+rather than restyling the heading.
 
 ## JavaScript
 
