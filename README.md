@@ -12,6 +12,13 @@ mkdir my-site && cd my-site
 npx ucsd-decorator-kit@latest init
 ```
 
+To run an unreleased change — or if the registry is unreachable — every command
+on this page also works straight from the repository, which is what CI uses:
+
+```bash
+npx -y github:UCSD/decorator-kit init
+```
+
 That installs `ucsd-decorator-v5` — the Decorator itself — plus this kit, writes
 the rules in the format each AI tool reads, installs the skill, wires
 Dependabot and a CI workflow, and — for Claude Code — adds a `Stop` hook that
