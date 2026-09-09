@@ -501,6 +501,29 @@ backgrounds instead come from a CSS class that carries its own asset:
 offers built-in backgrounds the same way. Do not "correct" a preset to match the
 table.
 
+#### "Use a grit background" — pick the right file
+
+This is a common instruction and the package makes it easy to get wrong. Of the
+18 files with `grit` in the name, six are referenced by no template and no
+stylesheet — and four of those six are named `bg-grit-*`, the most
+background-sounding names in the directory. A search for a grit background finds
+the wrong file first. Verified 2026-09 against the CDN.
+
+| Where | Use | How |
+|---|---|---|
+| Hero slide | `blue-grit.jpg`, `navy-simple-grit.jpg`, `yellow-simple-grit.jpg` — all 1440 × 530 | `img src` on the slide, as `homepage.html` does |
+| Callout content | `.jumbotron-callout-content-one` (navy default), plus `.navy-yellow` or `.blue-navy` as a modifier on the same element | apply the class — the stylesheet supplies a 1400 × 810 file and its 425 × 750 mobile pair |
+| Full-width text | `.jumbotron-full-width` | apply the class |
+
+Shipped example: `class="jumbotron side-image-white jumbotron-callout-content-one
+navy-yellow"`. Do not also supply a file for those — the class is the mechanism,
+and a supplied image fights the media query that swaps in the mobile pair.
+
+**Never use these six.** Nothing in the package or on the CDN references them:
+`bg-grit-pattern.jpg`, `bg-grit-orbs-1.jpg`, `bg-grit-orbs-2.jpg`,
+`bg-grit-orbs-2-light.jpg` (all 2400 × 776), `text-mod-yellow-grit.png`, and
+`txt-navy-turquoise-grit.jpg` with its mobile pair.
+
 **Not every file in the package's `dist/img/` is a module asset.** Some are
 referenced by no template and no stylesheet — `bg-grit-pattern.jpg` and
 `bg-grit-orbs-1.jpg`, both 2400 × 776, among them. Every hero slide in the
