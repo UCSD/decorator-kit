@@ -493,6 +493,22 @@ The homepage hero and the image rotator are different modules. The rotator is
 not available on the homepage template, which has the hero built in; the hero
 size does not carry over to it.
 
+**These sizes govern images you supply** — an `img src` on a hero or rotator
+slide, or an upload into a Background Image or Custom Image field. Some module
+backgrounds instead come from a CSS class that carries its own asset:
+`.jumbotron-callout-content-one`, `.navy-orbs`, `.jumbotron-orbs-1`, and
+`.blue-navy` each reference a 1400 × 810 file from the stylesheet, and the hero
+offers built-in backgrounds the same way. Do not "correct" a preset to match the
+table.
+
+**Not every file in the package's `dist/img/` is a module asset.** Some are
+referenced by no template and no stylesheet — `bg-grit-pattern.jpg` and
+`bg-grit-orbs-1.jpg`, both 2400 × 776, among them. Every hero slide in the
+shipped `homepage.html` is 1440 × 530, the grit presets `blue-grit.jpg`,
+`navy-simple-grit.jpg`, and `yellow-simple-grit.jpg` included. An orphan asset at
+some other size is not evidence of another sanctioned hero size — putting one in
+a hero slide is the mistake, not a second valid option.
+
 **Reach for 1200 × 800 when the module grows.** Callout content and text block
 scale their background to a height set by how much text is in the module, and
 the 1200 × 410 crops assume the homepage template, two or three callout boxes,
