@@ -163,6 +163,26 @@ full parse — but it does track `@media`/`@supports` nesting correctly: the
 at-rule's own prelude is never read as a selector, while what's inside it
 still gets scanned.
 
+**CSS in `canvas-components/` gets stricter checks.** That folder is where a
+project drops the component libraries its canvas uses. A library's own reset
+can reach the shell without naming a single chrome class: Tailwind's Preflight
+zeroes every margin and list style on the page, header and footer included. So
+every `*.css` file there is scanned, `*.min.css` included, and any selector
+naming no class, id, or attribute (`*`, `html`, `body`, `h1`, `ul li`) is
+flagged as `chrome/styling/global`.
+
+Four cases don't count, which keeps the check from turning into noise:
+
+- A rule that sets only custom properties passes, because the Decorator's CSS
+  reads none.
+- A selector nested inside a style rule, `@scope`, or `@keyframes` isn't global.
+- `:host` only matches inside a shadow root.
+- `:not(…)` does not count as anchoring.
+
+Exceptions work the same as for any stylesheet finding. Site CSS outside the
+folder isn't held to this: the gate never checked it, and turning the check on
+there would fail existing projects on day one.
+
 **JS: `removeAttribute("id")`, `setAttribute("id", …)`, and `.id =` are
 flagged — but only in files that also reference a protected token.** Canvas
 scripts assign ids to their own components constantly (a drawer component

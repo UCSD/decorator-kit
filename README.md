@@ -89,6 +89,36 @@ kit's own. A rule file that anyone can add is not a review, so a chrome
 instruction in one gets refused rather than followed, just like a chrome
 request made in chat.
 
+### Component libraries
+
+A canvas that needs more than the Decorator's own components gets them from
+`canvas-components/`: shadcn/ui, a charting library, web components. Give each
+library its own folder, holding the files the page loads and a `README.md`
+saying when and how to use it.
+
+```
+canvas-components/
+  shadcn/
+    README.md      compiled into the rule files by sync
+    dist/app.css
+    dist/app.js
+```
+
+`sync` compiles each library's README into a "Project component libraries"
+section. That section relaxes three Decorator look-and-feel rules inside the
+canvas: agents may use the library's components and classes, its icon set, and
+its heading styles. Typography stays on brand (Roboto, Teko, Brix Sans, or
+Refrigerator Deluxe), and no chrome,
+accessibility, or security rule relaxes.
+
+A library's own CSS is the usual way one leaks into the shell, so `verify`
+holds `canvas-components/` to a stricter standard than other site CSS. It scans
+minified files there too. It fails on any selector that names no class, id, or
+attribute (`*`, `body`, `h1`), unless the rule sets only custom properties. The
+README that `init` and `add` write into the folder covers the setup that keeps
+a library inside the canvas: no global reset, prefixed class names, and popups
+rendered inside the canvas.
+
 `check` and `verify` answer different questions and are easy to conflate: `check`
 is about whether *this kit's generated rule files* are current, `verify` is
 about whether *the project's built chrome* is still correct. `verify` needs
@@ -180,7 +210,7 @@ rules/                       canonical rule source
 skills/ucsd-decorator/       the skill — SKILL.md plus references
 library/                     Skills Library publishing staging (see below)
 templates/                   Dependabot config, workflow, and the canvas-rules/
-                             README written into projects
+                             and canvas-components/ READMEs written into projects
 scripts/lib/rules.mjs        the renderer, shared by the CLI and the compiler
 scripts/compile-rules.mjs    rules/ -> CLAUDE.md, AGENTS.md, .cursorrules,
                              .github/copilot-instructions.md

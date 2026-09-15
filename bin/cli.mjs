@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import { cp, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { CANVAS_RULES_DIR, renderRuleFiles } from "../scripts/lib/rules.mjs";
+import { CANVAS_COMPONENTS_DIR, CANVAS_RULES_DIR, renderRuleFiles } from "../scripts/lib/rules.mjs";
 
 // Installs the UC San Diego Decorator contract into a project.
 //
@@ -43,9 +43,10 @@ const SKILL_DEST = ".claude/skills/ucsd-decorator";
 const PROJECT_CONTRACT = "AGENTS.md";
 const DECORATOR_PACKAGE = "ucsd-decorator-v5";
 const CLAUDE_SETTINGS = ".claude/settings.json";
-// Install-once, like the CI templates: the directory belongs to the project's
-// developers, so the README is never in `manages` and never overwritten.
+// Install-once, like the CI templates: both directories belong to the project's
+// developers, so their READMEs are never in `manages` and never overwritten.
 const CANVAS_RULES_README = `${CANVAS_RULES_DIR}/README.md`;
+const CANVAS_COMPONENTS_README = `${CANVAS_COMPONENTS_DIR}/README.md`;
 
 // Entries that do not make a directory "an existing project" for `init`.
 const GREENFIELD_OK = new Set([
@@ -167,12 +168,14 @@ async function renderFor(managedOnly) {
     note: NOTE,
     exclude,
     canvasRulesDir: path.join(cwd, CANVAS_RULES_DIR),
+    canvasComponentsDir: path.join(cwd, CANVAS_COMPONENTS_DIR),
   });
   return outputs;
 }
 
-async function scaffoldCanvasRules() {
+async function scaffoldCanvasDirectories() {
   await put(CANVAS_RULES_README, await readFile(path.join(TEMPLATES, "canvas-rules-README.md"), "utf8"));
+  await put(CANVAS_COMPONENTS_README, await readFile(path.join(TEMPLATES, "canvas-components-README.md"), "utf8"));
 }
 
 async function addScripts() {
@@ -351,7 +354,7 @@ async function init() {
   const outputs = await renderFor(true);
   for (const [relativePath, contents] of outputs) await put(relativePath, contents, { force: true });
   await publishSkill();
-  await scaffoldCanvasRules();
+  await scaffoldCanvasDirectories();
   await put(".github/dependabot.yml", await readFile(path.join(TEMPLATES, "dependabot.yml"), "utf8"));
   await put(".github/workflows/decorator.yml", await readFile(path.join(TEMPLATES, "decorator.yml"), "utf8"));
   await installClaudeSettingsHook();
@@ -385,15 +388,16 @@ async function init() {
   console.log("homepage — because choosing one unasked is the kind of decision this kit");
   console.log("exists to prevent.");
   console.log("");
-  console.log(`Project-specific rules for the canvas go in ${CANVAS_RULES_DIR}/ as Markdown files.`);
-  console.log("Run `npx ucsd-decorator-kit sync` after adding one.");
+  console.log(`Project-specific rules for the canvas go in ${CANVAS_RULES_DIR}/ as Markdown files, and`);
+  console.log(`component libraries in ${CANVAS_COMPONENTS_DIR}/, one folder each with a README.md.`);
+  console.log("Run `npx ucsd-decorator-kit sync` after adding either.");
 }
 
 async function add() {
   const outputs = await renderFor(false);
   for (const [relativePath, contents] of outputs) await put(relativePath, contents);
   await publishSkill();
-  await scaffoldCanvasRules();
+  await scaffoldCanvasDirectories();
 
   // The rule set has four targets and `add` writes three. Say so every time,
   // rather than leaving someone to notice a missing file and wonder whether the
@@ -467,7 +471,9 @@ async function sync() {
   console.log("");
   printReport();
   console.log("");
-  console.log(`Managed files are current with ucsd-decorator-kit@${VERSION} and ${CANVAS_RULES_DIR}/.`);
+  console.log(
+    `Managed files are current with ucsd-decorator-kit@${VERSION}, ${CANVAS_RULES_DIR}/, and ${CANVAS_COMPONENTS_DIR}/.`,
+  );
 }
 
 async function check() {
@@ -505,10 +511,14 @@ async function check() {
   }
 
   if (stale.length) {
-    console.error(`These files are out of date with ucsd-decorator-kit@${VERSION} or ${CANVAS_RULES_DIR}/:`);
+    console.error(
+      `These files are out of date with ucsd-decorator-kit@${VERSION}, ${CANVAS_RULES_DIR}/, or ${CANVAS_COMPONENTS_DIR}/:`,
+    );
     for (const entry of stale) console.error(`  ${entry}`);
     console.error("");
-    console.error(`If you upgraded the kit or changed a file in ${CANVAS_RULES_DIR}/, that is expected.`);
+    console.error(
+      `If you upgraded the kit, changed a file in ${CANVAS_RULES_DIR}/, or added or changed a library in ${CANVAS_COMPONENTS_DIR}/, that is expected.`,
+    );
     console.error("Run `npx ucsd-decorator-kit sync` and commit the result.");
     process.exitCode = 1;
     return;
@@ -583,7 +593,7 @@ function help() {
   npx ucsd-decorator-kit init     scaffold a new project in an empty directory
   npx ucsd-decorator-kit add      install into an existing project
   npx ucsd-decorator-kit sync     refresh managed files after upgrading the kit or
-                                  editing ${CANVAS_RULES_DIR}/
+                                  editing ${CANVAS_RULES_DIR}/ or ${CANVAS_COMPONENTS_DIR}/
   npx ucsd-decorator-kit check    fail if managed files are stale (for CI)
   npx ucsd-decorator-kit drift    report whether the Decorator moved upstream
   npx ucsd-decorator-kit verify   run the chrome integrity gate against this project

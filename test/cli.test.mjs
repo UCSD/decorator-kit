@@ -383,6 +383,76 @@ describe("canvas-rules", () => {
   });
 });
 
+// canvas-components/ is where a project drops the component libraries its
+// canvas uses. Each library's README must reach every tool's rule file under a
+// preamble that relaxes the Decorator's look-and-feel inside the canvas — and
+// nothing more: typography and the chrome stay exactly as they were.
+describe("canvas-components", () => {
+  it("add scaffolds canvas-components/ with a README that is never compiled or managed", async () => {
+    const project = path.join(workdir, "components-scaffold");
+    await mkdir(project, { recursive: true });
+    await run(["add"], { cwd: project });
+
+    assert.match(await readFile(path.join(project, "canvas-components/README.md"), "utf8"), /Brix Sans/);
+    await run(["sync"], { cwd: project });
+    assert.doesNotMatch(await readFile(path.join(project, "CLAUDE.md"), "utf8"), /^## Project component libraries$/m);
+    const manifest = JSON.parse(await readFile(path.join(project, "decorator-kit.json"), "utf8"));
+    assert.ok(!manifest.manages.some((entry) => entry.startsWith("canvas-components")));
+  });
+
+  it("sync compiles one section per library folder, before the project's canvas rules", async () => {
+    const project = path.join(workdir, "components-compile");
+    await mkdir(project, { recursive: true });
+    await run(["add"], { cwd: project });
+
+    await mkdir(path.join(project, "canvas-components/shadcn/dist"), { recursive: true });
+    await writeFile(
+      path.join(project, "canvas-components/shadcn/README.md"),
+      "# shadcn/ui\n\nUse it for dialogs and forms.\n\n## Setup\n\nTailwind prefix `tw:`.\n",
+    );
+    await writeFile(path.join(project, "canvas-components/shadcn/dist/app.css"), ".tw\\:flex{display:flex}");
+    await mkdir(path.join(project, "canvas-components/charts"), { recursive: true });
+    await mkdir(path.join(project, "canvas-components/.cache"), { recursive: true });
+    await writeFile(path.join(project, "canvas-components/notes.md"), "# Loose notes\n\nNot a library.\n");
+    await writeFile(path.join(project, "canvas-rules/forms.md"), "# Forms\n\nUse the shadcn form components.\n");
+
+    assert.equal((await run(["sync"], { cwd: project })).code, 0);
+
+    for (const file of ["CLAUDE.md", ".cursorrules", ".github/copilot-instructions.md"]) {
+      const compiled = await readFile(path.join(project, file), "utf8");
+      const libraries = compiled.search(/^## Project component libraries$/m);
+      assert.ok(libraries > compiled.indexOf("## Security"), `${file}: libraries come after the kit's rules`);
+      assert.ok(libraries < compiled.search(/^## Project canvas rules$/m), `${file}: and before the project's canvas rules`);
+      assert.match(compiled, /relax \*\*inside the canvas only\*\*/);
+      assert.match(compiled, /\*\*Typography stays on brand: Roboto, Teko, Brix Sans, or Refrigerator Deluxe\.\*\*/);
+
+      const charts = compiled.indexOf("### charts");
+      const shadcn = compiled.indexOf("### shadcn/ui");
+      assert.ok(libraries < charts && charts < shadcn, `${file}: one section per folder, in name order`);
+      assert.match(compiled, /_Folder `canvas-components\/charts\/`\._\n\n_This folder has no usage notes\./);
+      assert.match(compiled, /_From `canvas-components\/shadcn\/README\.md`\._/);
+      assert.match(compiled, /^#### Setup$/m);
+      assert.doesNotMatch(compiled, /Loose notes|\.cache/);
+    }
+  });
+
+  it("check fails when a library is added without sync, and says why", async () => {
+    const project = path.join(workdir, "components-check");
+    await mkdir(project, { recursive: true });
+    await run(["add"], { cwd: project });
+
+    await mkdir(path.join(project, "canvas-components/charts"), { recursive: true });
+    await writeFile(path.join(project, "canvas-components/charts/README.md"), "# Charts\n\nUse for dashboards.\n");
+
+    const failed = await run(["check"], { cwd: project });
+    assert.equal(failed.code, 1);
+    assert.match(failed.stderr, /library in canvas-components\//);
+
+    await run(["sync"], { cwd: project });
+    assert.equal((await run(["check"], { cwd: project })).code, 0);
+  });
+});
+
 // `verify` is a thin execFileSync wrapper around checks/chrome-contract.mjs —
 // exercised directly and thoroughly in test/chrome-contract.test.mjs. These
 // tests are about the wrapper itself: flag passthrough, exit-code

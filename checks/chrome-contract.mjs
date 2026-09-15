@@ -40,6 +40,7 @@ const TIER_LABELS = {
   "chrome/styling/stylesheet": "tier 4 (styling)",
   "chrome/styling/script": "tier 4 (styling)",
   "chrome/styling/page-ground": "tier 4 (styling)",
+  "chrome/styling/global": "tier 4 (styling)",
   "chrome/styling/expired-exception": "tier 4 (styling)",
 };
 
@@ -207,8 +208,10 @@ Flags:
                              clicked). An agent must never pass this.
 
 Reads *.html under the current directory (excluding node_modules/, vendor/,
-core-template/) plus every *.css and *.js (excluding *.min.*) for tier 4. No
-server, no browser, no ucsd-decorator-kit CLI required.`);
+core-template/) plus every *.css and *.js (excluding *.min.*) for tier 4, and
+every *.css under canvas-components/, minified included, which tier 4 also
+checks for global selectors. No server, no browser, no ucsd-decorator-kit CLI
+required.`);
 }
 
 try {

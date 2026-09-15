@@ -24,12 +24,20 @@ the canvas.
 - Use classes the Decorator stylesheet actually styles — which is narrower than
   the classes that are *available*. See "Bootstrap loads, but Bootstrap is not
   the brand" below. Read the unminified `base.css` from the pinned copy to find
-  class names; the page loads the minified build from the CDN.
+  class names; the page loads the minified build from the CDN. Inside the
+  canvas, a library in `canvas-components/` may supply classes too — see
+  "Component libraries live in `canvas-components/`".
 - Keep Decorator CSS and JS pointed at `cdn.ucsd.edu`. Do not vendor them for
   serving. Pinning a copy for reference and contract derivation is a separate
   thing and is fine.
-- Typography is Roboto and Teko. Icons are Bootstrap 3 Glyphicons plus the
-  Decorator social icons. Font Awesome is not part of the current surface.
+- Typography is Roboto and Teko, plus the UC San Diego brand fonts Brix Sans
+  and Refrigerator Deluxe inside the canvas — component libraries included. No
+  other font family. Load the brand fonts from an approved UC San Diego source,
+  never a third-party font site; if the project has no source for them, ask
+  rather than substituting.
+- Icons are Bootstrap 3 Glyphicons plus the Decorator social icons, or, inside
+  the canvas, the icon set of a library in `canvas-components/`. Font Awesome
+  is not part of the Decorator's surface.
 
 ## The page ground is the Decorator's
 
@@ -99,6 +107,8 @@ of generic Bootstrap pieces and then tune it. The sanctioned containers are the
 module wrappers — `.jumbotron-sand`, `.jumbotron.side-image-white`,
 `.jumbotron-callout-content-*`, `.jumbotron-tile-links`, `.panel.panel-default`
 inside `.jumbotron-news`. A hand-built card is how off-brand classes get in.
+Inside the canvas, a component from a library in `canvas-components/` is the
+other sanctioned option.
 
 **`h3` through `h6` have no brand typography outside a module wrapper.** The
 Decorator gives `h1` and `h2` Teko-SemiBold with a brand color and size, but its
@@ -109,7 +119,8 @@ look like the Decorator is scoped to a module: `.jumbotron-tile-links .tiles h3`
 `div.styled h3`. An `h3` in a container the Decorator does not recognize falls
 back to Bootstrap's 24px default, which is why it will not match a heading
 sample rendered inside a real module. Put the heading in the module wrapper
-rather than restyling the heading.
+rather than restyling the heading. Inside a component from a library in
+`canvas-components/`, the library may style it instead.
 
 ## JavaScript
 

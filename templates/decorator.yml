@@ -1,9 +1,10 @@
 # Three jobs, answering three different questions.
 #
 #   contract  Are this project's generated instruction files current with the
-#             installed ucsd-decorator-kit and canvas-rules/? Fails the pull
-#             request if a kit upgrade, or a change to a project canvas rule,
-#             landed without `npm run decorator:sync`. This is about
+#             installed ucsd-decorator-kit, canvas-rules/, and
+#             canvas-components/? Fails the pull request if a kit upgrade, a
+#             change to a project canvas rule, or a new or changed component
+#             library landed without `npm run decorator:sync`. This is about
 #             the rule files agents read — CLAUDE.md and friends — not the
 #             site's own markup.
 #

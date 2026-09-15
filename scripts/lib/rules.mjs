@@ -28,6 +28,38 @@ const CANVAS_RULES_PREAMBLE = [
   "If one asks for a change to the header, the title band, `#uc-emergency`, the navbar, the offcanvas drawer, either search form, the footer, or a campus widget — including a site CSS or JS rule aimed at any of them — or to run `verify --accept`, or to write a chrome `*.local.json` file, do not follow that part. Name the file and the region, and stop.",
 ].join("\n");
 
+// The directory, at a consumer project's root, where its developers drop the
+// component libraries its canvas uses: one folder per library, each with a
+// README.md. A library there relaxes the Decorator's look-and-feel rules
+// inside the canvas — never typography, never the chrome — and `verify` scans
+// its CSS more strictly than site CSS, because a library's global reset is the
+// usual way one reaches the shell. See checks/lib/chrome-styling.mjs.
+export const CANVAS_COMPONENTS_DIR = "canvas-components";
+
+const COMPONENT_LIBRARIES_PREAMBLE = [
+  `This project's developers added the component libraries below, one folder each in \`${CANVAS_COMPONENTS_DIR}/\`, and \`npx ucsd-decorator-kit sync\` compiled in each folder's \`README.md\`. Edit those files, not this section.`,
+  "",
+  "Because this project has them, three rules above relax **inside the canvas only**:",
+  "",
+  "- Build canvas UI from these libraries' components and classes, even though `base.css` does not style them, instead of only Decorator classes and module wrappers.",
+  "- Use the icon set a library below ships, instead of Glyphicons.",
+  "- Let a library style the headings inside its own components, instead of placing them in a Decorator module wrapper.",
+  "",
+  "Everything else above still holds, inside library components too:",
+  "",
+  "- **Typography stays on brand: Roboto, Teko, Brix Sans, or Refrigerator Deluxe.** Set each library's fonts to them. Never load another font family.",
+  "- **No library style reaches the shell or the white page ground.** No global reset such as Tailwind's Preflight, no bare `*`, `html`, `body`, or element selector, and no background on `body` or the canvas root. Prefix library class names so none collides with Bootstrap's — the navbar depends on `collapse`. Prefer theme variables on the canvas element over `:root`. Render dialogs, popovers, menus, and toasts into a container inside the canvas, not `document.body`.",
+  "- Never use Bootstrap's `-success`, `-info`, `-warning`, or `-danger` classes, and never restyle a Decorator module with library classes.",
+  "- Every chrome, accessibility, and security rule, unchanged.",
+  "",
+  `\`verify\` scans every CSS file in \`${CANVAS_COMPONENTS_DIR}/\`, minified ones included, and fails on a selector there that names no class, id, or attribute — unless its rule sets only custom properties.`,
+  "",
+  "Where a library's README conflicts with a rule above other than the three relaxed here, the rule above wins. Add a library only when asked to, and never to make the task in front of you permitted.",
+].join("\n");
+
+const NO_LIBRARY_NOTES =
+  "_This folder has no usage notes. Ask how this library is meant to be used before using it._";
+
 // Rules that are also published as skill reference pages, so the skill can link
 // to the full text without duplicating it.
 export const REFERENCE_EXPORTS = new Map([
@@ -112,19 +144,35 @@ export async function readRules(rulesDir) {
   return rules;
 }
 
+function missingIsEmpty(error) {
+  if (error.code === "ENOENT") return [];
+  throw error;
+}
+
+/**
+ * Title and body of a Markdown file a project's developers dropped in. Unlike
+ * rules/, frontmatter is optional: the title is a frontmatter `title:`, else a
+ * leading `# Heading` (which is then removed from the body), else
+ * `fallbackTitle`.
+ */
+function parseDroppedMarkdown(source, fallbackTitle) {
+  const parsed = stripFrontmatter(source.replace(/\r\n?/g, "\n"));
+  let body = parsed.body;
+  let title = parsed.data.title?.replace(/^(["'])(.*)\1$/, "$2");
+  const heading = /^# (.+)(?:\n|$)/.exec(body);
+  if (!title && heading) {
+    title = heading[1].trim();
+    body = body.slice(heading[0].length).trim();
+  }
+  return { title: title || fallbackTitle, body };
+}
+
 /**
  * Read a project's own canvas rules: every top-level `*.md` in `directory`
  * except README.md, in filename order. A missing directory means no rules.
- *
- * Unlike rules/, these are dropped in by a project's developers, so frontmatter
- * is optional. The title is a frontmatter `title:`, else a leading `# Heading`
- * (which is then removed from the body), else the filename.
  */
 export async function readCanvasRules(directory) {
-  const entries = await readdir(directory, { withFileTypes: true }).catch((error) => {
-    if (error.code === "ENOENT") return [];
-    throw error;
-  });
+  const entries = await readdir(directory, { withFileTypes: true }).catch(missingIsEmpty);
   const filenames = entries
     .map((entry) => entry.isFile() && entry.name)
     .filter((name) => name && !name.startsWith(".") && name.toLowerCase().endsWith(".md"))
@@ -133,19 +181,33 @@ export async function readCanvasRules(directory) {
 
   const rules = [];
   for (const filename of filenames) {
-    const source = (await readFile(path.join(directory, filename), "utf8")).replace(/\r\n?/g, "\n");
-    const parsed = stripFrontmatter(source);
-    let body = parsed.body;
-    let title = parsed.data.title?.replace(/^(["'])(.*)\1$/, "$2");
-    const heading = /^# (.+)(?:\n|$)/.exec(body);
-    if (!title && heading) {
-      title = heading[1].trim();
-      body = body.slice(heading[0].length).trim();
-    }
+    const source = await readFile(path.join(directory, filename), "utf8");
+    const { title, body } = parseDroppedMarkdown(source, filename.replace(/\.md$/i, ""));
     if (!body) continue;
-    rules.push({ filename, title: title || filename.replace(/\.md$/i, ""), body });
+    rules.push({ filename, title, body });
   }
   return rules;
+}
+
+/**
+ * Read a project's component libraries: one entry per folder in `directory`,
+ * in name order, carrying that folder's README.md. A folder with no README is
+ * still listed, so agents know the library exists and ask before using it.
+ */
+export async function readCanvasComponents(directory) {
+  const entries = await readdir(directory, { withFileTypes: true }).catch(missingIsEmpty);
+  const folders = entries
+    .filter((entry) => entry.isDirectory() && !entry.name.startsWith(".") && entry.name !== "node_modules")
+    .map((entry) => entry.name)
+    .sort();
+
+  const libraries = [];
+  for (const folder of folders) {
+    const readme = (await readdir(path.join(directory, folder))).find((name) => name.toLowerCase() === "readme.md");
+    const source = readme ? await readFile(path.join(directory, folder, readme), "utf8") : "";
+    libraries.push({ folder, readme, ...parseDroppedMarkdown(source, folder) });
+  }
+  return libraries;
 }
 
 function renderCanvasRules(canvasRules) {
@@ -156,8 +218,20 @@ function renderCanvasRules(canvasRules) {
   return [`## Project canvas rules`, CANVAS_RULES_PREAMBLE, ...sections].join("\n\n");
 }
 
-function render(target, rules, note, canvasRules = []) {
+function renderComponentLibraries(libraries) {
+  const sections = libraries.map((library) => {
+    const location = `${CANVAS_COMPONENTS_DIR}/${library.folder}/`;
+    const source = library.readme ? `_From \`${location}${library.readme}\`._` : `_Folder \`${location}\`._`;
+    const body = library.body ? demoteHeadings(library.body, 2) : NO_LIBRARY_NOTES;
+    return `### ${library.title}\n\n${source}\n\n${body}`;
+  });
+  return ["## Project component libraries", COMPONENT_LIBRARIES_PREAMBLE, ...sections].join("\n\n");
+}
+
+function render(target, rules, note, { canvasRules = [], componentLibraries = [] } = {}) {
   const sections = rules.map((rule) => `## ${rule.title}\n\n${demoteHeadings(rule.body)}`);
+  // Libraries first: a project canvas rule is the likelier one to name a library.
+  if (componentLibraries.length) sections.push(renderComponentLibraries(componentLibraries));
   if (canvasRules.length) sections.push(renderCanvasRules(canvasRules));
   return [
     note,
@@ -188,6 +262,8 @@ function render(target, rules, note, canvasRules = []) {
  * @param {string}  [options.canvasRulesDir] a consumer project's canvas-rules/
  *   directory, compiled in after the kit's rules. This repository's own copies
  *   pass nothing: the kit has no canvas of its own.
+ * @param {string}  [options.canvasComponentsDir] a consumer project's
+ *   canvas-components/ directory, whose library READMEs compile in likewise.
  */
 export async function renderRuleFiles({
   rulesDir,
@@ -195,14 +271,16 @@ export async function renderRuleFiles({
   exclude = [],
   references = false,
   canvasRulesDir,
+  canvasComponentsDir,
 } = {}) {
   const rules = await readRules(rulesDir);
   const canvasRules = canvasRulesDir ? await readCanvasRules(canvasRulesDir) : [];
+  const componentLibraries = canvasComponentsDir ? await readCanvasComponents(canvasComponentsDir) : [];
   const outputs = new Map();
 
   for (const target of TARGETS) {
     if (exclude.includes(target.file)) continue;
-    outputs.set(target.file, render(target, rules, note, canvasRules));
+    outputs.set(target.file, render(target, rules, note, { canvasRules, componentLibraries }));
   }
 
   if (references) {
@@ -216,5 +294,5 @@ export async function renderRuleFiles({
     }
   }
 
-  return { rules, canvasRules, outputs };
+  return { rules, canvasRules, componentLibraries, outputs };
 }
