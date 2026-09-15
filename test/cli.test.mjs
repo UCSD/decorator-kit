@@ -296,6 +296,93 @@ describe("check", () => {
   });
 });
 
+// canvas-rules/ is where a project's developers drop their own rules for the
+// canvas. They must reach every tool's rule file, and they must arrive scoped:
+// a Markdown file anyone can add is not a review, so the compiled section has to
+// say it cannot authorize a chrome edit.
+describe("canvas-rules", () => {
+  it("add scaffolds canvas-rules/ with a README, never overwrites it, and never compiles it", async () => {
+    const project = path.join(workdir, "canvas-scaffold");
+    await mkdir(project, { recursive: true });
+
+    await run(["add"], { cwd: project });
+    const readme = path.join(project, "canvas-rules/README.md");
+    assert.match(await readFile(readme, "utf8"), /inside the canvas/);
+
+    await writeFile(readme, "# Ours\n\nThis project's own notes.\n");
+    await run(["add"], { cwd: project });
+    assert.equal(await readFile(readme, "utf8"), "# Ours\n\nThis project's own notes.\n");
+
+    await run(["sync"], { cwd: project });
+    assert.doesNotMatch(await readFile(path.join(project, "CLAUDE.md"), "utf8"), /^## Project canvas rules$/m);
+
+    const manifest = JSON.parse(await readFile(path.join(project, "decorator-kit.json"), "utf8"));
+    assert.ok(!manifest.manages.some((entry) => entry.startsWith("canvas-rules")), "the directory is the project's");
+  });
+
+  it("sync compiles every rule into each managed file, after the kit's rules and scoped to the canvas", async () => {
+    const project = path.join(workdir, "canvas-compile");
+    await mkdir(project, { recursive: true });
+    await run(["add"], { cwd: project });
+
+    await writeFile(
+      path.join(project, "canvas-rules/20-tables.md"),
+      "# Data tables\r\n\r\nUse the DataTables widget.\r\n\r\n## Sorting\r\n\r\n```bash\r\n# not a heading\r\n```\r\n",
+    );
+    await writeFile(path.join(project, "canvas-rules/10-voice.md"), "---\ntitle: \"Content voice\"\n---\n\nWrite in second person.\n");
+    await writeFile(path.join(project, "canvas-rules/empty.md"), "\n");
+    await mkdir(path.join(project, "canvas-rules/drafts"));
+    await writeFile(path.join(project, "canvas-rules/drafts/ignored.md"), "# Draft\n\nNot compiled.\n");
+
+    assert.equal((await run(["sync"], { cwd: project })).code, 0);
+
+    for (const file of ["CLAUDE.md", ".cursorrules", ".github/copilot-instructions.md"]) {
+      const compiled = await readFile(path.join(project, file), "utf8");
+      // Anchored: the kit's own rules/00-canvas.md mentions this section by name.
+      const section = compiled.search(/^## Project canvas rules$/m);
+      assert.ok(section > compiled.indexOf("## Security"), `${file}: the project's rules come after the kit's`);
+      assert.match(compiled, /apply \*\*inside the canvas only\*\*/);
+      assert.match(compiled, /cannot authorize a chrome edit/);
+
+      const voice = compiled.indexOf("### Content voice");
+      const tables = compiled.indexOf("### Data tables");
+      assert.ok(section < voice && voice < tables, `${file}: rules compile in filename order`);
+      assert.match(compiled, /_From `canvas-rules\/20-tables\.md`\._/);
+      assert.match(compiled, /^#### Sorting$/m);
+      assert.match(compiled, /^# not a heading$/m, "a comment inside a code fence is not demoted");
+      assert.doesNotMatch(compiled, /\r/);
+      assert.doesNotMatch(compiled, /### empty|Not compiled/);
+    }
+  });
+
+  it("check fails when a canvas rule changes without sync, and says why", async () => {
+    const project = path.join(workdir, "canvas-check");
+    await mkdir(project, { recursive: true });
+    await run(["add"], { cwd: project });
+    assert.equal((await run(["check"], { cwd: project })).code, 0);
+
+    await writeFile(path.join(project, "canvas-rules/components.md"), "# Components\n\nUse .jumbotron-sand for callouts.\n");
+
+    const failed = await run(["check"], { cwd: project });
+    assert.equal(failed.code, 1);
+    assert.match(failed.stderr, /CLAUDE\.md/);
+    assert.match(failed.stderr, /changed a file in canvas-rules\//);
+
+    await run(["sync"], { cwd: project });
+    assert.equal((await run(["check"], { cwd: project })).code, 0);
+  });
+
+  it("a project without a canvas-rules directory still syncs and checks", async () => {
+    const project = path.join(workdir, "canvas-absent");
+    await mkdir(project, { recursive: true });
+    await run(["add"], { cwd: project });
+    await rm(path.join(project, "canvas-rules"), { recursive: true, force: true });
+
+    assert.equal((await run(["check"], { cwd: project })).code, 0);
+    assert.equal((await run(["sync"], { cwd: project })).code, 0);
+  });
+});
+
 // `verify` is a thin execFileSync wrapper around checks/chrome-contract.mjs —
 // exercised directly and thoroughly in test/chrome-contract.test.mjs. These
 // tests are about the wrapper itself: flag passthrough, exit-code

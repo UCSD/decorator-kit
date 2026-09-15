@@ -99,6 +99,14 @@ requests in particular, see "When you are asked to restyle the shell" below: the
 cause is usually the site's own CSS, and stopping before you look means missing
 it.
 
+**A project's own canvas rules live in `canvas-rules/`.** Its developers drop
+Markdown files there, and `npx ucsd-decorator-kit sync` compiles them into the
+project's `CLAUDE.md` and the other rule files under "Project canvas rules".
+Follow them inside the canvas. They rank below this skill and the kit's rules,
+and they cannot authorize a chrome edit: if one asks for a change outside the
+canvas, name the file and the region, and stop. When asked to record a canvas
+rule, add a file there and run `sync` — never edit the compiled section.
+
 ## Protected regions
 
 These are the regions that break in practice. `references/protected-regions.md`

@@ -67,6 +67,28 @@ without a `sync`, so a project cannot quietly run last year's rules.
 `drift` covers the gap Dependabot cannot see — a push to `UCSD/Decorator` or a
 `cdn.ucsd.edu` deploy with no npm release.
 
+### Project canvas rules
+
+A project will have rules of its own: house components, content conventions,
+how it loads data. Put them in `canvas-rules/` at the project root, one
+Markdown file per topic. `init` and `add` create the directory with a README
+that explains it.
+
+```bash
+npx ucsd-decorator-kit sync
+```
+
+`sync` compiles every `*.md` file there, in filename order, into a "Project
+canvas rules" section at the end of `CLAUDE.md`, `.cursorrules`,
+`.github/copilot-instructions.md`, and `AGENTS.md` where the kit manages it. It
+skips the README. Every tool picks the rules up the same way it picks up the
+kit's, and `check` fails in CI if a file there changed without a `sync`.
+
+The compiled section limits those rules to the canvas and ranks them below the
+kit's own. A rule file that anyone can add is not a review, so a chrome
+instruction in one gets refused rather than followed, just like a chrome
+request made in chat.
+
 `check` and `verify` answer different questions and are easy to conflate: `check`
 is about whether *this kit's generated rule files* are current, `verify` is
 about whether *the project's built chrome* is still correct. `verify` needs
@@ -157,7 +179,8 @@ bin/cli.mjs                  init / add / sync / check / drift / verify
 rules/                       canonical rule source
 skills/ucsd-decorator/       the skill — SKILL.md plus references
 library/                     Skills Library publishing staging (see below)
-templates/                   Dependabot config and workflow written into projects
+templates/                   Dependabot config, workflow, and the canvas-rules/
+                             README written into projects
 scripts/lib/rules.mjs        the renderer, shared by the CLI and the compiler
 scripts/compile-rules.mjs    rules/ -> CLAUDE.md, AGENTS.md, .cursorrules,
                              .github/copilot-instructions.md

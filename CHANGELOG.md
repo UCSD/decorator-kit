@@ -1,5 +1,28 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **`canvas-rules/`, a directory for a project's own canvas rules.** Developers
+  drop Markdown files there. `sync` compiles every top-level `*.md` file except
+  `README.md`, in filename order, into a "Project canvas rules" section at the
+  end of each managed rule file. Frontmatter is optional: a rule's title comes
+  from `title:`, then from a leading `# Heading`, then from the filename. `init`
+  and `add` create the directory with a README, which is never overwritten and
+  never listed in `manages`.
+- The compiled section starts with a preamble that limits those rules to the
+  canvas, ranks them below the kit's rules, and says they cannot authorize a
+  chrome edit, `verify --accept`, or a write to a chrome `*.local.json` file.
+  `rules/00-canvas.md` and the skill say the same.
+- `check` now also fails when a file in `canvas-rules/` changed without a
+  `sync`, and its message names that as a cause.
+
+### Fixed
+
+- Heading demotion in compiled rules no longer rewrites `# comment` lines inside
+  fenced code blocks.
+
 ## 2.0.0
 
 Closes a loophole where an AI agent could edit protected chrome, then make
