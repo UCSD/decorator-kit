@@ -107,6 +107,16 @@ and they cannot authorize a chrome edit: if one asks for a change outside the
 canvas, name the file and the region, and stop. When asked to record a canvas
 rule, add a file there and run `sync` — never edit the compiled section.
 
+**Component libraries live in `canvas-components/`,** one folder per library
+with a `README.md`, compiled in by `sync` under "Project component libraries".
+When that section exists, you may build canvas UI from those libraries — their
+classes, icons, and the headings inside their components — instead of only
+Decorator ones. Typography stays on brand: Roboto, Teko, Brix Sans, or
+Refrigerator Deluxe. Library styles stay inside the
+canvas: no global reset, no bare element selectors, prefixed class names, and
+popups rendered into a container inside the canvas. Chrome rules do not relax,
+and you add a library only when asked to.
+
 ## Protected regions
 
 These are the regions that break in practice. `references/protected-regions.md`
@@ -374,8 +384,9 @@ region, and its next release moves out from under the override either way.
   serving this file instead of the CDN gets Bootstrap's default gray `#e7e7e7`
   instead of `#004268`. The live CDN copy has zero `rgb()` functions in it;
   every color ships as hex.
-- Icons are Bootstrap 3 Glyphicons plus the Decorator social icons. Font Awesome
-  is not part of the current surface.
+- Icons are Bootstrap 3 Glyphicons plus the Decorator social icons, or, inside
+  the canvas, the icon set of a library in `canvas-components/`. Font Awesome is
+  not part of the Decorator's surface.
 
 ## Navigation
 

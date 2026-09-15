@@ -31,6 +31,28 @@
 - **Rule: "The page ground is the Decorator's"** in
   `rules/10-brand-integrity.md`. "Inside the canvas, CSS is unlimited" now stops
   at what the canvas paints outside itself.
+- **`canvas-components/`, one folder per component library the canvas uses.**
+  Each folder holds the library's files and a `README.md`. `sync` compiles the
+  READMEs into a "Project component libraries" section. A folder with no
+  README is still listed, with a note telling agents to ask before using it.
+  The section relaxes three rules inside the canvas: library classes and
+  components, a library's icon set, and library-styled headings. Typography
+  stays on brand, and every chrome, accessibility, and security rule
+  stays as written. `init` and `add` create the folder with a README on
+  keeping a library inside the canvas.
+- **`verify` holds CSS in `canvas-components/` to a stricter standard than
+  other site CSS.** It scans `*.min.css` there too. A new
+  `chrome/styling/global` finding flags any selector that names no class, id,
+  or attribute (`*`, `html`, `body`, `h1`), unless its rule sets only custom
+  properties. That catches a Tailwind Preflight-style reset, which the
+  protected-token scan can't see. Selectors nested in a style rule, `@scope`,
+  or `@keyframes` don't count as global. Reviewed exceptions in
+  `chrome-styling.local.json` apply as usual. Site CSS outside the folder is
+  unaffected.
+- **Brix Sans and Refrigerator Deluxe are approved inside the canvas**,
+  alongside Roboto and Teko. Both are UC San Diego brand fonts. The rules say to
+  load them from an approved UC San Diego source, never a third-party font
+  site, and not to use any other font family.
 
 ### Fixed
 

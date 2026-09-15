@@ -100,6 +100,26 @@ edit an existing one so that the task in front of you becomes permitted, and
 never edit the compiled section directly — `sync` overwrites it, and `check`
 fails on it.
 
+## Component libraries live in `canvas-components/`
+
+A project can build its canvas with component libraries — shadcn/ui, a charting
+library, a set of web components — by adding each one as a folder in
+`canvas-components/`, with a `README.md` saying when and how to use it. `sync`
+compiles those READMEs into a "Project component libraries" section near the
+end of this file.
+
+That section relaxes three Decorator look-and-feel rules inside the canvas:
+library classes instead of only Decorator ones, a library's icon set, and
+library-styled headings inside library components. Typography stays on
+brand — Roboto, Teko, Brix Sans, or Refrigerator Deluxe — and no chrome,
+accessibility, or security rule relaxes. If the section is
+not in this file, no library is in use — follow the rules as written.
+
+Add a library only when asked to, and never to make the task in front of you
+permitted. Library styles stay inside the canvas: `verify` fails on a
+stylesheet in `canvas-components/` with a selector that names no class, id, or
+attribute.
+
 ## The pristine template is read-only
 
 `core-template/`, `vendor/decorator-5/`, and `node_modules/ucsd-decorator-v5/`

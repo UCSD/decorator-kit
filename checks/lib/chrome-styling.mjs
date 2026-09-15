@@ -30,6 +30,11 @@ import { KIT_ROOT } from "./chrome-contract.mjs";
 
 export const STYLING_OVERLAY_FILE = "chrome-styling.local.json";
 
+// Where a project drops the component libraries its canvas uses — the same
+// directory scripts/lib/rules.mjs compiles their READMEs from. CSS there is
+// held to more than site CSS; see scanCssFile's `strict`.
+export const CANVAS_COMPONENTS_DIR = "canvas-components";
+
 // ── config ───────────────────────────────────────────────────────────────
 
 const REQUIRED_EXCEPTION_FIELDS = ["file", "selector", "reason", "reviewOn", "approvedBy"];
@@ -197,19 +202,27 @@ function lineOfPiece(text, offset, piece, startLine) {
   return startLine + countNewlines(text.slice(0, offset + leadingWhitespace));
 }
 
-function scanSelectorList(preludeText, startLine, file, protectedTokens, exceptions, findings) {
+/** Each selector in a list, whitespace-collapsed, with the line its first character is on. */
+function selectorsIn(preludeText, startLine) {
+  const selectors = [];
   for (const { text, offset } of splitTopLevel(preludeText, ",")) {
-    const trimmed = collapseWhitespace(text);
-    if (!trimmed) continue;
-    const hits = findProtectedTokenHits(trimmed, protectedTokens);
+    const selector = collapseWhitespace(text);
+    if (selector) selectors.push({ selector, line: lineOfPiece(preludeText, offset, text, startLine) });
+  }
+  return selectors;
+}
+
+function scanSelectorList(preludeText, startLine, file, protectedTokens, exceptions, findings) {
+  for (const { selector, line } of selectorsIn(preludeText, startLine)) {
+    const hits = findProtectedTokenHits(selector, protectedTokens);
     if (!hits.length) continue;
     pushUnlessExcepted(findings, exceptions, {
       kind: "chrome/styling/stylesheet",
       file,
-      line: lineOfPiece(preludeText, offset, text, startLine),
-      selector: trimmed,
+      line,
+      selector,
       tokens: hits,
-      detail: `selector "${trimmed}" reaches ${hits.join(", ")} — that belongs to the Decorator shell, not the canvas`,
+      detail: `selector "${selector}" reaches ${hits.join(", ")} — that belongs to the Decorator shell, not the canvas`,
     });
   }
 }
@@ -346,6 +359,43 @@ function scanDeclarations(preludeText, preludeLine, body, bodyLine, file, root, 
   }
 }
 
+// ── component-library globals ────────────────────────────────────────────
+//
+// CSS under canvas-components/ is scanned `strict`: a library's global reset
+// (Tailwind's Preflight) restyles the whole page without naming a chrome token.
+
+const QUOTED = /(["'])(?:\\.|(?!\1).)*\1/g;
+
+/**
+ * Does this selector reach elements by type alone? One anchored to a class,
+ * id, or attribute only reaches elements carrying it, and the protected-token
+ * check decides whether those belong to the shell. One naming none of them —
+ * `*`, `html`, `body`, `h1`, `ul li` — styles every match on the page, header
+ * and footer included, and no token derivation can see that. `:not(…)` does
+ * not anchor (`:not(.card) p` still reaches the footer's paragraphs), and
+ * `:host` only ever matches inside a shadow root.
+ */
+function isGlobalSelector(selector) {
+  const bare = selector.replace(QUOTED, "").replace(/:not\([^()]*\)/g, "");
+  if (/[.#](?:[\w-]|\\)|\[/.test(bare)) return false;
+  return !/^:host\b/.test(bare);
+}
+
+/** A rule that only sets custom properties styles nothing by itself, and the Decorator's CSS reads none. */
+function setsOnlyCustomProperties(block) {
+  return block
+    .replace(QUOTED, '""')
+    .split(";")
+    .map((declaration) => declaration.trim())
+    .filter(Boolean)
+    .every((declaration) => declaration.startsWith("--"));
+}
+
+/** Inside a style rule (CSS nesting), `@scope`, or `@keyframes`, a bare-looking selector is not global. */
+function anchorsNestedSelectors(block) {
+  return block.atRule === null || block.atRule === "scope" || block.atRule.endsWith("keyframes");
+}
+
 /**
  * Flag any site-authored selector that hits a protected token, and any rule
  * that repaints the page ground (see "page ground" above). Handles
@@ -355,8 +405,18 @@ function scanDeclarations(preludeText, preludeLine, body, bodyLine, file, root, 
  * *text* and a line number is the contract. A rule body is read from its `{`
  * to the next brace, so declarations after a nested rule inside it are not
  * scanned; plain site CSS rarely nests.
+ *
+ * With `strict` — CSS under canvas-components/ — also flag, as
+ * `chrome/styling/global`, any selector that names no class, id, or attribute,
+ * unless its rule sets only custom properties. A component library's global
+ * reset reaches the shell without naming a single chrome token.
  */
-export function scanCssFile(file, source, protectedTokens, { exceptions = [], canvasSelector = "main#main-content" } = {}) {
+export function scanCssFile(
+  file,
+  source,
+  protectedTokens,
+  { exceptions = [], strict = false, canvasSelector = "main#main-content" } = {},
+) {
   const root = canvasRoot(canvasSelector);
   const findings = [];
   const clean = stripCssComments(source);
@@ -387,21 +447,42 @@ export function scanCssFile(file, source, protectedTokens, { exceptions = [], ca
     }
     if (ch === "{") {
       const prelude = clean.slice(bufferStart, i);
-      const isAtRule = prelude.trim().startsWith("@");
-      const isStyleRule = !isAtRule && prelude.trim() !== "";
+      const trimmed = prelude.trim();
+      const atRule = trimmed.startsWith("@") ? (/^@([\w-]+)/.exec(trimmed)?.[1] ?? "").toLowerCase() : null;
+      const isStyleRule = atRule === null && trimmed !== "";
+      // `atRule: null` marks a style rule; anything else is an at-rule (or a stray brace, "").
+      const block = isStyleRule
+        ? { atRule: null, prelude, line: bufferStartLine, start: i + 1, globals: [] }
+        : { atRule: atRule ?? "", globals: [] };
       if (isStyleRule) {
         scanSelectorList(prelude, bufferStartLine, file, protectedTokens, exceptions, findings);
+        if (strict && !stack.some(anchorsNestedSelectors)) {
+          block.globals = selectorsIn(prelude, bufferStartLine).filter(({ selector }) => isGlobalSelector(selector));
+        }
       }
-      stack.push(isStyleRule ? { prelude, line: bufferStartLine } : null);
+      stack.push(block);
       i++;
       bufferStart = i;
       bufferStartLine = line;
       continue;
     }
     if (ch === "}") {
-      const rule = stack.pop();
-      if (rule) {
-        scanDeclarations(rule.prelude, rule.line, clean.slice(bufferStart, i), bufferStartLine, file, root, exceptions, findings);
+      const block = stack.pop();
+      if (block?.atRule === null) {
+        scanDeclarations(block.prelude, block.line, clean.slice(bufferStart, i), bufferStartLine, file, root, exceptions, findings);
+        // Decided at the closing brace, once the declarations are known.
+        if (block.globals.length && !setsOnlyCustomProperties(clean.slice(block.start, i))) {
+          for (const { selector, line: selectorLine } of block.globals) {
+            pushUnlessExcepted(findings, exceptions, {
+              kind: "chrome/styling/global",
+              file,
+              line: selectorLine,
+              selector,
+              detail: `selector "${selector}" names no class, id, or attribute, so it styles every match on the page — the Decorator shell included`,
+              remedy: `scope it under the canvas (${canvasSelector}) or the library's own root element, or turn off the library's global reset`,
+            });
+          }
+        }
       }
       i++;
       bufferStart = i;
@@ -625,6 +706,18 @@ export async function discoverStyleFiles(cwd) {
   return walkFiles(cwd, { exclude: DEFAULT_EXCLUDE_DIRS, matches: (name) => /\.css$/i.test(name) && !/\.min\.css$/i.test(name) });
 }
 
+/**
+ * Every `*.css` under canvas-components/, minified included. Site CSS discovery
+ * skips `*.min.css`; a component library's build is minified as often as not,
+ * and it is the CSS most likely to carry a global reset.
+ */
+export async function discoverComponentStyleFiles(cwd) {
+  return walkFiles(path.join(cwd, CANVAS_COMPONENTS_DIR), {
+    exclude: DEFAULT_EXCLUDE_DIRS,
+    matches: (name) => /\.css$/i.test(name),
+  }).catch((error) => (error.code === "ENOENT" ? [] : Promise.reject(error)));
+}
+
 export async function discoverScriptFiles(cwd) {
   return walkFiles(cwd, { exclude: DEFAULT_EXCLUDE_DIRS, matches: (name) => /\.js$/i.test(name) && !/\.min\.js$/i.test(name) });
 }
@@ -634,20 +727,26 @@ export async function discoverScriptFiles(cwd) {
  * loaded `pages` (see chrome-contract.mjs's `loadRoutePages`), then scan its
  * site-authored CSS and JS. `styleFiles`/`scriptFiles` default to every
  * `*.css`/`*.js` under `cwd` (excluding `*.min.*`, node_modules, vendor,
- * core-template) — pass explicit lists to scan a narrower or different set.
+ * core-template), plus every `*.css` under canvas-components/ — pass explicit
+ * lists to scan a narrower or different set. CSS under canvas-components/ is
+ * scanned strictly however it got into the list.
  */
 export async function runStyling(cwd, { pages, canvasSelector, regions, styleFiles, scriptFiles }) {
   const config = await loadStylingConfig(cwd);
   const protectedTokens = deriveProtectedTokens(pages, canvasSelector, regions, config.widgetTokens);
 
-  const css = styleFiles ?? (await discoverStyleFiles(cwd));
+  const css =
+    styleFiles ?? [...new Set([...(await discoverStyleFiles(cwd)), ...(await discoverComponentStyleFiles(cwd))])];
   const js = scriptFiles ?? (await discoverScriptFiles(cwd));
 
   const findings = [];
   for (const absolute of css) {
     const relative = path.relative(cwd, absolute).split(path.sep).join("/");
     const source = await readFile(absolute, "utf8");
-    findings.push(...scanCssFile(relative, source, protectedTokens, { exceptions: config.allow, canvasSelector }));
+    const strict = relative.startsWith(`${CANVAS_COMPONENTS_DIR}/`);
+    findings.push(
+      ...scanCssFile(relative, source, protectedTokens, { exceptions: config.allow, strict, canvasSelector }),
+    );
   }
   for (const absolute of js) {
     const relative = path.relative(cwd, absolute).split(path.sep).join("/");

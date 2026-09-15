@@ -7,6 +7,7 @@ import { decoratorPage } from "./fixtures/decorator-page.mjs";
 import { discoverRoutes, loadConfig, loadRoutePages } from "../checks/lib/chrome-contract.mjs";
 import {
   deriveProtectedTokens,
+  discoverComponentStyleFiles,
   discoverStyleFiles,
   loadStylingConfig,
   runStyling,
@@ -394,5 +395,115 @@ describe("runStyling end-to-end: all three shipped regressions together", () => 
       ["chrome/styling/page-ground", "css/site.css", 2],
       ["chrome/styling/page-ground", "css/site.css", 3],
     ]);
+  });
+});
+
+// canvas-components/ is where a project drops the component libraries its
+// canvas uses. A library's reset — Tailwind's Preflight zeroing every margin
+// and list style on the page — reaches the shell without naming one chrome
+// token, so the protected-token scan alone cannot see it.
+describe("scanCssFile strict — a component library's CSS may not style the page globally", () => {
+  const none = new Set();
+
+  it("flags selectors that name no class, id, or attribute, with the correct lines — at-rules included", () => {
+    const source = [
+      "*, ::before, ::after { box-sizing: border-box; margin: 0; }",
+      "@layer base {",
+      "  ul { list-style: none; }",
+      "}",
+      "body { font-family: system-ui; }",
+      ":not(.card) p { margin: 0; }",
+    ].join("\n");
+    const findings = scanCssFile("canvas-components/ui/app.min.css", source, none, { strict: true });
+    assert.deepEqual(
+      findings.map((f) => [f.kind, f.selector, f.line]),
+      [
+        ["chrome/styling/global", "*", 1],
+        ["chrome/styling/global", "::before", 1],
+        ["chrome/styling/global", "::after", 1],
+        ["chrome/styling/global", "ul", 3],
+        ["chrome/styling/global", "body", 5],
+        ["chrome/styling/global", ":not(.card) p", 6],
+      ],
+    );
+  });
+
+  it("does not flag anchored, scoped, nested, keyframe, shadow-root, or custom-property-only rules", () => {
+    const source = [
+      ".tw\\:flex { display: flex; }",
+      "#app-root h1 { font-size: 2rem; }",
+      '[data-slot="button"] { cursor: pointer; }',
+      ':root, :host { --tw-color-primary: #182b49; --tw-font: "a;b"; }',
+      "*, ::before, ::after, ::backdrop { --tw-border-style: solid; }",
+      "@keyframes spin { from { transform: rotate(0) } to { transform: rotate(360deg) } }",
+      ".card { h2 { margin: 0; } }",
+      "@scope (#app-root) { p { margin: 0; } }",
+      ":host { display: block; }",
+    ].join("\n");
+    assert.deepEqual(scanCssFile("canvas-components/ui/app.css", source, none, { strict: true }), []);
+  });
+
+  it("leaves site CSS as it was — strict is off unless the file is under canvas-components/", () => {
+    assert.deepEqual(scanCssFile("css/site.css", "body { margin: 0; }\nh1 { color: #00629b; }", none), []);
+  });
+
+  it("a reviewed exception suppresses a global finding; an expired one reports itself", () => {
+    const exception = {
+      file: "canvas-components/ui/app.css",
+      selector: "body",
+      reason: "scroll lock while a dialog is open",
+      reviewOn: "2999-01-01",
+      approvedBy: "jsmith",
+    };
+    const source = "body { overflow: hidden; }";
+    assert.deepEqual(scanCssFile(exception.file, source, none, { strict: true, exceptions: [exception] }), []);
+
+    const expired = scanCssFile(exception.file, source, none, {
+      strict: true,
+      exceptions: [{ ...exception, reviewOn: "2000-01-01" }],
+    });
+    assert.deepEqual(expired.map((f) => f.kind), ["chrome/styling/expired-exception"]);
+  });
+});
+
+describe("discoverComponentStyleFiles", () => {
+  it("finds minified CSS under canvas-components/, and nothing outside it", async () => {
+    const dir = await project();
+    await mkdir(path.join(dir, "canvas-components/ui/dist"), { recursive: true });
+    await mkdir(path.join(dir, "css"), { recursive: true });
+    await writeFile(path.join(dir, "canvas-components/ui/dist/app.min.css"), "");
+    await writeFile(path.join(dir, "css/bootstrap.min.css"), "");
+    const files = await discoverComponentStyleFiles(dir);
+    assert.deepEqual(
+      files.map((f) => path.relative(dir, f).split(path.sep).join("/")),
+      ["canvas-components/ui/dist/app.min.css"],
+    );
+  });
+
+  it("returns nothing when the project has no canvas-components/", async () => {
+    assert.deepEqual(await discoverComponentStyleFiles(await project()), []);
+  });
+});
+
+describe("runStyling end-to-end: a component library dropped into canvas-components/", () => {
+  it("scans its minified build for shell tokens and global selectors, and holds site CSS to neither", async () => {
+    const dir = await project();
+    await writeFile(path.join(dir, "index.html"), decoratorPage("Home"));
+    await mkdir(path.join(dir, "canvas-components/ui/dist"), { recursive: true });
+    await mkdir(path.join(dir, "css"), { recursive: true });
+    const library = "canvas-components/ui/dist/app.min.css";
+    await writeFile(path.join(dir, library), ".collapse{visibility:collapse}h1{margin:0}.tw\\:flex{display:flex}");
+    await writeFile(path.join(dir, "css/site.css"), "body { margin: 0; }\n");
+
+    const { config, pages } = await loadPages(dir);
+    const { findings } = await runStyling(dir, { pages, canvasSelector: config.canvas, regions: config.regions });
+
+    assert.ok(
+      findings.some((f) => f.kind === "chrome/styling/stylesheet" && f.file === library && f.selector === ".collapse"),
+      "Tailwind's collapse utility hits the class Bootstrap's navbar depends on",
+    );
+    const global = findings.filter((f) => f.kind === "chrome/styling/global");
+    assert.deepEqual(global.map((f) => [f.file, f.selector]), [[library, "h1"]]);
+    assert.match(global[0].remedy, /main#main-content/);
   });
 });
