@@ -17,11 +17,34 @@
   `rules/00-canvas.md` and the skill say the same.
 - `check` now also fails when a file in `canvas-rules/` changed without a
   `sync`, and its message names that as a cause.
+- **Tier 4 `chrome/styling/page-ground`.** A canvas-scoped stylesheet could
+  turn the white page behind the canvas gray while all four tiers passed.
+  Found on a generated app: `.student-canvas.sx-light { box-shadow: 0 0 0
+  100vmax #f2f4f7; clip-path: inset(0 -100vmax) }` painted from a 1170px
+  container out to both edges of the viewport, naming no chrome token. The
+  check reads declarations, not selectors: it flags paint past an element's
+  own box (a `box-shadow` spread in viewport units or ≥ 1000px, a
+  `clip-path: inset()` pushed outward that far, a `100vw` width, a `50vw`
+  breakout margin or offset) and a non-white background on `html`, `body`,
+  `:root`, or the canvas root. `position: fixed` rules — modal backdrops — are
+  exempt. Like every tier 4 finding, `--accept` cannot clear it.
+- **Rule: "The page ground is the Decorator's"** in
+  `rules/10-brand-integrity.md`. "Inside the canvas, CSS is unlimited" now stops
+  at what the canvas paints outside itself.
 
 ### Fixed
 
 - Heading demotion in compiled rules no longer rewrites `# comment` lines inside
   fenced code blocks.
+
+### Upgrading
+
+- `verify` can newly fail on a project that uses full-bleed CSS. Fix the CSS —
+  a tinted band belongs in a module wrapper such as `.jumbotron-sand`. A
+  reviewed exception in `chrome-styling.local.json` is a human's decision, not
+  an agent's.
+- Run `sync` after upgrading so the managed rule files carry the new rule;
+  `check` fails until you do.
 
 ## 2.0.0
 

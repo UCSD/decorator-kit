@@ -95,7 +95,10 @@ and accepts it — because presentation changes are legitimate.
 from the pristine Decorator template.
 
 **Tier 4 — styling and scripting.** No site-authored stylesheet or script may
-target the shell. Catches the regressions that leave the markup untouched.
+target the shell, and no stylesheet may repaint the white page ground behind
+the canvas — by a background on `html`, `body`, or the canvas root, or by
+paint that bleeds past a canvas element's box to the viewport edges. Catches
+the regressions that leave the markup untouched.
 
 Tier 3 is the one that cannot be dropped. Replay the actual incident: an agent
 replaces the drawer search form with a link, in the one shell that feeds every
