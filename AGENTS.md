@@ -230,7 +230,8 @@ once per container.
 
 ### Styling
 
-**Style the canvas, never the shell.** Inside the canvas, CSS is unlimited. The
+**Style the canvas, never the shell.** Inside the canvas, CSS is unlimited — as
+long as what it paints stays inside the canvas too. The
 shell arrives already styled from `cdn.ucsd.edu`, including responsive behavior
 an override will not follow, so site CSS must not target a chrome class or id —
 not scoped, and least of all with `!important`. If the chrome renders wrong,
@@ -253,6 +254,35 @@ the canvas.
   thing and is fine.
 - Typography is Roboto and Teko. Icons are Bootstrap 3 Glyphicons plus the
   Decorator social icons. Font Awesome is not part of the current surface.
+
+### The page ground is the Decorator's
+
+The white behind the canvas belongs to the shell, even though no chrome class
+names it: the CDN `base.min.css` sets `body, html { background: #fff }`, and
+`.layout-main` is full width. Canvas-scoped CSS can still repaint it in two
+ways, and neither touches a chrome token:
+
+- **A background on the ground itself** — `html`, `body`, `:root`, or the
+  canvas root (`main#main-content`, `div#ag-app-canvas`).
+- **A full-bleed trick** that paints past a canvas element's own box to the
+  edges of the viewport: `box-shadow: 0 0 0 100vmax` paired with
+  `clip-path: inset(0 -100vmax)`, `width: 100vw`, or
+  `margin: 0 calc(50% - 50vw)`.
+
+Measured 2026-09 on a generated app: `.student-canvas.sx-light { background:
+#f2f4f7; box-shadow: 0 0 0 100vmax #f2f4f7; clip-path: inset(0 -100vmax) }`,
+on a 1170px `.container` inside the canvas, turned the whole band between the
+navbar and the footer gray. The header, navbar, and footer were untouched, so
+it read as "the chrome is fine but the page is the wrong color."
+
+Leave the outermost canvas wrapper unpainted. A tinted band is a module —
+`.jumbotron-sand`, callout content, full-width text — whose wrapper the
+Decorator already lays out. A color on a panel, card, or row *inside* the
+canvas is fine. A `position: fixed` overlay, such as a modal backdrop, is
+meant to cover the viewport and is not this.
+
+`verify` reports both shapes as `chrome/styling/page-ground`. Like every tier 4
+finding, `--accept` cannot clear it; fix the CSS.
 
 ### Bootstrap loads, but Bootstrap is not the brand
 

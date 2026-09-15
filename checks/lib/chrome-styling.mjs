@@ -169,36 +169,44 @@ function findProtectedTokenHits(selectorText, protectedTokens) {
   return [...hits];
 }
 
+/** Push a stylesheet finding unless a reviewed exception covers file + selector; an expired exception reports itself instead. */
+function pushUnlessExcepted(findings, exceptions, finding) {
+  const exception = findException(exceptions, finding.file, finding.selector);
+  if (!exception) {
+    findings.push(finding);
+    return;
+  }
+  if (isExpired(exception)) {
+    findings.push({
+      kind: "chrome/styling/expired-exception",
+      file: finding.file,
+      line: finding.line,
+      selector: finding.selector,
+      detail: `the exception for "${finding.selector}" expired on ${exception.reviewOn} and no longer applies`,
+      reason: exception.reason,
+    });
+  }
+}
+
+/** Line of the first non-whitespace character of the piece starting at `offset` within `text`, which itself starts on `startLine`. */
+function lineOfPiece(text, offset, piece, startLine) {
+  // A piece routinely starts with the newline left over from the previous
+  // selector's trailing comma or declaration's semicolon — count up to where
+  // its content actually is, not up to the piece boundary itself.
+  const leadingWhitespace = /^\s*/.exec(piece)[0].length;
+  return startLine + countNewlines(text.slice(0, offset + leadingWhitespace));
+}
+
 function scanSelectorList(preludeText, startLine, file, protectedTokens, exceptions, findings) {
   for (const { text, offset } of splitTopLevel(preludeText, ",")) {
     const trimmed = collapseWhitespace(text);
     if (!trimmed) continue;
     const hits = findProtectedTokenHits(trimmed, protectedTokens);
     if (!hits.length) continue;
-    // offset is where this (untrimmed) piece starts within preludeText; count
-    // newlines up to where its first non-whitespace character actually is,
-    // not up to the piece boundary itself — a piece routinely starts with the
-    // newline left over from the previous selector's trailing comma.
-    const leadingWhitespace = /^\s*/.exec(text)[0].length;
-    const line = startLine + countNewlines(preludeText.slice(0, offset + leadingWhitespace));
-    const exception = findException(exceptions, file, trimmed);
-    if (exception) {
-      if (isExpired(exception)) {
-        findings.push({
-          kind: "chrome/styling/expired-exception",
-          file,
-          line,
-          selector: trimmed,
-          detail: `the exception for "${trimmed}" expired on ${exception.reviewOn} and no longer applies`,
-          reason: exception.reason,
-        });
-      }
-      continue;
-    }
-    findings.push({
+    pushUnlessExcepted(findings, exceptions, {
       kind: "chrome/styling/stylesheet",
       file,
-      line,
+      line: lineOfPiece(preludeText, offset, text, startLine),
       selector: trimmed,
       tokens: hits,
       detail: `selector "${trimmed}" reaches ${hits.join(", ")} — that belongs to the Decorator shell, not the canvas`,
@@ -206,14 +214,150 @@ function scanSelectorList(preludeText, startLine, file, protectedTokens, excepti
   }
 }
 
+// ── page ground ──────────────────────────────────────────────────────────
+//
+// The white behind the canvas is shell too: base.min.css sets
+// `body, html { background: #fff }` and `.layout-main` is full width. A rule
+// can repaint it without naming a single chrome token, so the token check
+// above never sees it. Shipped regression: a canvas-scoped
+// `.student-canvas.sx-light { box-shadow: 0 0 0 100vmax #f2f4f7;
+// clip-path: inset(0 -100vmax) }` turned the whole band under the navbar gray
+// from inside a 1170px container, with every other tier green.
+//
+// Two shapes are flagged. Declarations that paint past their own box to the
+// viewport edges (any selector), and a non-white background on the page
+// ground itself — html, body, :root, or the canvas root. A background on a
+// component *inside* the canvas is the canvas's business and is not flagged.
+
+const HUGE_LENGTH = String.raw`(?:(?:\d+\.?\d*|\.\d+)(?:vw|vh|vmax|vmin)|\d{4,}(?:\.\d+)?px)`;
+
+const BLEED_DECLARATIONS = [
+  {
+    property: /^box-shadow$/,
+    value: new RegExp(HUGE_LENGTH, "i"),
+    what: "a box-shadow spread to viewport size",
+  },
+  {
+    property: /^clip-path$/,
+    value: new RegExp(String.raw`inset\([^)]*-\s*${HUGE_LENGTH}`, "i"),
+    what: "a clip-path inset that extends past the element's own edges",
+  },
+  {
+    property: /^(?:min-)?(?:width|inline-size)$/,
+    value: /(?:^|[^\d.])100(?:\.0+)?vw\b/i,
+    what: "a 100vw width",
+  },
+  {
+    property: /^(?:margin(?:-left|-right|-inline(?:-start|-end)?)?|left|right|inset(?:-inline(?:-start|-end)?)?)$/,
+    value: /(?:^|[^\d.])50(?:\.0+)?vw\b/i,
+    what: "a 50vw breakout offset",
+  },
+];
+
+const BACKGROUND_PROPERTY = /^background(?:-color|-image)?$/;
+const WHITE_OR_NOTHING = new Set(["transparent", "none", "#fff", "#ffffff", "white", "rgb(255,255,255)", "inherit", "initial", "unset", "revert"]);
+
+/** `{ property, value, line }` for each declaration in a rule body. Lowercased property; value without `!important`. */
+function parseDeclarations(body, startLine) {
+  const declarations = [];
+  for (const { text, offset } of splitTopLevel(body, ";")) {
+    const colon = text.indexOf(":");
+    if (colon === -1) continue;
+    const property = text.slice(0, colon).trim().toLowerCase();
+    if (!/^-?[a-z][a-z-]*$/.test(property)) continue;
+    const value = collapseWhitespace(text.slice(colon + 1).replace(/!\s*important\s*$/i, ""));
+    declarations.push({ property, value, line: lineOfPiece(body, offset, text, startLine) });
+  }
+  return declarations;
+}
+
+/** The last compound of a selector — the element it actually styles. */
+function subjectCompound(selector) {
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < selector.length; i++) {
+    const c = selector[i];
+    if (c === "[" || c === "(") depth++;
+    else if (c === "]" || c === ")") depth--;
+    else if (depth === 0 && /[\s>+~]/.test(c)) start = i + 1;
+  }
+  return selector.slice(start).trim();
+}
+
+/** Tag and id of the canvas selector's own element, e.g. `main#main-content` → `{ tag: "main", id: "main-content" }`. */
+function canvasRoot(canvasSelector) {
+  const compound = subjectCompound(canvasSelector ?? "");
+  return {
+    tag: /^[a-z][\w-]*/i.exec(compound)?.[0].toLowerCase() ?? null,
+    id: /#([\w-]+)/.exec(compound)?.[1] ?? null,
+  };
+}
+
+function isPageGround(selector, root) {
+  const subject = subjectCompound(selector);
+  if (subject.includes("::")) return false; // a pseudo-element is its own box, not the element's ground
+  if (/^(?:html|body|:root)(?![\w-])/i.test(subject)) return true;
+  if (root.id && new RegExp(`#${escapeRegExp(root.id)}(?![\\w-])`).test(subject)) return true;
+  // A bare `main` is the canvas root in every Decorator template; a bare `div` is not worth guessing at.
+  return root.tag === "main" && /^main(?![\w-])/i.test(subject);
+}
+
+function scanDeclarations(preludeText, preludeLine, body, bodyLine, file, root, exceptions, findings) {
+  const declarations = parseDeclarations(body, bodyLine);
+  if (!declarations.length) return;
+  const selectorList = collapseWhitespace(preludeText);
+  const remedy =
+    "leave the page ground white — put a tinted band in a module wrapper such as .jumbotron-sand inside the canvas (rules/10-brand-integrity.md, \"The page ground is the Decorator's\")";
+
+  // A fixed-position overlay (a modal backdrop) is meant to cover the viewport, and only while open.
+  const fixed = declarations.some((d) => d.property === "position" && /^fixed\b/i.test(d.value));
+  if (!fixed) {
+    for (const declaration of declarations) {
+      const match = BLEED_DECLARATIONS.find((b) => b.property.test(declaration.property) && b.value.test(declaration.value));
+      if (!match) continue;
+      pushUnlessExcepted(findings, exceptions, {
+        kind: "chrome/styling/page-ground",
+        file,
+        line: declaration.line,
+        selector: selectorList,
+        detail: `${declaration.property}: ${declaration.value} — ${match.what} paints past this element's box to the edges of the viewport, over the Decorator's white page ground`,
+        remedy,
+      });
+    }
+  }
+
+  const backgrounds = declarations.filter(
+    (d) => BACKGROUND_PROPERTY.test(d.property) && !WHITE_OR_NOTHING.has(d.value.toLowerCase().replace(/\s+/g, "")),
+  );
+  if (!backgrounds.length) return;
+  for (const { text, offset } of splitTopLevel(preludeText, ",")) {
+    const selector = collapseWhitespace(text);
+    if (!selector || !isPageGround(selector, root)) continue;
+    for (const declaration of backgrounds) {
+      pushUnlessExcepted(findings, exceptions, {
+        kind: "chrome/styling/page-ground",
+        file,
+        line: lineOfPiece(preludeText, offset, text, preludeLine),
+        selector,
+        detail: `${declaration.property}: ${declaration.value} on ${subjectCompound(selector)} repaints the page ground, which the Decorator sets to #fff`,
+        remedy,
+      });
+    }
+  }
+}
+
 /**
- * Flag any site-authored selector that hits a protected token. Handles
+ * Flag any site-authored selector that hits a protected token, and any rule
+ * that repaints the page ground (see "page ground" above). Handles
  * `@media`/`@supports` nesting (their prelude is never itself a selector, but
  * what is inside still gets scanned) and strings (so `content: "{"` cannot be
- * mistaken for a brace). Not a full CSS parse — selector *text* and a line
- * number is the contract.
+ * mistaken for a brace). Not a full CSS parse — selector and declaration
+ * *text* and a line number is the contract. A rule body is read from its `{`
+ * to the next brace, so declarations after a nested rule inside it are not
+ * scanned; plain site CSS rarely nests.
  */
-export function scanCssFile(file, source, protectedTokens, { exceptions = [] } = {}) {
+export function scanCssFile(file, source, protectedTokens, { exceptions = [], canvasSelector = "main#main-content" } = {}) {
+  const root = canvasRoot(canvasSelector);
   const findings = [];
   const clean = stripCssComments(source);
   const n = clean.length;
@@ -244,17 +388,21 @@ export function scanCssFile(file, source, protectedTokens, { exceptions = [] } =
     if (ch === "{") {
       const prelude = clean.slice(bufferStart, i);
       const isAtRule = prelude.trim().startsWith("@");
-      if (!isAtRule && prelude.trim()) {
+      const isStyleRule = !isAtRule && prelude.trim() !== "";
+      if (isStyleRule) {
         scanSelectorList(prelude, bufferStartLine, file, protectedTokens, exceptions, findings);
       }
-      stack.push(isAtRule);
+      stack.push(isStyleRule ? { prelude, line: bufferStartLine } : null);
       i++;
       bufferStart = i;
       bufferStartLine = line;
       continue;
     }
     if (ch === "}") {
-      stack.pop();
+      const rule = stack.pop();
+      if (rule) {
+        scanDeclarations(rule.prelude, rule.line, clean.slice(bufferStart, i), bufferStartLine, file, root, exceptions, findings);
+      }
       i++;
       bufferStart = i;
       bufferStartLine = line;
@@ -499,7 +647,7 @@ export async function runStyling(cwd, { pages, canvasSelector, regions, styleFil
   for (const absolute of css) {
     const relative = path.relative(cwd, absolute).split(path.sep).join("/");
     const source = await readFile(absolute, "utf8");
-    findings.push(...scanCssFile(relative, source, protectedTokens, { exceptions: config.allow }));
+    findings.push(...scanCssFile(relative, source, protectedTokens, { exceptions: config.allow, canvasSelector }));
   }
   for (const absolute of js) {
     const relative = path.relative(cwd, absolute).split(path.sep).join("/");

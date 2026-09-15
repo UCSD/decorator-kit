@@ -173,6 +173,26 @@ containing an unescaped brace placed right around an id mutation could in
 principle confuse which function it blames. Real canvas interaction scripts
 are short and rarely hit this.
 
+**CSS: repainting the page ground is flagged too, with no token involved.**
+Found after tier 4 was live: a canvas-scoped
+`.student-canvas.sx-light { box-shadow: 0 0 0 100vmax #f2f4f7;
+clip-path: inset(0 -100vmax) }` turned the white behind the canvas gray from
+edge to edge of the viewport. Every selector in it belonged to the canvas, so
+the token check had nothing to match. `chrome/styling/page-ground` reads
+declarations instead, and flags two shapes:
+
+- paint past the element's own box: a `box-shadow` length in viewport units or
+  ≥ 1000px, a `clip-path: inset()` with an edge of that size pushed outward, a
+  `100vw` width, or a `50vw` breakout margin or offset — on any selector,
+  unless the same rule is `position: fixed` (a modal backdrop covers the
+  viewport on purpose);
+- a background other than white/transparent on the ground itself — a selector
+  whose subject is `html`, `body`, `:root`, or the canvas root (its id from the
+  canvas selector, or a bare `main` when the canvas is a `main`).
+
+A background on anything *inside* the canvas is not flagged. Exceptions use the
+same `allow` list, keyed by file and the rule's selector text.
+
 **JS exceptions are keyed by enclosing function name, not source line.**
 Reformatting a body must not silently drop an exception — and an anonymous
 callback is not a usable key, so the nearest *named* enclosing function is
@@ -197,9 +217,9 @@ section for what to check by hand (or by driving a browser yourself) until
 this gate grows one: below 768px, with the drawer open, the panel must be
 `#search`, laid out, and at least 49px tall; above it, hidden.
 
-The canvas is not covered by any of this. Styling and scripting
+What the canvas contains is not covered by any of this. Styling and scripting
 `main#main-content` is the entire point of the site; tier 4 only draws the line
-at the shell.
+at the shell — and at the page ground behind the canvas, which is part of it.
 
 ## The parts that are easy to get wrong
 

@@ -149,6 +149,90 @@ describe("scanCssFile — shipped regression 2: a widget id restyled even though
   });
 });
 
+describe("scanCssFile — shipped regression 4: canvas-scoped CSS repainting the page ground", () => {
+  const pageGround = (findings) => findings.filter((f) => f.kind === "chrome/styling/page-ground");
+
+  it("flags the full-bleed box-shadow + clip-path that turned the whole band gray, and nothing else in the rule", () => {
+    const css = [
+      ".student-canvas.sx-light {",
+      "  --sx-paper: #f2f4f7;",
+      "  background: var(--sx-paper);",
+      "  box-shadow: 0 0 0 100vmax var(--sx-paper);",
+      "  clip-path: inset(0 -100vmax);",
+      "}",
+      "",
+    ].join("\n");
+    const findings = pageGround(scanCssFile("app/globals.css", css, new Set(), { exceptions: [] }));
+    assert.deepEqual(
+      findings.map((f) => [f.selector, f.line, f.detail.split(":")[0]]),
+      [
+        [".student-canvas.sx-light", 4, "box-shadow"],
+        [".student-canvas.sx-light", 5, "clip-path"],
+      ],
+      "the background on a canvas component is the canvas's business; the bleed is not",
+    );
+    assert.ok(findings[0].remedy.includes(".jumbotron-sand"));
+  });
+
+  it("catches the same rule minified onto one line, with !important", () => {
+    const css = `.a{color:red}.student-canvas.sx-light{background:#f2f4f7;box-shadow:0 0 0 100vmax #f2f4f7!important;clip-path:inset(0 -100vmax)}`;
+    assert.equal(pageGround(scanCssFile("app/globals.css", css, new Set(), { exceptions: [] })).length, 2);
+  });
+
+  it("flags the other full-bleed shapes: 100vw width, 50vw breakout margin, a 9999px shadow", () => {
+    const css = `.bleed-a { width: 100vw; }\n.bleed-b { margin: 0 calc(50% - 50vw); }\n.bleed-c { box-shadow: 0 0 0 9999px #eee; }\n`;
+    const findings = pageGround(scanCssFile("css/site.css", css, new Set(), { exceptions: [] }));
+    assert.deepEqual(findings.map((f) => f.selector), [".bleed-a", ".bleed-b", ".bleed-c"]);
+  });
+
+  it("does not flag ordinary canvas CSS: normal shadows, a small inset, max-width: 100vw, or a fixed modal backdrop", () => {
+    const css = [
+      ".card { background: #f7f8f9; box-shadow: 0 1px 2px rgba(0,0,0,.2); }",
+      ".focus-ring { clip-path: inset(-2px); }",
+      ".media { max-width: 100vw; width: 50vw; }",
+      ".modal-backdrop { position: fixed; inset: 0; box-shadow: 0 0 0 100vmax rgba(0,0,0,.5); width: 100vw; }",
+      "",
+    ].join("\n");
+    assert.equal(pageGround(scanCssFile("css/site.css", css, new Set(), { exceptions: [] })).length, 0);
+  });
+
+  it("flags a non-white background on html, body, :root, or the canvas root — but not on white or on a descendant", () => {
+    const css = [
+      "body { background: #f2f4f7; }",
+      ":root { background-color: #eee; }",
+      "main#main-content { background: #f7f8f9; }",
+      "html, .hero { background-color: #eef1f4; }",
+      "body { background: #FFF; }",
+      "main#main-content .card { background: #f7f8f9; }",
+      "body::before { background: #000; }",
+      "",
+    ].join("\n");
+    const findings = pageGround(scanCssFile("css/site.css", css, new Set(), { exceptions: [] }));
+    assert.deepEqual(
+      findings.map((f) => [f.selector, f.line]),
+      [["body", 1], [":root", 2], ["main#main-content", 3], ["html", 4]],
+    );
+  });
+
+  it("resolves the canvas root from the project's canvas selector", () => {
+    const css = `#ag-app-canvas { background: #eee; }\nmain { background: #eee; }\n`;
+    const agKit = pageGround(scanCssFile("css/site.css", css, new Set(), { exceptions: [], canvasSelector: "div#ag-app-canvas" }));
+    assert.deepEqual(agKit.map((f) => f.selector), ["#ag-app-canvas"], "a bare main is not the canvas root in that kit");
+    const decorator = pageGround(scanCssFile("css/site.css", css, new Set(), { exceptions: [] }));
+    assert.deepEqual(decorator.map((f) => f.selector), ["main"]);
+  });
+
+  it("a valid exception suppresses by file + rule selector; an expired one reports itself", () => {
+    const css = `.full-bleed-hero { width: 100vw; }`;
+    const good = [{ file: "css/site.css", selector: ".full-bleed-hero", reason: "approved campaign band", reviewOn: "2099-01-01" }];
+    assert.equal(scanCssFile("css/site.css", css, new Set(), { exceptions: good }).length, 0);
+
+    const findings = scanCssFile("css/site.css", css, new Set(), { exceptions: [{ ...good[0], reviewOn: "2000-01-01" }] });
+    assert.equal(findings.length, 1);
+    assert.equal(findings[0].kind, "chrome/styling/expired-exception");
+  });
+});
+
 describe("scanJsFile — shipped regression 3: JS deleting the id the mobile drawer search is keyed on", () => {
   it('flags removeAttribute("id") when the file references a protected token, keyed by the enclosing named function', () => {
     const tokens = new Set(["#search"]);
@@ -292,5 +376,23 @@ describe("runStyling end-to-end: all three shipped regressions together", () => 
     assert.ok(stylesheet.some((f) => f.selector === "#search"));
     assert.ok(stylesheet.some((f) => f.selector === "#chat-bubble"), "the widget id, present in no page's markup");
     assert.ok(script.some((f) => f.function === "dedupeIds"));
+  });
+
+  it("reports a page-ground repaint as tier 4 even when every chrome token is untouched", async () => {
+    const dir = await project();
+    await writeFile(path.join(dir, "index.html"), decoratorPage("Home"));
+    await writeFile(path.join(dir, "about.html"), decoratorPage("About"));
+    await mkdir(path.join(dir, "css"), { recursive: true });
+    await writeFile(
+      path.join(dir, "css/site.css"),
+      `.student-canvas.sx-light {\n  box-shadow: 0 0 0 100vmax #f2f4f7;\n  clip-path: inset(0 -100vmax);\n}\n`,
+    );
+
+    const { config, pages } = await loadPages(dir);
+    const { findings } = await runStyling(dir, { pages, canvasSelector: config.canvas, regions: config.regions });
+    assert.deepEqual(findings.map((f) => [f.kind, f.file, f.line]), [
+      ["chrome/styling/page-ground", "css/site.css", 2],
+      ["chrome/styling/page-ground", "css/site.css", 3],
+    ]);
   });
 });

@@ -39,6 +39,7 @@ const TIER_LABELS = {
   "chrome/structure": "tier 3 (structure)",
   "chrome/styling/stylesheet": "tier 4 (styling)",
   "chrome/styling/script": "tier 4 (styling)",
+  "chrome/styling/page-ground": "tier 4 (styling)",
   "chrome/styling/expired-exception": "tier 4 (styling)",
 };
 
