@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/UCSD/decorator-kit/contracts/decorator-kit.schema.json",
+  "$id": "https://cdn.jsdelivr.net/npm/ucsd-decorator-kit/contracts/decorator-kit.schema.json",
   "title": "decorator-kit.json",
   "description": "Written into a project by `ucsd-decorator-kit init` or `add`. Declares the writable canvas, where Decorator markup is read from, and exactly which files the kit owns in this project.",
   "type": "object",

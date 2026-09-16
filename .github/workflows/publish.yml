@@ -1,0 +1,38 @@
+# Publishes ucsd-decorator-kit to npm when a GitHub release is published.
+#
+# Uses npm trusted publishing: npm exchanges this run's OIDC token for a
+# short-lived publish credential, so there is no NPM_TOKEN secret to leak, and
+# it attaches a provenance attestation tying the tarball to this commit and
+# this workflow. The trusted publisher is configured on npmjs.com, not here —
+# see RELEASING.md, including why the first publish is done by hand.
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Trusted publishing needs npm 11.5.1 or later, which Node 22 does not
+      # bundle. No cache: npm advises against caching in release builds.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: Release tag matches package.json
+        run: |
+          expected="v$(node -p 'require("./package.json").version')"
+          if [ "$GITHUB_REF_NAME" != "$expected" ]; then
+            echo "::error::Release tag $GITHUB_REF_NAME does not match package.json ($expected). Bump the version in a pull request first."
+            exit 1
+          fi
+      # prepublishOnly runs `npm test`, including test/package.test.mjs against
+      # the tarball this step is about to upload.
+      - run: npm publish

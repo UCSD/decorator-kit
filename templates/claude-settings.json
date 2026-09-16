@@ -18,10 +18,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx ucsd-decorator-kit verify || exit 2",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && [ -x node_modules/.bin/ucsd-decorator-kit ] || exit 0; node_modules/.bin/ucsd-decorator-kit verify || exit 2",
             "asyncRewake": true,
             "rewakeSummary": "Chrome integrity gate found a regression — do not run verify --accept yourself; surface this to the user and stop.",
             "timeout": 120
+          },
+          {
+            "type": "command",
+            "command": "[ -x \"${CLAUDE_PROJECT_DIR:-.}/node_modules/.bin/ucsd-decorator-kit\" ] || { echo 'The chrome integrity gate did not run: ucsd-decorator-kit is not installed in this project. Install it with: npm install --save-dev ucsd-decorator-kit' >&2; exit 1; }",
+            "timeout": 10
           }
         ]
       }

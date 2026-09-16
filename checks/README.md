@@ -45,14 +45,25 @@ produced the commit, since it runs on GitHub's infrastructure, not inside
 whatever session made the change.
 
 **A Claude Code Stop hook, plus permission guards** — `init`, or
-`add --with-hook`, merges a `Stop` hook into `.claude/settings.json` (see
-`templates/claude-settings.json`) that runs `npx ucsd-decorator-kit verify`
-after every turn. It runs in the background — `asyncRewake: true` — so it
-never blocks the turn from ending; if it finds a regression, the agent is
-woken back up afterward with the findings fed back as context, in the same
-turn that broke it, rather than waiting for CI or a human to notice. The
-trigger is exit code 2, not `verify`'s own exit code 1, hence the hook
-command being `npx ucsd-decorator-kit verify || exit 2`. The same template
+`add --with-hook`, merges two `Stop` hooks into `.claude/settings.json` (see
+`templates/claude-settings.json`). The first runs `verify` after every turn,
+from `node_modules/.bin/ucsd-decorator-kit`. It runs in the background —
+`asyncRewake: true` — so it never blocks the turn from ending; if it finds a
+regression, the agent is woken back up afterward with the findings fed back as
+context, in the same turn that broke it, rather than waiting for CI or a human
+to notice. The trigger is exit code 2, not `verify`'s own exit code 1, hence
+the command ending `verify || exit 2`.
+
+The hook never calls `npx`. In a project without the kit installed, npx would
+download the newest release after every turn — and before the kit was on npm,
+it failed, and the agent was told the gate had found a regression. Instead,
+when the kit is missing the first hook exits 0 and the second prints a
+non-blocking error saying so. That message goes to the person, because
+installing a dependency is their call, not the agent's. `add --with-hook` also
+installs the kit, and replaces the `npx ucsd-decorator-kit verify || exit 2`
+hook earlier releases wrote.
+
+The same template
 also adds a `permissions` block: `deny` on editing the three chrome
 `*.local.json` files, and `ask` on any Bash command matching `--accept` —
 this only protects a project when the person working on it is using Claude

@@ -27,7 +27,15 @@ async function run(args, options = {}) {
   try {
     const { stdout, stderr } = await execFileAsync(process.execPath, [CLI, ...args], {
       cwd: options.cwd ?? workdir,
-      env: { ...process.env, npm_config_yes: "true" },
+      // Offline against an empty cache: an `npm install` the CLI starts fails
+      // at once instead of reaching the registry. test/package.test.mjs covers
+      // an install that succeeds.
+      env: {
+        ...process.env,
+        npm_config_yes: "true",
+        npm_config_offline: "true",
+        npm_config_cache: path.join(workdir, "npm-cache"),
+      },
     });
     return { code: 0, stdout, stderr };
   } catch (error) {
@@ -131,6 +139,59 @@ describe("add", () => {
     assert.equal(await exists(path.join(project, ".github/workflows/decorator.yml")), false);
     assert.equal(await exists(path.join(project, ".claude/settings.json")), false);
   });
+
+  it("keeps AGENTS.md in the manifest of a project init set up", async () => {
+    const project = path.join(workdir, "add-over-init");
+    await mkdir(project, { recursive: true });
+    await run(["add"], { cwd: project });
+    const manifestPath = path.join(project, "decorator-kit.json");
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    manifest.manages.push(CONTRACT);
+    await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+
+    const result = await run(["add", "--with-hook"], { cwd: project });
+    assert.equal(result.code, 0);
+    assert.ok(JSON.parse(await readFile(manifestPath, "utf8")).manages.includes(CONTRACT));
+  });
+});
+
+// The workflow `--with-ci` writes runs `npm run decorator:check`, and the hook
+// `--with-hook` writes runs node_modules/.bin/ucsd-decorator-kit. Neither works
+// unless the kit is a devDependency and the scripts exist.
+describe("add installs what its flags run", () => {
+  for (const flag of ["--with-ci", "--with-hook", "--with-decorator"]) {
+    it(`${flag} adds the decorator:* scripts and says how to install the kit when it cannot`, async () => {
+      const project = path.join(workdir, `kit${flag}`);
+      await mkdir(project, { recursive: true });
+      await writeFile(path.join(project, "package.json"), JSON.stringify({ name: "site", version: "1.0.0" }, null, 2));
+
+      const result = await run(["add", flag], { cwd: project });
+      assert.equal(result.code, 0);
+
+      const pkg = JSON.parse(await readFile(path.join(project, "package.json"), "utf8"));
+      assert.equal(pkg.scripts["decorator:check"], "ucsd-decorator-kit check");
+      assert.equal(pkg.scripts["decorator:verify"], "ucsd-decorator-kit verify");
+      const version = JSON.parse(await readFile(path.join(ROOT, "package.json"), "utf8")).version;
+      assert.match(result.stdout, new RegExp(`npm install --save-dev ucsd-decorator-kit@${version.replaceAll(".", "\\.")}`));
+    });
+  }
+
+  it("leaves a kit version the project already declares alone", async () => {
+    const project = path.join(workdir, "kit-declared");
+    await mkdir(project, { recursive: true });
+    await writeFile(
+      path.join(project, "package.json"),
+      JSON.stringify({ name: "site", version: "1.0.0", devDependencies: { "ucsd-decorator-kit": "^2.0.0" } }, null, 2),
+    );
+
+    const result = await run(["add", "--with-ci"], { cwd: project });
+    assert.equal(result.code, 0);
+
+    const pkg = JSON.parse(await readFile(path.join(project, "package.json"), "utf8"));
+    assert.equal(pkg.devDependencies["ucsd-decorator-kit"], "^2.0.0");
+    assert.doesNotMatch(result.stdout, /Installing ucsd-decorator-kit/);
+    assert.doesNotMatch(result.stdout, /is not installed here/);
+  });
 });
 
 describe("add --with-hook", () => {
@@ -143,9 +204,34 @@ describe("add --with-hook", () => {
 
     const settings = JSON.parse(await readFile(path.join(project, ".claude/settings.json"), "utf8"));
     assert.equal(settings.hooks.Stop.length, 1);
-    const command = settings.hooks.Stop[0].hooks[0].command;
-    assert.match(command, /ucsd-decorator-kit verify/);
-    assert.equal(settings.hooks.Stop[0].hooks[0].asyncRewake, true, "must background, not block the turn");
+    const [gate, notice] = settings.hooks.Stop[0].hooks;
+    assert.match(gate.command, /node_modules\/\.bin\/ucsd-decorator-kit verify \|\| exit 2/);
+    assert.equal(gate.asyncRewake, true, "must background, not block the turn");
+    assert.equal(notice.asyncRewake, undefined, "a missing install is the user's to fix, not the agent's");
+    for (const hook of [gate, notice]) {
+      assert.doesNotMatch(hook.command, /\bnpx\b/, "a hook must never fetch the kit from the registry");
+    }
+  });
+
+  it("replaces the npx hook an earlier release installed, keeping the project's own hooks", async () => {
+    const project = path.join(workdir, "hook-legacy");
+    await mkdir(path.join(project, ".claude"), { recursive: true });
+    const legacy = { type: "command", command: "npx ucsd-decorator-kit verify || exit 2", asyncRewake: true };
+    const own = { type: "command", command: "npm run lint" };
+    await writeFile(
+      path.join(project, ".claude/settings.json"),
+      JSON.stringify({ hooks: { Stop: [{ hooks: [legacy] }, { hooks: [own, { ...legacy }] }] } }, null, 2),
+    );
+
+    const result = await run(["add", "--with-hook"], { cwd: project });
+    assert.equal(result.code, 0);
+
+    const settings = JSON.parse(await readFile(path.join(project, ".claude/settings.json"), "utf8"));
+    const commands = settings.hooks.Stop.flatMap((group) => group.hooks.map((hook) => hook.command));
+    assert.ok(!commands.includes(legacy.command), "the legacy hook is gone from every group");
+    assert.deepEqual(settings.hooks.Stop[0].hooks, [own], "the project's hook stays in its group");
+    assert.equal(settings.hooks.Stop.length, 2, "the group that held only the legacy hook is removed");
+    assert.equal(commands.filter((command) => /ucsd-decorator-kit verify/.test(command)).length, 1);
   });
 
   it("merges into an existing settings.json without disturbing unrelated content", async () => {
