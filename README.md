@@ -19,6 +19,9 @@ on this page also works straight from the repository, which is what CI uses:
 npx -y github:UCSD/decorator-kit init
 ```
 
+That runs whatever is on `main` at the time, released or not, so use it to try
+a change, not to set up a site.
+
 That installs `ucsd-decorator-v5` — the Decorator itself — plus this kit, writes
 the rules in the format each AI tool reads, installs the skill, wires
 Dependabot and a CI workflow, and — for Claude Code — adds a `Stop` hook that
@@ -50,6 +53,11 @@ for the Claude Code Stop hook. The last one merges into an existing
 `.claude/settings.json` rather than overwriting it, so a project's own hooks
 and permissions survive.
 
+Each of those three flags also adds `ucsd-decorator-kit` as a devDependency,
+at the version you ran, along with the `decorator:*` npm scripts. The workflow
+and the hook run the kit from `node_modules`, and without it installed they
+have nothing to run. A project that already lists the kit keeps its version.
+
 ### Staying current
 
 | Command | Does |
@@ -61,7 +69,10 @@ and permissions survive.
 
 Both `ucsd-decorator-v5` and `ucsd-decorator-kit` are devDependencies, so
 Dependabot opens a pull request when either moves: the Decorator and the rules
-update through one mechanism. `check` fails the build if a kit upgrade landed
+update through one mechanism. With the kit installed, `npx ucsd-decorator-kit`
+runs that installed copy. Without it, npx downloads the newest release on
+every run, so the kit version changes whenever a release ships, not when you
+upgrade. `check` fails the build if a kit upgrade landed
 without a `sync`, so a project cannot quietly run last year's rules.
 
 `drift` covers the gap Dependabot cannot see — a push to `UCSD/Decorator` or a
@@ -221,8 +232,10 @@ contracts/                   portable chrome regions, selector rules, and
 checks/                      the chrome integrity gate: chrome-contract.mjs
                              (CLI) and lib/ (tiers 1-4) — runs standalone,
                              `bin/cli.mjs verify` is a thin wrapper around it
-test/                        including the AGENTS.md refusal and the replayed
-                             chrome-regression incidents
+test/                        including the AGENTS.md refusal, the replayed
+                             chrome-regression incidents, and an install of
+                             the packed tarball
+RELEASING.md                 how a version reaches npm
 ```
 
 `CLAUDE.md`, `AGENTS.md`, `.cursorrules`, and `.github/copilot-instructions.md`

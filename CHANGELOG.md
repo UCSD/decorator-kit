@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.1.0
 
 ### Added
 
@@ -58,6 +58,42 @@
 
 - Heading demotion in compiled rules no longer rewrites `# comment` lines inside
   fenced code blocks.
+- `decorator-kit.json`'s `$schema` pointed at a GitHub URL that returned 404.
+  It now points at the schema in the kit version that wrote the file, on
+  jsDelivr: `https://cdn.jsdelivr.net/npm/ucsd-decorator-kit@<version>/contracts/decorator-kit.schema.json`.
+- **The Claude Code Stop hook reported a regression after every turn in
+  projects without the kit installed.** It ran `npx ucsd-decorator-kit verify
+  || exit 2`. With the kit not on npm, npx failed, the command exited 2, and
+  the agent was told the chrome gate had found a regression when nothing had
+  been checked. Now on npm, the same command would download the newest release
+  after every turn. The hook now runs the kit from `node_modules` and never
+  calls npx. When the kit is not installed, the gate skips and a second hook
+  tells the person, not the agent.
+- **`add --with-ci`, `--with-hook`, and `--with-decorator` now install the
+  kit.** The workflow `--with-ci` wrote runs `npm run decorator:check`, but
+  only `--with-decorator` added that script, and no flag installed the kit it
+  calls. Each of the three now adds `ucsd-decorator-kit` as a devDependency, at
+  the version being run, plus the `decorator:*` scripts. A project that
+  already lists the kit keeps its version. `init` now installs the kit at the
+  version being run, too, rather than the newest.
+- Re-running `add` on a project `init` set up dropped `AGENTS.md` from
+  `decorator-kit.json`, so `sync` stopped refreshing it. `add` now keeps it.
+
+### Packaging
+
+- First release published to npm. Later releases publish from a GitHub
+  release through trusted publishing, with a provenance attestation; see
+  `RELEASING.md`.
+- Licensed under MIT. The package previously declared ISC and shipped no
+  license file.
+- The tarball now includes `CHANGELOG.md`, and leaves out
+  `scripts/compile-rules.mjs`, `scripts/check-library.mjs`, and
+  `scripts/sync-library.mjs`, which only work from a checkout of this
+  repository.
+- `npm test` installs the packed tarball into an empty project and runs `add`,
+  `check`, and `verify` from it, so a file missing from `files` fails CI.
+- `.claude-plugin/plugin.json` carried version 1.0.0 through the 2.0.0
+  release. It now matches `package.json`, and `npm test` fails if they differ.
 
 ### Upgrading
 
@@ -67,6 +103,18 @@
   an agent's.
 - Run `sync` after upgrading so the managed rule files carry the new rule;
   `check` fails until you do.
+- **Projects set up before 2.1.0**, which most likely installed the kit
+  straight from GitHub, don't have it in `node_modules`. Install it, re-run
+  `add --with-hook` if the project uses the Claude Code hook, then sync:
+
+  ```bash
+  npm install --save-dev ucsd-decorator-kit
+  npx ucsd-decorator-kit add --with-hook
+  npx ucsd-decorator-kit sync
+  ```
+
+  `add --with-hook` replaces the old hook, merges into the rest of
+  `.claude/settings.json`, and skips rule files that already exist.
 
 ## 2.0.0
 

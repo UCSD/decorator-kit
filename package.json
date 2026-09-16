@@ -1,6 +1,6 @@
 {
   "name": "ucsd-decorator-kit",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "module",
   "description": "Agent-facing contract for building on the UC San Diego Decorator 5 design system.",
   "keywords": [
@@ -21,26 +21,29 @@
     "url": "https://github.com/UCSD/decorator-kit/issues"
   },
   "bin": {
-    "ucsd-decorator-kit": "./bin/cli.mjs"
+    "ucsd-decorator-kit": "bin/cli.mjs"
   },
   "files": [
     "bin",
-    "scripts",
+    "scripts/lib",
+    "scripts/pin-decorator.mjs",
     "rules",
     "skills",
     "contracts",
     "checks",
-    "templates"
+    "templates",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "compile": "node scripts/compile-rules.mjs",
     "check:library": "node scripts/check-library.mjs",
     "pin:decorator": "node scripts/pin-decorator.mjs",
     "test": "node scripts/compile-rules.mjs --check && node scripts/check-library.mjs && node --test test/*.test.mjs",
-    "sync:library": "node scripts/sync-library.mjs"
+    "sync:library": "node scripts/sync-library.mjs",
+    "prepublishOnly": "npm test"
   },
   "engines": {
     "node": ">=22"
   },
-  "license": "ISC"
+  "license": "MIT"
 }

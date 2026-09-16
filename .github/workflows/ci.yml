@@ -1,4 +1,4 @@
-# The kit's own gate. Three things must hold on every push:
+# The kit's own gate. Four things must hold on every push:
 #
 #   * the committed CLAUDE.md / AGENTS.md / .cursorrules /
 #     copilot-instructions.md are current with rules/ — they are generated, and a
@@ -7,6 +7,8 @@
 #     cannot reach the public page in a shape that makes the sync throw
 #   * `add` still refuses to write AGENTS.md, which is the property that keeps
 #     this kit safe to run inside a repository that has its own agent contract
+#   * the npm tarball still ships every file the CLI reads at runtime — tested
+#     by installing it, since the rest of the suite runs from this checkout
 name: CI
 
 on:
