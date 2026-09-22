@@ -1,0 +1,650 @@
+/*
+ * Decorator Kit Developer Guide — canvas styles.
+ *
+ * Every rule is scoped under main#main-content and a guide-* class that only
+ * exists inside the canvas. Nothing here names a chrome class or id, paints
+ * the page ground, or overrides a Decorator module. Colors are the verified
+ * Decorator values (see CLAUDE.md, "Verified chrome facts").
+ */
+
+/* ---- Section rhythm ---------------------------------------------------- */
+
+main#main-content .guide-section {
+  padding-top: 24px;
+  margin-bottom: 48px;
+  border-top: 1px solid #d6d6d6;
+}
+
+main#main-content .guide-section:first-of-type {
+  border-top: 0;
+}
+
+main#main-content .guide-intro {
+  font-size: 18px;
+  line-height: 1.6;
+  max-width: 760px;
+}
+
+main#main-content .guide-meta {
+  color: #595959;
+  font-size: 14px;
+}
+
+/* ---- Specimen card ------------------------------------------------------ */
+
+main#main-content .guide-specimen {
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+  margin: 0 0 32px;
+  overflow: hidden;
+}
+
+main#main-content .guide-specimen-head {
+  padding: 16px 20px 8px;
+}
+
+main#main-content .guide-specimen-head h3 {
+  font-family: Roboto, sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: #182b49;
+  margin: 0 0 4px;
+}
+
+main#main-content .guide-specimen-head p {
+  margin: 0 0 8px;
+}
+
+main#main-content .guide-classes code {
+  display: inline-block;
+  margin: 0 4px 4px 0;
+  color: #182b49;
+  background: #f5f0e6;
+}
+
+main#main-content .guide-preview {
+  padding: 20px;
+  border-top: 1px dashed #d6d6d6;
+  border-bottom: 1px dashed #d6d6d6;
+}
+
+main#main-content .guide-preview-flush {
+  padding: 0;
+}
+
+main#main-content .guide-preview-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #595959;
+  margin: 0 0 12px;
+}
+
+main#main-content .guide-preview-flush .guide-preview-label {
+  margin: 12px 20px;
+}
+
+/* ---- Prompt block: an inset panel inside the card ---------------------- */
+
+main#main-content .guide-prompt {
+  margin: 16px 20px 20px;
+  padding: 14px 16px 16px;
+  background: #f6f7f9;
+  border: 1px solid #e3e5e8;
+  border-radius: 12px;
+  color: #182b49;
+}
+
+main#main-content .guide-prompt-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+main#main-content .guide-prompt-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #182b49;
+  margin: 0;
+}
+
+main#main-content .guide-prompt-title .glyphicon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: rgba(0, 98, 155, 0.1);
+  color: #00629b;
+  font-size: 12px;
+  top: 0;
+}
+
+main#main-content .guide-prompt pre {
+  background: #fff;
+  border: 1px solid #e3e5e8;
+  border-radius: 8px;
+  color: #182b49;
+  margin: 0;
+  padding: 14px 16px;
+  font-size: 13.5px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+main#main-content .guide-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 8px 18px;
+  border: 1px solid #cfd5dc;
+  border-radius: 22px;
+  background: #fff;
+  color: #182b49;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 1px 2px rgba(24, 43, 73, 0.06);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+main#main-content .guide-copy .glyphicon {
+  top: 0;
+  font-size: 13px;
+}
+
+main#main-content .guide-copy:hover {
+  border-color: #00629b;
+  color: #00629b;
+}
+
+main#main-content .guide-copy:focus {
+  outline: 3px solid #ffcd00;
+  outline-offset: 2px;
+}
+
+main#main-content .guide-copy.is-copied,
+main#main-content .guide-copy.is-copied:hover {
+  background: #00629b;
+  border-color: #00629b;
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main#main-content .guide-copy {
+    transition: none;
+  }
+}
+
+main#main-content .guide-source {
+  padding: 10px 20px;
+  font-size: 13px;
+  color: #595959;
+  margin: 0;
+}
+
+/* ---- Layout wireframes -------------------------------------------------- */
+
+main#main-content .guide-wire {
+  border: 1px solid #b3b3b3;
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+main#main-content .guide-wire-band {
+  padding: 6px 10px;
+  color: #fff;
+}
+
+main#main-content .guide-wire-header { background: #2b92b9; }
+main#main-content .guide-wire-title { background: #fff; color: #182b49; border-bottom: 1px solid #d6d6d6; }
+main#main-content .guide-wire-nav { background: #00629b; }
+main#main-content .guide-wire-footer { background: #00629b; }
+
+main#main-content .guide-wire-body {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  min-height: 150px;
+  background: #fff;
+}
+
+main#main-content .guide-wire-col {
+  border-radius: 4px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+main#main-content .guide-wire-canvas {
+  flex: 3;
+  background: #fff3c2;
+  border: 2px dashed #c9a100;
+  color: #5c4a00;
+}
+
+main#main-content .guide-wire-side {
+  flex: 1;
+  background: #f5f0e6;
+  color: #182b49;
+}
+
+main#main-content .guide-wire-stack {
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+}
+
+main#main-content .guide-wire-stack .guide-wire-col {
+  width: 100%;
+}
+
+main#main-content .guide-wire-hero {
+  background: #182b49;
+  color: #fff;
+  min-height: 60px;
+}
+
+main#main-content .guide-wire-legend {
+  font-size: 13px;
+  color: #595959;
+}
+
+main#main-content .guide-wire-legend span {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+  margin-right: 4px;
+  border-radius: 3px;
+}
+
+main#main-content .guide-wire-legend .guide-key-canvas {
+  background: #fff3c2;
+  border: 2px dashed #c9a100;
+}
+
+main#main-content .guide-wire-legend .guide-key-chrome {
+  background: #00629b;
+}
+
+/* ---- Color swatches ----------------------------------------------------- */
+
+main#main-content .guide-swatches {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+main#main-content .guide-swatches li {
+  border: 1px solid #d6d6d6;
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+main#main-content .guide-swatch-chip {
+  height: 64px;
+}
+
+main#main-content .guide-swatch-text {
+  padding: 8px 10px;
+}
+
+main#main-content .guide-swatch-text strong {
+  display: block;
+}
+
+main#main-content .guide-chip-blue { background: #00629b; }
+main#main-content .guide-chip-navy { background: #182b49; }
+main#main-content .guide-chip-yellow { background: #ffcd00; }
+main#main-content .guide-chip-header { background: #2b92b9; }
+main#main-content .guide-chip-active { background: #004268; }
+main#main-content .guide-chip-sand { background: #f5f0e6; }
+
+/* ---- Do / don't --------------------------------------------------------- */
+
+main#main-content .guide-rule-list {
+  padding-left: 0;
+  list-style: none;
+}
+
+main#main-content .guide-rule-list li {
+  padding: 8px 0 8px 32px;
+  position: relative;
+  border-bottom: 1px solid #ececec;
+}
+
+main#main-content .guide-rule-list .glyphicon {
+  position: absolute;
+  left: 4px;
+  top: 11px;
+}
+
+main#main-content .guide-do .glyphicon { color: #00629b; }
+main#main-content .guide-dont .glyphicon { color: #182b49; }
+
+/* ---- Recipes ------------------------------------------------------------ */
+
+main#main-content .guide-recipe-stack {
+  counter-reset: guide-step;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+}
+
+main#main-content .guide-recipe-stack li {
+  counter-increment: guide-step;
+  padding: 8px 12px 8px 44px;
+  margin-bottom: 6px;
+  background: #f5f0e6;
+  border-radius: 6px;
+  position: relative;
+}
+
+main#main-content .guide-recipe-stack li::before {
+  content: counter(guide-step);
+  position: absolute;
+  left: 10px;
+  top: 7px;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  border-radius: 50%;
+  background: #00629b;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* ---- Visible focus for canvas links ------------------------------------- */
+
+main#main-content .guide-section a:focus,
+main#main-content .guide-specimen a:focus {
+  outline: 3px solid #ffcd00;
+  outline-offset: 2px;
+}
+
+/* Tiles, news and CTA images in previews keep their module sizing; this only
+   caps the preview images the guide itself adds. */
+main#main-content .guide-preview figure img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Live region for copy feedback */
+main#main-content .guide-status {
+  min-height: 1px;
+}
+
+/* ---- Brand-status tags (app patterns page) ------------------------------ */
+
+main#main-content .guide-tag {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin: 0 6px 6px 0;
+  border: 1px solid transparent;
+}
+
+main#main-content .guide-tag-decorator {
+  background: #00629b;
+  color: #fff;
+}
+
+main#main-content .guide-tag-neutral {
+  background: #fff;
+  color: #182b49;
+  border-color: #182b49;
+}
+
+main#main-content .guide-tag-layer {
+  background: #ffcd00;
+  color: #182b49;
+}
+
+main#main-content .guide-tag-source {
+  background: #f5f0e6;
+  color: #182b49;
+}
+
+/* Responsive-utility demo chips */
+main#main-content .guide-bp {
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: #182b49;
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ---- Page index: grouped cards ----------------------------------------- */
+
+main#main-content .guide-index-lead {
+  color: #595959;
+  font-size: 16px;
+  margin: 0 0 20px;
+}
+
+main#main-content .guide-index-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+main#main-content .guide-index-grid > [class*="col-"] {
+  display: flex;
+  margin-bottom: 24px;
+}
+
+main#main-content .guide-index-card {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #e3e5e8;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(24, 43, 73, 0.06), 0 6px 20px rgba(24, 43, 73, 0.06);
+  overflow: hidden;
+}
+
+main#main-content .guide-index-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px 18px 14px;
+}
+
+main#main-content .guide-index-head > div {
+  flex: 1;
+  min-width: 0;
+}
+
+main#main-content .guide-index-head h3 {
+  font-family: Roboto, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #182b49;
+  margin: 2px 0 2px;
+}
+
+main#main-content .guide-index-head p {
+  font-size: 14px;
+  color: #595959;
+  margin: 0;
+}
+
+main#main-content .guide-index-icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(0, 98, 155, 0.1);
+  color: #00629b;
+  font-size: 18px;
+}
+
+main#main-content .guide-index-count {
+  flex: none;
+  min-width: 28px;
+  padding: 2px 9px;
+  border-radius: 12px;
+  background: #f1f2f4;
+  color: #182b49;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  margin-top: 4px;
+}
+
+main#main-content .guide-index-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 6px;
+}
+
+main#main-content .guide-index-list li + li a {
+  box-shadow: inset 0 1px 0 #eceef1;
+}
+
+main#main-content .guide-index-list a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 9px 18px;
+  color: #182b49;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+main#main-content .guide-index-list a:hover {
+  background: rgba(0, 98, 155, 0.06);
+}
+
+main#main-content .guide-index-list a:focus {
+  outline: 3px solid #ffcd00;
+  outline-offset: -3px;
+  background: rgba(0, 98, 155, 0.06);
+}
+
+main#main-content .guide-index-text {
+  flex: 1;
+  min-width: 0;
+}
+
+main#main-content .guide-index-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+main#main-content .guide-index-list a:hover .guide-index-title,
+main#main-content .guide-index-list a:focus .guide-index-title {
+  color: #00629b;
+}
+
+main#main-content .guide-index-sub {
+  display: block;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #595959;
+  margin-top: 1px;
+}
+
+main#main-content .guide-index-list .glyphicon-chevron-right {
+  flex: none;
+  font-size: 11px;
+  color: #9aa3ad;
+}
+
+main#main-content .guide-index-list a:hover .glyphicon-chevron-right,
+main#main-content .guide-index-list a:focus .glyphicon-chevron-right {
+  color: #00629b;
+}
+
+main#main-content .guide-index-pill {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: #ffcd00;
+  color: #182b49;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main#main-content .guide-index-list a {
+    transition: none;
+  }
+}
+
+main#main-content .guide-backtop {
+  text-align: right;
+  font-size: 14px;
+  margin: -8px 0 0;
+}
+
+main#main-content .guide-backtop a {
+  display: inline-block;
+  min-height: 44px;
+  padding: 12px 4px;
+}
+
+main#main-content .guide-area {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #00629b;
+  margin-bottom: 2px;
+}
+
+main#main-content .guide-step-prompts .guide-prompt + .guide-prompt {
+  margin-top: -8px;
+}
+
+/* ---- Page subtitle under the h1 ----------------------------------------- */
+
+main#main-content .guide-subtitle {
+  font-size: 20px;
+  line-height: 1.45;
+  color: #182b49;
+  max-width: 760px;
+  margin: -4px 0 16px;
+}

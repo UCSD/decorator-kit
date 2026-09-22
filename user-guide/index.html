@@ -1,0 +1,1420 @@
+<!doctype html>
+<html class="no-js" lang="en-US">
+
+<head>
+	<title>Decorator Kit Developer Guide</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<meta name="robots" content="index,follow,noarchive">
+	<meta name="ORGANIZATION" content="University of California, San Diego">
+	<meta name="SITE" content="Decorator V5">
+	<meta name="PAGETITLE" content="Decorator Kit Developer Guide">
+	<meta name="DESCRIPTION" content="A visual guide to Decorator 5 layouts, modules, and Bootstrap 3.3.7 components, with prompts for building UC San Diego pages and apps with an AI agent.">
+
+	<link rel="stylesheet" href="https://cdn.ucsd.edu/cms/decorator-5/styles/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdn.ucsd.edu/cms/decorator-5/styles/base.min.css">
+
+
+
+	<!-- Begin site-specific CSS files -->
+	<link rel="stylesheet" href="css/guide.css">
+
+	<!-- End site-specific CSS files -->
+
+	<script src="https://cdn.ucsd.edu/cms/decorator-5/scripts/modernizr.min.js"></script>
+
+
+
+</head>
+
+<body>
+
+	<header class="layout-header">
+		<a class="sr-only" href="#main-content">Skip to main content</a>
+		<div id="uc-emergency"></div>
+		<section class="layout-login">
+			<div class="layout-container"></div>
+		</section>
+
+		<section class="layout-title">
+			<div class="layout-container container">
+				<a href="index.html" class="title-header title-header-large">Decorator V5</a>
+				<a href="index.html" class="title-header title-header-short">V5</a>
+				<a href="https://www.ucsd.edu" class="title-logo">UC San Diego</a>
+			</div>
+		</section>
+	</header>
+
+	<!-- mobile offcanvas nav -->
+	<div class="navmenu navmenu-default navmenu-fixed-left offcanvas" style="">
+
+		<ul class="nav navbar-nav navbar-right">
+			<li>
+				<div class="search">
+					<button class="search-toggle btn-default">
+						<span class="glyphicon glyphicon-search"></span> <span class="caret"></span>
+					</button>
+
+					<div class="search-content" id="search">
+						<form action="https://act.ucsd.edu/cwp/tools/search-redir" method="get" id="cse-site-search">
+							<select class="search-scope" name="search-scope">
+								<option value="default_collection">All UCSD Sites</option>
+								<option value="faculty-staff">Faculty/Staff</option>
+							</select>
+
+							<div class="input-group">
+								<input placeholder="Search..." type="search" class="form-control search-term" id="q"
+									name="search-term">
+							</div>
+						</form>
+					</div>
+				</div>
+			</li>
+		</ul>
+
+
+		<ul class="nav navmenu-nav">
+			<li class="active"><a href="index.html">Developer Guide</a></li>
+			<li><a href="index.html#layouts">Layouts</a></li>
+			<li class="dropdown open">
+				<a href="index.html#components" class="dropdown-toggle">Components <b class="caret"></b></a>
+				<ul class="dropdown-menu navmenu-nav">
+					<li><a href="index.html#components">Components</a></li>
+					<li><a href="app-patterns.html">App Patterns</a></li>
+					<li><a href="app-patterns.html#shell">App Shells</a></li>
+					<li><a href="app-patterns.html#dashboards">Dashboards by Area</a></li>
+				</ul>
+			</li>
+			<li><a href="index.html#modules">Modules</a></li>
+			<li><a href="index.html#recipes">App Recipes</a></li>
+			<li><a href="https://developer.ucsd.edu/design/v5-kitchen-sink/kitchen-sink/index.html">Kitchen Sink</a></li>
+		</ul>
+	</div>
+	<!-- end mobile offcanvas nav -->
+
+	<!-- navbar -->
+	<nav class="navbar navbar-default navbar-static-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="offcanvas" data-target=".navmenu"
+					data-canvas="body" aria-expanded="false" aria-controls="navbar">
+					<span class="sr-only">Toggle navigation</span>
+
+					<div class="col-sm-1 mobile-nav-bars">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</div>
+					<div class="col-sm-1 mobile-nav-icon">
+						MENU
+					</div>
+				</button>
+				<div class="col-sm-4 pull-right visible-xs-block">
+					<img src="http://cdn.ucsd.edu/developer/decorator/5.0.2/img/ucsd-footer-logo-white.png" alt=""
+						class="img-responsive header-logo" />
+				</div>
+			</div>
+
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li class="active"><a href="index.html">Developer Guide</a></li>
+					<li><a href="index.html#layouts">Layouts</a></li>
+					<li class="dropdown">
+						<a href="index.html#components" class="dropdown-toggle" data-hover="dropdown" role="button"
+							aria-haspopup="true" aria-expanded="false">Components <span class="caret"></span></a>
+						<ul class="dropdown-menu">
+							<li><a href="index.html#components">Components</a></li>
+							<li><a href="app-patterns.html">App Patterns</a></li>
+							<li><a href="app-patterns.html#shell">App Shells</a></li>
+							<li><a href="app-patterns.html#dashboards">Dashboards by Area</a></li>
+						</ul>
+					</li>
+					<li><a href="index.html#modules">Modules</a></li>
+					<li><a href="index.html#recipes">App Recipes</a></li>
+					<li><a href="https://developer.ucsd.edu/design/v5-kitchen-sink/kitchen-sink/index.html">Kitchen Sink</a></li>
+				</ul>
+
+				<div class="btn-nav"></div>
+
+				<ul class="nav navbar-nav navbar-right">
+					<li>
+						<div class="search">
+							<button class="search-toggle btn-default">
+								<span class="glyphicon glyphicon-search"></span> <span class="caret"></span>
+							</button>
+
+							<div class="search-content" id="search">
+								<form action="http://act.ucsd.edu/cwp/tools/search-redir" method="get"
+									id="cse-site-search">
+									<select class="search-scope" name="search-scope">
+										<option value="default_collection">All UCSD Sites</option>
+										<option value="faculty-staff">Faculty/Staff</option>
+									</select>
+
+									<div class="input-group">
+										<input placeholder="Search..." type="search" class="form-control search-term"
+											id="q" name="search-term">
+									</div>
+								</form>
+							</div>
+						</div>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<!-- end navbar -->
+
+	<main class="layout-main" id="main-content" role="main">
+
+		<div class="container">
+			<div class="row">
+				<ol class="breadcrumb breadcrumbs-list">
+					<li><a href="https://developer.ucsd.edu/design/v5-kitchen-sink/kitchen-sink/index.html">Kitchen Sink</a></li>
+					<li class="active">Developer Guide</li>
+				</ol>
+			</div>
+		</div>
+
+		<div class="container">
+			<div class="row">
+				<section class="col-xs-12 col-md-9 main-section pull-right">
+
+					<h1>Decorator Kit Developer Guide</h1>
+
+					<p class="guide-subtitle">Layouts, components, app patterns, and copy-ready prompts for building on Decorator&nbsp;5.</p>
+
+					<p class="guide-intro">A visual reference for building UC San Diego pages and apps with an AI
+						agent. Every example on this page is live Decorator&nbsp;5 markup, and each one has a prompt
+						you can copy and adapt. Use the prompts on their own, or combine them into the app recipes
+						further down.</p>
+
+					<p class="guide-meta">Built on <code>ucsd-decorator-v5@5.0.4</code> ·
+						Bootstrap&nbsp;3.3.7 as served from <code>cdn.ucsd.edu</code> · Markup sourced from
+						<code>node_modules/ucsd-decorator-v5/dist/</code></p>
+
+					<div class="guide-status sr-only" role="status" aria-live="polite"></div>
+
+					<!-- ============================================================ -->
+					<section id="start" class="guide-section" aria-labelledby="start-heading">
+						<h2 id="start-heading">Start here</h2>
+
+						<p>The kit's rules already tell the agent to stay inside the canvas, read markup from the
+							npm package, and load the Decorator from the CDN. A good prompt adds the four decisions
+							the agent is not allowed to make for you:</p>
+
+						<ol class="guide-recipe-stack">
+							<li><strong>Template:</strong> which layout to start from. The agent will stop and ask
+								if you leave this out.</li>
+							<li><strong>File:</strong> the new page name. Say so if it should replace
+								<code>index.html</code>.</li>
+							<li><strong>Pieces:</strong> the modules and components to use, by name. The names
+								on this page match the reference files.</li>
+							<li><strong>Content:</strong> real headings, copy, links, and data, or say which
+								parts are placeholders.</li>
+						</ol>
+
+						<article class="guide-specimen" aria-labelledby="prompt-anatomy">
+							<div class="guide-specimen-head">
+								<h3 id="prompt-anatomy">Prompt template</h3>
+								<p>Fill in the brackets. Delete any line you don't need.</p>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-template"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-template">Start from the Decorator [two-column.html] template and save it as [page-name.html] at the project root.
+Site title: [Department name]. Navigation items: [Home, About, Services, Contact] — update the drawer, the navbar, and the side nav.
+In the canvas, build:
+1. [module or component name] — [what it says / does]
+2. [module or component name] — [what it says / does]
+3. [module or component name] — [what it says / does]
+Images: [real paths + alt text, or "use placeholders at the module's documented size"].
+Custom behavior goes in js/[name].js. Styles go in css/[name].css, scoped to main#main-content.
+Don't use Bootstrap -success/-info/-warning/-danger classes. Keep every chrome region as shipped.</pre>
+							</div>
+						</article>
+					</section>
+
+					<!-- ============================================================ -->
+					<section id="layouts" class="guide-section" aria-labelledby="layouts-heading">
+						<h2 id="layouts-heading">Layout templates</h2>
+
+						<p>Four templates cover almost every page. The yellow dashed area is the <strong>canvas</strong>,
+							the only part the agent may edit. The blue bands are <strong>chrome</strong>: the header,
+							navbar, drawer, search, and footer. They look the same on every page.</p>
+
+						<p class="guide-wire-legend"><span class="guide-key-canvas"></span> Canvas (editable)
+							&nbsp;&nbsp; <span class="guide-key-chrome"></span> Chrome (do not edit)</p>
+
+						<div class="row">
+							<div class="col-sm-6">
+								<article class="guide-specimen" aria-labelledby="lay-blank">
+									<div class="guide-specimen-head">
+										<h3 id="lay-blank">blank-slate.html</h3>
+										<p>Full-width canvas under the navbar. Best for apps, dashboards, and
+											single-purpose tools.</p>
+									</div>
+									<div class="guide-preview">
+										<div class="guide-wire" aria-hidden="true">
+											<div class="guide-wire-band guide-wire-header">Header</div>
+											<div class="guide-wire-band guide-wire-title">Title band</div>
+											<div class="guide-wire-band guide-wire-nav">Navbar + search</div>
+											<div class="guide-wire-body">
+												<div class="guide-wire-col guide-wire-canvas">Canvas</div>
+											</div>
+											<div class="guide-wire-band guide-wire-footer">Footer</div>
+										</div>
+									</div>
+									<div class="guide-prompt">
+										<div class="guide-prompt-bar">
+											<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+											<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-lay-blank"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+										</div>
+<pre id="p-lay-blank">Use blank-slate.html. Copy it to [app.html] and rewrite its CSS and script paths to cdn.ucsd.edu. Replace only what's inside main#main-content with [describe the app].</pre>
+									</div>
+								</article>
+							</div>
+
+							<div class="col-sm-6">
+								<article class="guide-specimen" aria-labelledby="lay-two">
+									<div class="guide-specimen-head">
+										<h3 id="lay-two">two-column.html</h3>
+										<p>Side navigation plus a wide content column. Best for department pages
+											and documentation. This guide uses it.</p>
+									</div>
+									<div class="guide-preview">
+										<div class="guide-wire" aria-hidden="true">
+											<div class="guide-wire-band guide-wire-header">Header</div>
+											<div class="guide-wire-band guide-wire-title">Title band</div>
+											<div class="guide-wire-band guide-wire-nav">Navbar + search</div>
+											<div class="guide-wire-body">
+												<div class="guide-wire-col guide-wire-side">Side nav</div>
+												<div class="guide-wire-col guide-wire-canvas">Canvas</div>
+											</div>
+											<div class="guide-wire-band guide-wire-footer">Footer</div>
+										</div>
+									</div>
+									<div class="guide-prompt">
+										<div class="guide-prompt-bar">
+											<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+											<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-lay-two"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+										</div>
+<pre id="p-lay-two">Use two-column.html. Save it as [about.html]. Keep pull-right on the main section and keep the DOM order as shipped. Side nav (article.main-content-nav) lists: [items]. Canvas content: [modules].</pre>
+									</div>
+								</article>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-sm-6">
+								<article class="guide-specimen" aria-labelledby="lay-three">
+									<div class="guide-specimen-head">
+										<h3 id="lay-three">three-column.html</h3>
+										<p>Left menu, wide middle column, and a right column for related links,
+											contacts, or alerts.</p>
+									</div>
+									<div class="guide-preview">
+										<div class="guide-wire" aria-hidden="true">
+											<div class="guide-wire-band guide-wire-header">Header</div>
+											<div class="guide-wire-band guide-wire-title">Title band</div>
+											<div class="guide-wire-band guide-wire-nav">Navbar + search</div>
+											<div class="guide-wire-body">
+												<div class="guide-wire-col guide-wire-side">Menu</div>
+												<div class="guide-wire-col guide-wire-canvas">Canvas</div>
+												<div class="guide-wire-col guide-wire-side">Info</div>
+											</div>
+											<div class="guide-wire-band guide-wire-footer">Footer</div>
+										</div>
+									</div>
+									<div class="guide-prompt">
+										<div class="guide-prompt-bar">
+											<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+											<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-lay-three"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+										</div>
+<pre id="p-lay-three">Use three-column.html. Save it as [resources.html]. Left menu: [items]. Middle: [content]. Right info column: a .msg.info note with [office hours] and a list of [related links].</pre>
+									</div>
+								</article>
+							</div>
+
+							<div class="col-sm-6">
+								<article class="guide-specimen" aria-labelledby="lay-home">
+									<div class="guide-specimen-head">
+										<h3 id="lay-home">homepage.html</h3>
+										<p>Carousel hero and stacked callout modules. For a site's landing page.</p>
+									</div>
+									<div class="guide-preview">
+										<div class="guide-wire" aria-hidden="true">
+											<div class="guide-wire-band guide-wire-header">Header</div>
+											<div class="guide-wire-band guide-wire-title">Title band</div>
+											<div class="guide-wire-band guide-wire-nav">Navbar + search</div>
+											<div class="guide-wire-body guide-wire-stack">
+												<div class="guide-wire-col guide-wire-hero">Hero 1440 × 530</div>
+												<div class="guide-wire-col guide-wire-canvas">Callout modules</div>
+											</div>
+											<div class="guide-wire-band guide-wire-footer">Footer</div>
+										</div>
+									</div>
+									<div class="guide-prompt">
+										<div class="guide-prompt-bar">
+											<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+											<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-lay-home"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+										</div>
+<pre id="p-lay-home">Use homepage.html as the new index.html (overwrite is OK). Hero: [3] slides at 1440 × 530 with headlines [..]. Below it, stack: callout content with 3 boxes, tiles with links, and news with images.</pre>
+									</div>
+								</article>
+							</div>
+						</div>
+					</section>
+
+					<!-- ============================================================ -->
+					<section id="brand" class="guide-section" aria-labelledby="brand-heading">
+						<h2 id="brand-heading">Brand basics</h2>
+
+						<article class="guide-specimen" aria-labelledby="brand-colors">
+							<div class="guide-specimen-head">
+								<h3 id="brand-colors">Decorator colors</h3>
+								<p>These are the values the Decorator itself uses. Use them for your canvas CSS
+									instead of inventing new ones.</p>
+							</div>
+							<div class="guide-preview">
+								<ul class="guide-swatches">
+									<li><div class="guide-swatch-chip guide-chip-blue"></div><div class="guide-swatch-text"><strong>UC San Diego Blue</strong>#00629B · buttons, footer</div></li>
+									<li><div class="guide-swatch-chip guide-chip-navy"></div><div class="guide-swatch-text"><strong>Navy</strong>#182B49 · h2, text links, hovers</div></li>
+									<li><div class="guide-swatch-chip guide-chip-yellow"></div><div class="guide-swatch-text"><strong>Gold</strong>#FFCD00 · .styled-yellow, alerts</div></li>
+									<li><div class="guide-swatch-chip guide-chip-header"></div><div class="guide-swatch-text"><strong>Header</strong>#2B92B9 · .layout-header (chrome)</div></li>
+									<li><div class="guide-swatch-chip guide-chip-active"></div><div class="guide-swatch-text"><strong>Active nav</strong>#004268 · navbar active item</div></li>
+									<li><div class="guide-swatch-chip guide-chip-sand"></div><div class="guide-swatch-text"><strong>Sand</strong>#F5F0E6 · .msg.info, div.styled</div></li>
+								</ul>
+							</div>
+							<p class="guide-source">Source: <code>dist/css/base.css</code>, checked against the live
+								<code>cdn.ucsd.edu</code> stylesheet.</p>
+						</article>
+
+						<article class="guide-specimen" aria-labelledby="brand-type">
+							<div class="guide-specimen-head">
+								<h3 id="brand-type">Typography</h3>
+								<p><code>h1</code> and <code>h2</code> get Teko SemiBold and a brand color (on the CDN build, <code>h2</code> is navy). From
+									<code>h3</code> down there's no brand styling unless the heading sits inside a
+									module wrapper, so put lower headings in a module.</p>
+								<p class="guide-classes"><code>h1</code><code>h2</code><code>div.styled</code><code>.text-link</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<p>The section headings on this page are <code>h2</code>. Body copy is Roboto. <a href="#brand-type">Inline links</a> use the Decorator link
+									color.</p>
+								<div class="styled">
+									<h3>Inside div.styled</h3>
+									<p>A sand box that gives <code>h3</code>–<code>h6</code> the brand blue. Use it
+										for asides and "on this page" boxes.</p>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-type"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-type">Use one h1 per page and h2 for each section. If a section needs h3 headings, put them inside a Decorator module wrapper or a div.styled box. Don't restyle the headings. Fonts are Roboto and Teko only.</pre>
+							</div>
+						</article>
+					</section>
+
+					<!-- ============================================================ -->
+					<section id="components" class="guide-section" aria-labelledby="components-heading">
+						<h2 id="components-heading">Components</h2>
+
+						<p>Bootstrap&nbsp;3 loads on every Decorator page, but the Decorator only restyles some of it.
+							The components below are the on-brand ones. Anything that paints a color and isn't
+							styled in <code>base.css</code> renders in stock Bootstrap blue, green, or red. See
+							<a href="#guardrails">Guardrails</a>.</p>
+
+						<div class="msg info">
+							<h2>App patterns</h2>
+							Building an app? Tabs, side menus, toolbars, list groups, pagination, modals and
+							responsive helpers each have their own page: <a href="app-patterns.html">App Patterns</a>.
+							It also has <a href="app-patterns.html#shell">complete app shells</a> and
+							<a href="app-patterns.html#dashboards">starter dashboards for campus areas</a>.
+						</div>
+
+						<!-- Buttons -->
+						<article class="guide-specimen" aria-labelledby="c-buttons">
+							<div class="guide-specimen-head">
+								<h3 id="c-buttons">Buttons</h3>
+								<p>The Decorator restyles <code>-primary</code> and <code>-default</code>. For a gold
+									call to action, use <code>.styled-yellow</code>.</p>
+								<p class="guide-classes"><code>.btn.btn-primary</code><code>.btn.btn-default</code><code>.btn.styled-yellow</code><code>.btn-block</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<button type="button" class="btn btn-primary">Primary</button>
+								<button type="button" class="btn btn-default">Default</button>
+								<a class="btn styled-yellow" href="#c-buttons">Gold CTA</a>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-buttons"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-buttons">Add a primary action button "[Apply now]" (btn btn-primary) and a secondary "[Learn more]" (btn btn-default), using the markup in kitchen-sink/buttons.html. Use a &lt;button&gt; for actions and an &lt;a&gt; for navigation. No btn-success/-info/-warning/-danger.</pre>
+							</div>
+							<p class="guide-source">Source: <code>dist/kitchen-sink/buttons.html</code></p>
+						</article>
+
+						<!-- Messages -->
+						<article class="guide-specimen" aria-labelledby="c-msg">
+							<div class="guide-specimen-head">
+								<h3 id="c-msg">Messages and alerts</h3>
+								<p>Use the Decorator's own message boxes, not Bootstrap's <code>alert-info</code>
+									family. <code>.msg.alert</code> is gold with a warning icon and
+									<code>.msg.info</code> is sand with an info icon.</p>
+								<p class="guide-classes"><code>.msg.alert</code><code>.msg.info</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="msg alert">
+									<h2>Alert</h2>
+									Registration closes Friday at 5&nbsp;p.m.
+								</div>
+								<div class="msg info">
+									<h2>Note</h2>
+									Office hours are Monday–Thursday, 9&nbsp;a.m.–4&nbsp;p.m.
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-msg"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-msg">Show a deadline warning using the Decorator .msg.alert box (from kitchen-sink/alerts.html, "Legacy Alert Styles"), with heading "[Alert]" and text "[..]". Use .msg.info for neutral notes. Don't use Bootstrap alert-info/-success/-warning/-danger.</pre>
+							</div>
+							<p class="guide-source">Source: <code>dist/kitchen-sink/alerts.html</code>, "Legacy Alert Styles"</p>
+						</article>
+
+						<!-- Breadcrumbs -->
+						<article class="guide-specimen" aria-labelledby="c-crumbs">
+							<div class="guide-specimen-head">
+								<h3 id="c-crumbs">Breadcrumbs</h3>
+								<p>Every template puts one at the top of the canvas. Point each link at a real page.</p>
+								<p class="guide-classes"><code>ol.breadcrumb.breadcrumbs-list</code><code>li.active</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<ol class="breadcrumb breadcrumbs-list">
+									<li><a href="#c-crumbs">Home</a></li>
+									<li><a href="#c-crumbs">Services</a></li>
+									<li class="active">Request form</li>
+								</ol>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-crumbs"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-crumbs">Set the breadcrumb to Home › [Section] › [This page]. Resolve each href relative to this page's own folder.</pre>
+							</div>
+						</article>
+
+						<!-- Forms -->
+						<article class="guide-specimen" aria-labelledby="c-forms">
+							<div class="guide-specimen-head">
+								<h3 id="c-forms">Forms</h3>
+								<p>Stock Bootstrap&nbsp;3 form markup. The Decorator restyles <code>.form-control</code>.
+									Every input gets a <code>&lt;label for&gt;</code> and a standard
+									<code>autocomplete</code> value.</p>
+								<p class="guide-classes"><code>.form-group</code><code>.form-control</code><code>.checkbox</code><code>.help-block</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<form action="#c-forms" method="get">
+									<div class="row">
+										<div class="col-sm-6 form-group">
+											<label for="demo-name">Full name</label>
+											<input type="text" class="form-control" id="demo-name" name="name" autocomplete="name">
+										</div>
+										<div class="col-sm-6 form-group">
+											<label for="demo-email">UC San Diego email</label>
+											<input type="email" class="form-control" id="demo-email" name="email" autocomplete="email" aria-describedby="demo-email-help">
+											<p class="help-block" id="demo-email-help">Use your @ucsd.edu address.</p>
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="demo-topic">Topic</label>
+										<select class="form-control" id="demo-topic" name="topic">
+											<option>General question</option>
+											<option>Technical support</option>
+										</select>
+									</div>
+									<div class="checkbox">
+										<label><input type="checkbox" name="updates"> Email me updates</label>
+									</div>
+									<button type="submit" class="btn btn-primary">Submit</button>
+								</form>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-forms"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-forms">Build a [contact] form using the Bootstrap 3 markup in kitchen-sink/forms.html (basic example). Fields: [name, email, topic select, message textarea]. Bind each label with for/id, use standard autocomplete values, no autofocus. Show validation errors above the form in a .msg.alert box. Put the submit logic in js/[form-name].js.</pre>
+							</div>
+							<p class="guide-source">Source: <code>dist/kitchen-sink/forms.html</code>, "Basic example"</p>
+						</article>
+
+						<!-- Input group -->
+						<article class="guide-specimen" aria-labelledby="c-input">
+							<div class="guide-specimen-head">
+								<h3 id="c-input">Input group with button</h3>
+								<p>For a search or filter box inside your app. It isn't the site search, which is
+									chrome.</p>
+								<p class="guide-classes"><code>.input-group</code><code>.input-group-btn</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<form action="#c-input" method="get" role="search">
+									<label for="demo-filter" class="sr-only">Filter courses</label>
+									<div class="input-group">
+										<input type="text" class="form-control" id="demo-filter" name="filter" placeholder="Filter courses">
+										<span class="input-group-btn">
+											<button class="btn btn-default" type="submit">Go</button>
+										</span>
+									</div>
+								</form>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-input"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-input">Add a filter box above the [course list] using the "Button addons" input group from kitchen-sink/input_groups.html, with an .sr-only label. Scope any CSS to main#main-content so it can't reach the site search. Filtering logic goes in js/[filter].js.</pre>
+							</div>
+							<p class="guide-source">Source: <code>dist/kitchen-sink/input_groups.html</code>, "Button addons"</p>
+						</article>
+
+						<!-- Tables -->
+						<article class="guide-specimen" aria-labelledby="c-tables">
+							<div class="guide-specimen-head">
+								<h3 id="c-tables">Tables</h3>
+								<p>The Decorator styles <code>table.styled</code> (gray header) and
+									<code>table.styled-dark</code> (blue header). Mark alternate rows with
+									<code>tr.even</code>. Wrap wide tables in <code>.table-responsive</code>.</p>
+								<p class="guide-classes"><code>table.styled-dark</code><code>table.styled</code><code>tr.even</code><code>.table-responsive</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="table-responsive">
+									<table class="styled-dark">
+										<caption>Open service requests</caption>
+										<thead>
+											<tr><th scope="col">Ticket</th><th scope="col">Requester</th><th scope="col">Status</th></tr>
+										</thead>
+										<tbody>
+											<tr><td>RQ-1042</td><td>Facilities</td><td>In progress</td></tr>
+											<tr class="even"><td>RQ-1043</td><td>Registrar</td><td>Waiting on requester</td></tr>
+											<tr><td>RQ-1044</td><td>Library</td><td>Closed</td></tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-tables"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-tables">Render [data] as a table.styled-dark inside .table-responsive, with a &lt;caption&gt;, th scope="col", and tr.even on alternate rows. Show status as text, not color alone. If it needs sorting or paging, use the DataTables widget instead (see Widgets).</pre>
+							</div>
+							<p class="guide-source">Source: <code>dist/css/base.css</code>, "table" section</p>
+						</article>
+
+						<!-- Drawer -->
+						<article class="guide-specimen" aria-labelledby="c-drawer">
+							<div class="guide-specimen-head">
+								<h3 id="c-drawer">Drawer (accordion)</h3>
+								<p>Expandable sections for FAQs and long lists. <code>base.min.js</code> handles the
+									expand and collapse, so you write no JavaScript.</p>
+								<p class="guide-classes"><code>.drawer-wrapper</code><code>.drawer</code><code>h2 &gt; a</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="drawer-wrapper">
+									<div class="drawer">
+										<h2><a href="#">Who can submit a request?</a></h2>
+										<div>
+											<p>Any current faculty, staff, or student with an active UC San Diego
+												account.</p>
+										</div>
+										<h2><a href="#">How long does review take?</a></h2>
+										<div>
+											<p>Most requests are reviewed within three business days.</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-drawer"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-drawer">Add an FAQ using the drawer module (.drawer-wrapper &gt; .drawer, from the Text and Headline module in templates/modules.html). Questions: [..]. Keep the h2 &gt; a / div pairs exactly as shipped, and don't add accordion JavaScript — base.min.js already handles it.</pre>
+							</div>
+							<p class="guide-source">Source: <code>dist/templates/modules.html</code> and <code>dist/kitchen-sink/javascript_components.html</code>, "Drawers"</p>
+						</article>
+
+						<!-- Grid + icons -->
+						<article class="guide-specimen" aria-labelledby="c-grid">
+							<div class="guide-specimen-head">
+								<h3 id="c-grid">Grid, helpers, and Glyphicons</h3>
+								<p>Colorless Bootstrap layout and utility classes are safe anywhere in the canvas.
+									Icons are Glyphicons. Font Awesome isn't part of the Decorator.</p>
+								<p class="guide-classes"><code>.row</code><code>.col-sm-*</code><code>.col-md-*</code><code>.img-responsive</code><code>.sr-only</code><code>.text-center</code><code>.list-unstyled</code><code>.glyphicon</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="row">
+									<div class="col-sm-4 text-center">
+										<p><span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> Schedule</p>
+									</div>
+									<div class="col-sm-4 text-center">
+										<p><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span> Contact</p>
+									</div>
+									<div class="col-sm-4 text-center">
+										<p><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> Location</p>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-grid"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-grid">Lay out [three feature blurbs] in a Bootstrap 3 .row with .col-sm-4 columns. Use Glyphicons with aria-hidden="true" next to visible text. No Font Awesome.</pre>
+							</div>
+							<p class="guide-source">Source: <code>dist/kitchen-sink/icons.html</code>, <code>helper_classes.html</code></p>
+						</article>
+					</section>
+
+					<!-- ============================================================ -->
+					<section id="modules" class="guide-section" aria-labelledby="modules-heading">
+						<h2 id="modules-heading">Modules</h2>
+
+						<p>Modules are the Decorator's page building blocks. Copy each module's wrapper, grid, and
+							classes exactly, and change only the text, image <code>src</code>/<code>alt</code>, and
+							link <code>href</code>. Each one is designed for a single image size; images at other
+							sizes get cropped.</p>
+
+						<!-- Full width -->
+						<article class="guide-specimen" aria-labelledby="m-full">
+							<div class="guide-specimen-head">
+								<h3 id="m-full">Full-width text and CTA</h3>
+								<p>A headline, a short paragraph, and one button on a textured band.</p>
+								<p class="guide-classes"><code>.jumbotron.jumbotron-full-width.side-image-white.bubbles</code></p>
+							</div>
+							<div class="guide-preview guide-preview-flush">
+								<span class="guide-preview-label">Live preview</span>
+								<section class="jumbotron jumbotron-full-width side-image-white bubbles">
+									<div class="container">
+										<div class="row">
+											<div class="col-md-8">
+												<h2>Research Computing Help</h2>
+												<p>Get storage, compute time, and one-on-one consulting for your lab's
+													research projects.</p>
+												<a class="btn btn-lg btn-primary" href="#m-full">Request support</a>
+											</div>
+										</div>
+									</div>
+								</section>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-m-full"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-m-full">Add the full-width text and CTA module (jumbotron jumbotron-full-width side-image-white bubbles) from templates/two-column.html. Headline: "[..]". Blurb: "[..]". Button: "[..]" linking to [url].</pre>
+							</div>
+						</article>
+
+						<!-- CTA image right -->
+						<article class="guide-specimen" aria-labelledby="m-cta">
+							<div class="guide-specimen-head">
+								<h3 id="m-cta">Call to action with image</h3>
+								<p>Text on one side and an image on the other. Flip the column order to put the image
+									on the left. Image size: <strong>550 × 370</strong>.</p>
+								<p class="guide-classes"><code>.jumbotron.side-image-white</code><code>.col-md-6</code><code>figure &gt; img.img-responsive</code></p>
+							</div>
+							<div class="guide-preview guide-preview-flush">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="jumbotron side-image-white">
+									<div class="container">
+										<div class="row">
+											<div class="col-md-6">
+												<h2>Who We Are</h2>
+												<p>Our staff supports faculty, students, and partners with timely,
+													innovative services. Meet the team behind every program.</p>
+												<p><a class="btn btn-default" href="#m-cta">Meet the staff</a></p>
+											</div>
+											<div class="col-md-6">
+												<figure>
+													<img src="img/cta-staff-550x370.jpg" alt="Staff members talking in a campus office" class="img-responsive">
+												</figure>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-m-cta"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-m-cta">Add a "Text and CTA w/Full Height Image Right" module from templates/modules.html. Headline "[..]" (about 25 characters per line, 2 lines max), blurb of about 100 words, button "[..]". Image: [path], 550 × 370, alt "[..]". No text in the image.</pre>
+							</div>
+						</article>
+
+						<!-- Sand CTA -->
+						<article class="guide-specimen" aria-labelledby="m-sand">
+							<div class="guide-specimen-head">
+								<h3 id="m-sand">Call to action, sand style</h3>
+								<p>The same layout on the Decorator's sand background, with the image on the left.
+									Image size: <strong>550 × 370</strong>.</p>
+								<p class="guide-classes"><code>.jumbotron.jumbotron-sand</code></p>
+							</div>
+							<div class="guide-preview guide-preview-flush">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="jumbotron jumbotron-sand">
+									<div class="container">
+										<div class="row">
+											<div class="col-md-6">
+												<figure>
+													<img alt="Faculty members in a seminar room" class="img-responsive" src="img/cta-faculty-550x370.jpg">
+												</figure>
+											</div>
+											<div class="col-md-6">
+												<h2>Faculty Mentoring</h2>
+												<p>Pair with a faculty mentor in your field for a quarter of guided
+													research and career advice.</p>
+												<p><a class="btn btn-default" href="#m-sand">Find a mentor</a></p>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-m-sand"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-m-sand">Add the "Dark Background Text and CTA" module (jumbotron jumbotron-sand) from templates/modules.html, with the image on the left. Headline "[..]", blurb "[..]", button "[..]". Image: [path] at 550 × 370 with alt text.</pre>
+							</div>
+						</article>
+
+						<!-- Callout one -->
+						<article class="guide-specimen" aria-labelledby="m-callout1">
+							<div class="guide-specimen-head">
+								<h3 id="m-callout1">Callout content, one box</h3>
+								<p>One centered panel over a preset background. The class supplies the image, so don't
+									add your own.</p>
+								<p class="guide-classes"><code>.jumbotron-callout-content-one</code><code>.navy-yellow</code><code>.panel.panel-primary</code><code>.panel-text</code></p>
+							</div>
+							<div class="guide-preview guide-preview-flush">
+								<span class="guide-preview-label">Live preview</span>
+								<section class="jumbotron side-image-white jumbotron-callout-content-one navy-yellow">
+									<div class="container">
+										<div class="row">
+											<div class="col-md-10 col-md-offset-1">
+												<div class="panel panel-primary">
+													<div class="panel-body">
+														<h2>Our History</h2>
+														<p class="panel-text">Since its founding, the program has grown
+															into one of the campus's largest interdisciplinary centers,
+															connecting research, teaching, and public service.</p>
+														<p><a class="btn styled-yellow" href="#m-callout1">See our timeline</a></p>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</section>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-m-callout1"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-m-callout1">Add Callout Content One (jumbotron side-image-white jumbotron-callout-content-one navy-yellow) from templates/two-column.html. Use the class background (don't supply an image). Panel heading "[..]", text "[..]", button .styled-yellow "[..]".</pre>
+							</div>
+						</article>
+
+						<!-- Callout two -->
+						<article class="guide-specimen" aria-labelledby="m-callout2">
+							<div class="guide-specimen-head">
+								<h3 id="m-callout2">Callout content, two to four boxes</h3>
+								<p>Semi-transparent blue panels on a background. Use the <code>.jumbotron-orbs-1</code>
+									preset texture, or a custom image at <strong>1200 × 410</strong>
+									(<strong>1200 × 800</strong> for four boxes or longer copy).</p>
+								<p class="guide-classes"><code>.jumbotron-callout-content-two</code><code>.jumbotron-orbs-1</code><code>.cta-two-three</code><code>.text-indent</code></p>
+							</div>
+							<div class="guide-preview guide-preview-flush">
+								<span class="guide-preview-label">Live preview</span>
+								<section aria-label="Program highlights" class="jumbotron side-image-white jumbotron-callout-content-two jumbotron-orbs-1">
+									<div class="container">
+										<div class="row">
+											<div class="col-md-8 text-indent">
+												<h2>Get Started</h2>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-md-6">
+												<div class="panel panel-primary">
+													<div class="cta-two-three panel-body">
+														<h3>New Students</h3>
+														<p class="panel-text">Orientation dates, advising, and your
+															first-quarter checklist.</p>
+														<p><a class="text-link" href="#m-callout2">Start here</a></p>
+													</div>
+												</div>
+											</div>
+											<div class="col-md-6">
+												<div class="panel panel-primary">
+													<div class="cta-two-three panel-body">
+														<h3>Transfer Students</h3>
+														<p class="panel-text">Credit evaluation, major prep, and
+															transfer-specific events.</p>
+														<p><a class="text-link" href="#m-callout2">Transfer guide</a></p>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</section>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-m-callout2"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-m-callout2">Add "Callout Content with [2|3|4] boxes" from templates/modules.html with the jumbotron-orbs-1 preset background. Don't carry over the inline style="" background or min-height from the demo. Section headline "[..]". Boxes: [title / one-sentence blurb / text-link] × [n].</pre>
+							</div>
+						</article>
+
+						<!-- Tiles -->
+						<article class="guide-specimen" aria-labelledby="m-tiles">
+							<div class="guide-specimen-head">
+								<h3 id="m-tiles">Tiles with links</h3>
+								<p>Image tiles with white link text. The images are shaded automatically. Image size:
+									<strong>550 × 370</strong>, cropped to 200px tall, so keep the subject centered.</p>
+								<p class="guide-classes"><code>.jumbotron.jumbotron-tile-links</code><code>.flex</code><code>.wrapper</code><code>img.background-image</code></p>
+							</div>
+							<div class="guide-preview guide-preview-flush">
+								<span class="guide-preview-label">Live preview</span>
+								<section aria-label="Quick links" class="jumbotron jumbotron-tile-links">
+									<div class="container">
+										<div class="flex">
+											<div class="wrapper">
+												<img class="background-image" src="img/tile-faculty-550x370.jpg" alt="">
+												<h2><a href="#m-tiles">Faculty</a></h2>
+											</div>
+											<div class="wrapper">
+												<img class="background-image" src="img/tile-staff-550x370.jpg" alt="">
+												<h2><a href="#m-tiles">Staff</a></h2>
+											</div>
+											<div class="wrapper">
+												<img class="background-image" src="img/tile-building-550x370.jpg" alt="">
+												<h2><a href="#m-tiles">Visit Us</a></h2>
+											</div>
+										</div>
+									</div>
+								</section>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-m-tiles"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-m-tiles">Add a tiles-with-links module. Take the flex/wrapper markup from the "Callout Content Blocks" block in templates/modules.html, but change the wrapper class from jumbotron-cta-blocks to jumbotron-tile-links, since the demo class isn't styled. Give every img.background-image an alt attribute (alt="" if the link text says it all). Tiles: [label → url] × [n]. Images at 550 × 370.</pre>
+							</div>
+						</article>
+
+						<!-- News -->
+						<article class="guide-specimen" aria-labelledby="m-news">
+							<div class="guide-specimen-head">
+								<h3 id="m-news">News with images</h3>
+								<p>Three linked cards with date and headline. All three images must be
+									<strong>388 × 246</strong>. The CMS also has an auto-populated version driven by
+									a feed. Its endpoint URL is the only value you should change.</p>
+								<p class="guide-classes"><code>.jumbotron.jumbotron-gray.jumbotron-news</code><code>a.panel.panel-default</code><code>.panel-news-date</code><code>.panel-news-title</code></p>
+							</div>
+							<div class="guide-preview guide-preview-flush">
+								<span class="guide-preview-label">Live preview</span>
+								<section class="jumbotron jumbotron-gray jumbotron-news" data-module="news-with-image">
+									<div class="container">
+										<div class="row">
+											<div class="col-xs-8">
+												<h2>In the News</h2>
+											</div>
+											<div class="col-xs-4 view-all-link text-right">
+												<a class="text-link" href="#m-news">View all news</a>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-sm-4">
+												<a class="panel panel-default" href="#m-news">
+													<img alt="" class="img-responsive" src="img/news-faculty-388x246.jpg">
+													<div class="panel-heading">
+														<p class="panel-news-date small">September 18, 2026</p>
+														<h3 class="panel-news-title">New Seminar Series Connects Policy and Data Science</h3>
+													</div>
+												</a>
+											</div>
+											<div class="col-sm-4">
+												<a class="panel panel-default" href="#m-news">
+													<img alt="" class="img-responsive" src="img/news-staff-388x246.jpg">
+													<div class="panel-heading">
+														<p class="panel-news-date small">September 11, 2026</p>
+														<h3 class="panel-news-title">Staff Excellence Awards Open for Nominations</h3>
+													</div>
+												</a>
+											</div>
+											<div class="col-sm-4">
+												<a class="panel panel-default" href="#m-news">
+													<img alt="" class="img-responsive" src="img/news-building-388x246.jpg">
+													<div class="panel-heading">
+														<p class="panel-news-date small">September 4, 2026</p>
+														<h3 class="panel-news-title">Renovated Commons Reopens for Fall Quarter</h3>
+													</div>
+												</a>
+											</div>
+										</div>
+									</div>
+								</section>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-m-news"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-m-news">Add the "News with Images" module from templates/modules.html. Three items: [date / headline / url / image path + alt]. All images 388 × 246. Keep the a.panel.panel-default card structure, and remove the invalid alt attribute the demo puts on the &lt;a&gt; tags.</pre>
+							</div>
+						</article>
+
+						<!-- Event listing -->
+						<article class="guide-specimen" aria-labelledby="m-events">
+							<div class="guide-specimen-head">
+								<h3 id="m-events">Event listing</h3>
+								<p>A stacked list of events with an image, a linked title, and the date and time.</p>
+								<p class="guide-classes"><code>.event-listing</code><code>.date-time</code><code>.col-md-3</code> + <code>.col-md-9</code></p>
+							</div>
+							<div class="guide-preview guide-preview-flush">
+								<span class="guide-preview-label">Live preview</span>
+								<section class="jumbotron side-image-white">
+									<div class="container">
+										<div class="event-listing">
+											<div class="row">
+												<div class="col-md-3">
+													<figure>
+														<img alt="" class="img-responsive" src="img/news-building-388x246.jpg">
+													</figure>
+												</div>
+												<div class="col-md-9">
+													<h2><a href="#m-events">Fall Open House</a></h2>
+													<p class="date-time">October 3 from 10 a.m.–2 p.m.</p>
+													<p>Tour the labs, meet faculty, and learn about graduate programs.</p>
+												</div>
+											</div>
+										</div>
+									</div>
+								</section>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-m-events"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-m-events">Add the "Multiple Listings" event module from templates/modules.html (section.jumbotron &gt; .container &gt; .event-listing, one per event). Events: [title / url / date-time text / blurb / image + alt]. For a calendar view instead, use the FullCalendar widget.</pre>
+							</div>
+						</article>
+
+						<article class="guide-specimen" aria-labelledby="m-sizes">
+							<div class="guide-specimen-head">
+								<h3 id="m-sizes">Image sizes at a glance</h3>
+								<p>The sizes the campus CMS publishes for each module. Every image in the same module
+									uses the same size.</p>
+							</div>
+							<div class="guide-preview">
+								<div class="table-responsive">
+									<table class="styled">
+										<caption>Module image sizes</caption>
+										<thead><tr><th scope="col">Module</th><th scope="col">Size (px)</th></tr></thead>
+										<tbody>
+											<tr><td>Hero — homepage</td><td>1440 × 530</td></tr>
+											<tr class="even"><td>Intro banner — article</td><td>1500 × 480</td></tr>
+											<tr><td>Image rotator</td><td>900 × 335</td></tr>
+											<tr class="even"><td>Call to action / Tiles with links</td><td>550 × 370</td></tr>
+											<tr><td>Call to action — inset</td><td>1200 × 388</td></tr>
+											<tr class="even"><td>Callout content / Text block</td><td>1200 × 410 (taller: 1200 × 800)</td></tr>
+											<tr><td>News with images</td><td>388 × 246</td></tr>
+											<tr class="even"><td>Profile photo</td><td>198 × 231</td></tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</article>
+					</section>
+
+					<!-- ============================================================ -->
+					<section id="widgets" class="guide-section" aria-labelledby="widgets-heading">
+						<h2 id="widgets-heading">Widgets</h2>
+
+						<p>Widgets need their own CSS and JavaScript as well as markup. Ask the agent to bring the
+							widget's <code>&lt;link&gt;</code> and <code>&lt;script&gt;</code> tags across from the
+							reference page and to put the setup code in a named file under <code>js/</code>.
+							<a href="https://developer.ucsd.edu/design/v5-kitchen-sink/widgets/index.html">See live widget demos</a>.</p>
+
+						<div class="row">
+							<div class="col-sm-6">
+								<article class="guide-specimen" aria-labelledby="w-dt">
+									<div class="guide-specimen-head">
+										<h3 id="w-dt">DataTables</h3>
+										<p>Sortable, searchable, paged tables for directories and reports.</p>
+									</div>
+									<div class="guide-prompt">
+										<div class="guide-prompt-bar">
+											<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+											<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-w-dt"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+										</div>
+<pre id="p-w-dt">Add the DataTables widget from widgets/datatables.html. Bring its CSS and JS tags across and fix their paths. Load the rows from [data.json]. Setup code goes in js/[directory-table].js. Columns: [..].</pre>
+									</div>
+								</article>
+							</div>
+							<div class="col-sm-6">
+								<article class="guide-specimen" aria-labelledby="w-fc">
+									<div class="guide-specimen-head">
+										<h3 id="w-fc">FullCalendar</h3>
+										<p>Month, week, and list views of events.</p>
+									</div>
+									<div class="guide-prompt">
+										<div class="guide-prompt-bar">
+											<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+											<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-w-fc"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+										</div>
+<pre id="p-w-fc">Add the FullCalendar widget from widgets/fullcalendar.html. Bring its dependencies across. Events come from [events.json]. Setup code goes in js/[calendar].js, with no inline $(document).ready.</pre>
+									</div>
+								</article>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-6">
+								<article class="guide-specimen" aria-labelledby="w-wiz">
+									<div class="guide-specimen-head">
+										<h3 id="w-wiz">Wizard</h3>
+										<p>Multi-step forms such as applications or intake.</p>
+									</div>
+									<div class="guide-prompt">
+										<div class="guide-prompt-bar">
+											<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+											<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-w-wiz"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+										</div>
+<pre id="p-w-wiz">Build a [3]-step [application] with the Wizard widget from widgets/wizard.html. Steps: [..]. Each step's fields follow the kitchen-sink/forms.html rules (labels, autocomplete, errors above the form). Setup code goes in js/[wizard].js.</pre>
+									</div>
+								</article>
+							</div>
+							<div class="col-sm-6">
+								<article class="guide-specimen" aria-labelledby="w-mc">
+									<div class="guide-specimen-head">
+										<h3 id="w-mc">MaxChar</h3>
+										<p>A live character counter for text areas.</p>
+									</div>
+									<div class="guide-prompt">
+										<div class="guide-prompt-bar">
+											<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+											<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-w-mc"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+										</div>
+<pre id="p-w-mc">Add a [500]-character limit to the [message] textarea with the MaxChar widget from widgets/MaxChar.html. Announce the remaining count to screen readers.</pre>
+									</div>
+								</article>
+							</div>
+						</div>
+					</section>
+
+					<!-- ============================================================ -->
+					<section id="recipes" class="guide-section" aria-labelledby="recipes-heading">
+						<h2 id="recipes-heading">App recipes</h2>
+
+						<p>Recipes combine the pieces above into complete pages. Each numbered list is the canvas
+							from top to bottom. Copy the prompt and replace the placeholders with your own content.</p>
+
+						<!-- Recipe 1 -->
+						<article class="guide-specimen" aria-labelledby="r-dept">
+							<div class="guide-specimen-head">
+								<h3 id="r-dept">Department landing page</h3>
+								<p class="guide-meta">Template: homepage.html</p>
+								<ol class="guide-recipe-stack">
+									<li>Hero carousel with 3 slides at 1440 × 530</li>
+									<li>Callout content with 3 boxes (Students · Research · Give)</li>
+									<li>Tiles with links for the main audiences</li>
+									<li>News with images</li>
+									<li>Event listing for the next three events</li>
+								</ol>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-r-dept"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-r-dept">Build the landing page for [Department of X] from homepage.html, saved as index.html (overwrite is OK). Rewrite the asset paths to cdn.ucsd.edu.
+Navigation (drawer + navbar): Home, About, Academics, Research, News, Contact.
+Canvas, top to bottom:
+1. Hero with 3 slides (1440 × 530): [headline + link] each.
+2. Callout content with 3 boxes on the jumbotron-orbs-1 preset: Students, Research, Give — one sentence and a text-link each.
+3. Tiles with links (jumbotron-tile-links, not jumbotron-cta-blocks): Faculty, Staff, Visit — 550 × 370 images with alt text.
+4. News with images: 3 items at 388 × 246.
+5. Event listing: next 3 events.
+Use placeholder images at the right sizes where I haven't given one.</pre>
+							</div>
+						</article>
+
+						<!-- Recipe 2 -->
+						<article class="guide-specimen" aria-labelledby="r-form">
+							<div class="guide-specimen-head">
+								<h3 id="r-form">Service request app</h3>
+								<p class="guide-meta">Template: two-column.html</p>
+								<ol class="guide-recipe-stack">
+									<li>h1 and a short intro paragraph</li>
+									<li>.msg.info with turnaround times</li>
+									<li>Error summary area (.msg.alert, hidden until submit)</li>
+									<li>Request form: name, email, department, type, details (MaxChar)</li>
+									<li>Drawer FAQ</li>
+								</ol>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-r-form"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-r-form">Create request.html from two-column.html for a [Facilities service request] app. Add "Request service" to the drawer, the navbar, and the side nav.
+Canvas:
+1. h1 "Request Service" and a one-paragraph intro.
+2. A .msg.info box: "Most requests are reviewed within 3 business days."
+3. An error summary container above the form that shows a .msg.alert listing each invalid field (with a link to it) after a failed submit.
+4. A Bootstrap 3 form (kitchen-sink/forms.html): full name (autocomplete=name), email (autocomplete=email), department select, request type radio group in a fieldset with a legend, and a details textarea with a 1000-character MaxChar counter. Submit is btn btn-primary.
+5. A drawer FAQ with 3 questions.
+Validation and submit logic go in js/request-form.js. POST to [endpoint] with a CSRF token. Don't log form contents.</pre>
+							</div>
+						</article>
+
+						<!-- Recipe 3 -->
+						<article class="guide-specimen" aria-labelledby="r-dir">
+							<div class="guide-specimen-head">
+								<h3 id="r-dir">Staff directory</h3>
+								<p class="guide-meta">Template: blank-slate.html</p>
+								<ol class="guide-recipe-stack">
+									<li>h1 and a filter input group</li>
+									<li>DataTables table from a JSON file</li>
+									<li>Call-to-action module: "Can't find someone?"</li>
+								</ol>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-r-dir"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-r-dir">Create directory.html from blank-slate.html. Add "Directory" to the drawer and the navbar.
+Canvas:
+1. h1 "Staff Directory" and a one-line intro.
+2. The DataTables widget (widgets/datatables.html) loading data/staff.json with the columns Name, Title, Unit, Email (mailto link), Phone. Bring the widget's CSS/JS across. Setup code goes in js/directory.js.
+3. A sand CTA module (jumbotron-sand): "Can't find someone?" with a btn btn-default linking to [campus directory].
+Escape every value from staff.json before rendering it.</pre>
+							</div>
+						</article>
+
+						<!-- Recipe 4 -->
+						<article class="guide-specimen" aria-labelledby="r-dash">
+							<div class="guide-specimen-head">
+								<h3 id="r-dash">Status dashboard</h3>
+								<p class="guide-meta">Template: blank-slate.html</p>
+								<ol class="guide-recipe-stack">
+									<li>h1 with a "last updated" line</li>
+									<li>.msg.alert for active incidents (only when one exists)</li>
+									<li>Callout content with 4 boxes: one per service, status as text</li>
+									<li>table.styled-dark incident history</li>
+								</ol>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-r-dash"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-r-dash">Create status.html from blank-slate.html for a [service status] dashboard.
+Canvas:
+1. h1 "Service Status" and a "Last updated [time]" paragraph.
+2. When there's an active incident, a .msg.alert with its summary.
+3. Callout content with 4 boxes (jumbotron-callout-content-two, jumbotron-orbs-1): one per service — [Email, Wi-Fi, Canvas, VPN]. Show status as words ("Operational", "Degraded") plus a Glyphicon, never color alone.
+4. A table.styled-dark of the last 10 incidents inside .table-responsive, with a caption and th scope.
+Load the data from [status.json] in js/status.js and escape every value. Don't use label-success/-warning/-danger or progress bars.</pre>
+							</div>
+						</article>
+
+						<!-- Recipe 5 -->
+						<article class="guide-specimen" aria-labelledby="r-kb">
+							<div class="guide-specimen-head">
+								<h3 id="r-kb">Knowledge base article</h3>
+								<p class="guide-meta">Template: three-column.html</p>
+								<ol class="guide-recipe-stack">
+									<li>Left menu: article categories</li>
+									<li>Middle: h1, steps, drawer FAQ</li>
+									<li>Right: div.styled "On this page" plus a .msg.info contact box</li>
+								</ol>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-r-kb"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-r-kb">Create kb/[article-slug].html from three-column.html. Resolve every nav href relative to kb/.
+Left menu: [categories]. Middle column: h1 "[title]", an intro, an ordered list of steps, then a drawer FAQ with [3] questions. Right column: a div.styled box with h3 "On this page" and anchor links to each h2, then a .msg.info box with the help desk contact.</pre>
+							</div>
+						</article>
+					</section>
+
+					<!-- ============================================================ -->
+					<section id="guardrails" class="guide-section" aria-labelledby="guardrails-heading">
+						<h2 id="guardrails-heading">Guardrails</h2>
+
+						<p>The kit's rule files enforce these automatically, and the <code>verify</code> check fails
+							when one is broken. Writing them into your prompt helps the agent get it right on the
+							first try.</p>
+
+						<div class="row">
+							<div class="col-md-6">
+								<div class="styled">
+									<h3>Do</h3>
+									<ul class="guide-rule-list guide-do">
+										<li><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Name the template in every new-page prompt.</li>
+										<li><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Load the Decorator CSS and JS from <code>cdn.ucsd.edu</code>.</li>
+										<li><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Scope every CSS rule to <code>main#main-content</code>.</li>
+										<li><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Put scripts in named files under <code>js/</code>.</li>
+										<li><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Update the drawer, the navbar, <em>and</em> the side nav when you add a page.</li>
+										<li><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Give each module images at its documented size, with alt text.</li>
+										<li><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Keep both search forms, in the drawer and the navbar, as shipped.</li>
+									</ul>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="styled">
+									<h3>Don't</h3>
+									<ul class="guide-rule-list guide-dont">
+										<li><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Use <code>*-success</code>, <code>*-info</code>, <code>*-warning</code>, or <code>*-danger</code> classes.</li>
+										<li><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Use <code>pagination</code>, <code>progress-bar</code>, <code>label-*</code>, or <code>list-group</code>. They render in stock Bootstrap colors.</li>
+										<li><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Edit the header, title band, navbar, drawer, search, or footer.</li>
+										<li><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Add <code>&lt;style&gt;</code> blocks or <code>style=""</code> attributes.</li>
+										<li><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Paint the page background or stretch a color past the canvas.</li>
+										<li><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Add Font Awesome or any font besides Roboto, Teko, Brix Sans, or Refrigerator Deluxe.</li>
+										<li><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Copy markup from a browser's DOM inspector or a whole kitchen-sink page.</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+
+						<article class="guide-specimen" aria-labelledby="g-review">
+							<div class="guide-specimen-head">
+								<h3 id="g-review">Review prompt</h3>
+								<p>Run this after the agent finishes a page.</p>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-review"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-review">Review [page.html] against the Decorator rules:
+- Is every change inside main#main-content?
+- Do all Decorator CSS/JS tags point at cdn.ucsd.edu?
+- Does any class end in -success/-info/-warning/-danger, or come only from bootstrap.min.css while painting a color?
+- One h1, headings in order, alt text on every image, labels on every input, 44px touch targets?
+- Does the new page appear in the drawer, the navbar, and the side nav?
+Then run `npx ucsd-decorator-kit verify` and report the findings. Don't run it with --accept.</pre>
+							</div>
+						</article>
+
+						<p>Accessibility reference: <a href="https://accessibility.ucsd.edu/checklists/websites.html">UC San
+							Diego website accessibility checklist</a>.</p>
+					</section>
+
+				</section>
+
+				<section class="col-xs-12 col-md-3 sidebar-section">
+
+					<article class="main-content-nav">
+						<h2>Developer Guide</h2>
+						<ul class="navbar-list">
+							<li class="active">
+								On this page
+								<ul>
+									<li><a href="#start">Start here</a></li>
+									<li><a href="#layouts">Layout templates</a></li>
+									<li><a href="#brand">Brand basics</a></li>
+									<li><a href="#components">Components</a></li>
+									<li><a href="app-patterns.html">App Patterns</a></li>
+									<li><a href="app-patterns.html#dashboards">Dashboards by area</a></li>
+									<li><a href="#modules">Modules</a></li>
+									<li><a href="#widgets">Widgets</a></li>
+									<li><a href="#recipes">App recipes</a></li>
+									<li><a href="#guardrails">Guardrails</a></li>
+								</ul>
+							</li>
+							<li>
+								<a href="https://developer.ucsd.edu/design/v5-kitchen-sink/kitchen-sink/index.html">Kitchen Sink</a>
+							</li>
+							<li>
+								<a href="https://developer.ucsd.edu/design/v5-kitchen-sink/templates/index.html">Templates</a>
+							</li>
+							<li>
+								<a href="https://developer.ucsd.edu/design/v5-kitchen-sink/widgets/index.html">Widgets</a>
+							</li>
+						</ul>
+					</article>
+				</section>
+			</div>
+		</div>
+	</main>
+
+	<footer class="footer">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-8">
+					<p>
+						<span>UC San Diego 9500 Gilman Dr. La Jolla, CA 92093 (858) 534-2230</span>
+						<br />
+						<span>
+							Copyright © <span class="footer-copyright-year"></span> Regents of the University of
+							California.
+							All rights reserved.
+						</span>
+					</p>
+					<ul class="footer-links">
+						<li><a href="https://www.ucsd.edu/_about/legal/index.html">Terms &amp; Conditions</a></li>
+						<li><a href="mailto:youremail@xyz.ucsd.edu">Feedback</a></li>
+					</ul>
+				</div>
+				<div class="col-sm-4">
+					<img src="http://cdn.ucsd.edu/developer/decorator/5.0.2/img/ucsd-footer-logo-white.png" alt=""
+						class="img-responsive footer-logo" />
+				</div>
+			</div>
+		</div>
+	</footer>
+
+	<script src="https://cdn.ucsd.edu/cms/decorator-5/scripts/jquery.min.js"></script>
+
+	<script src="https://cdn.ucsd.edu/cms/decorator-5/scripts/bootstrap.min.js"></script>
+
+	<script src="https://www.ucsd.edu/common/_emergency-broadcast/message.js"></script>
+
+
+	<script src="https://cdn.ucsd.edu/cms/decorator-5/scripts/vendor.min.js"></script>
+	<script src="https://cdn.ucsd.edu/cms/decorator-5/scripts/base.min.js"></script>
+	<script src="js/guide.js"></script>
+
+</body>
+
+</html>
