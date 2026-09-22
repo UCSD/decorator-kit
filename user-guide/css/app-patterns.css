@@ -1,0 +1,818 @@
+/*
+ * App patterns — brand layer for Bootstrap 3.3.7 components.
+ *
+ * Bootstrap paints some app components in its stock blue (#337ab7), and the
+ * Decorator's base.min.css doesn't restyle them. This file brings them onto
+ * the Decorator palette, for the canvas only.
+ *
+ * How it stays out of the chrome:
+ *   - Every rule is scoped under main#main-content and an app-* class that
+ *     exists only in the canvas.
+ *   - No rule names a class the chrome also uses (.nav, .active,
+ *     .dropdown-menu, .btn-default, .caret, .form-control, .input-group ...).
+ *     Active states are keyed on aria-current / aria-expanded / :checked,
+ *     which the markup needs for accessibility anyway.
+ *
+ * Part of the Decorator Kit Developer Guide. Copy this file into a project
+ * as-is, or copy only the blocks you use.
+ */
+
+/* ---- Tabs: .nav.nav-tabs.app-tabs ------------------------------------- */
+
+main#main-content .app-tabs > li > a {
+  color: #00629b;
+  min-height: 44px;
+  padding: 11px 16px;
+}
+
+main#main-content .app-tabs > li > a[aria-expanded="true"] {
+  color: #182b49;
+  font-weight: 700;
+  box-shadow: inset 0 3px 0 #00629b;
+}
+
+main#main-content .app-tabs > li > a:focus {
+  outline: 3px solid #ffcd00;
+  outline-offset: -3px;
+}
+
+main#main-content .app-tab-panels {
+  padding: 16px 4px 0;
+}
+
+/* ---- Side menu: .list-group.app-sidemenu ------------------------------ */
+
+main#main-content .app-sidemenu .list-group-item {
+  color: #182b49;
+  min-height: 44px;
+  padding: 11px 15px;
+}
+
+main#main-content .app-sidemenu a.list-group-item:hover,
+main#main-content .app-sidemenu a.list-group-item:focus {
+  background: #f5f0e6;
+  color: #182b49;
+}
+
+main#main-content .app-sidemenu a.list-group-item:focus {
+  outline: 3px solid #ffcd00;
+  outline-offset: -3px;
+  z-index: 3;
+}
+
+main#main-content .app-sidemenu .list-group-item[aria-current="page"],
+main#main-content .app-sidemenu .list-group-item[aria-current="page"]:hover,
+main#main-content .app-sidemenu .list-group-item[aria-current="page"]:focus {
+  background: #00629b;
+  border-color: #00629b;
+  color: #fff;
+  z-index: 2;
+}
+
+main#main-content .app-sidemenu .app-sidemenu-heading {
+  background: #182b49;
+  border-color: #182b49;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+/* ---- Counts on list items: .badge inside an app-* list ---------------- */
+
+main#main-content .app-sidemenu .badge,
+main#main-content .app-list .badge {
+  background: #182b49;
+}
+
+main#main-content .app-sidemenu [aria-current="page"] .badge {
+  background: #fff;
+  color: #00629b;
+}
+
+/* ---- Item list: .list-group.app-list ---------------------------------- */
+
+main#main-content .app-list .list-group-item {
+  min-height: 44px;
+}
+
+main#main-content .app-list a.list-group-item {
+  color: #182b49;
+}
+
+main#main-content .app-list a.list-group-item:hover,
+main#main-content .app-list a.list-group-item:focus {
+  background: #f5f0e6;
+}
+
+main#main-content .app-list .list-group-item-heading {
+  font-weight: 700;
+  color: #182b49;
+}
+
+/* ---- Pagination: nav > ul.pagination.app-pagination ------------------- */
+
+main#main-content .app-pagination > li > a {
+  color: #00629b;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 11px 14px;
+  text-align: center;
+}
+
+main#main-content .app-pagination > li > a:hover,
+main#main-content .app-pagination > li > a:focus {
+  background: #f5f0e6;
+  color: #182b49;
+}
+
+main#main-content .app-pagination > li > a[aria-current="page"],
+main#main-content .app-pagination > li > a[aria-current="page"]:hover {
+  background: #00629b;
+  border-color: #00629b;
+  color: #fff;
+}
+
+main#main-content .app-pagination > li > a:focus {
+  outline: 3px solid #ffcd00;
+  outline-offset: -3px;
+  z-index: 3;
+}
+
+/* ---- Segmented control: .btn-group.app-segmented ---------------------- */
+
+main#main-content .app-segmented .btn {
+  min-height: 44px;
+  padding: 11px 16px;
+  background: #fff;
+  color: #00629b;
+  border: 1px solid #00629b;
+}
+
+main#main-content .app-segmented label.btn:has(input:checked) {
+  background: #00629b;
+  color: #fff;
+}
+
+main#main-content .app-segmented label.btn:has(input:focus-visible) {
+  outline: 3px solid #ffcd00;
+  outline-offset: 2px;
+  z-index: 3;
+}
+
+/* ---- Toolbar / item bar: .btn-toolbar.app-toolbar --------------------- */
+
+main#main-content .app-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-left: 0;
+  padding: 8px;
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+  background: #fff;
+}
+
+main#main-content .app-toolbar > .btn-group,
+main#main-content .app-toolbar > .app-toolbar-search {
+  float: none;
+  margin-left: 0;
+}
+
+main#main-content .app-tool {
+  min-width: 44px;
+  min-height: 44px;
+  background: #fff;
+  color: #182b49;
+  border: 1px solid #b3b3b3;
+}
+
+main#main-content .app-tool:hover,
+main#main-content .app-tool:focus {
+  background: #f5f0e6;
+}
+
+main#main-content .app-tool:focus {
+  outline: 3px solid #ffcd00;
+  outline-offset: 1px;
+  z-index: 3;
+}
+
+main#main-content .app-toolbar-count {
+  font-weight: 700;
+  color: #182b49;
+  margin: 0 8px 0 4px;
+}
+
+main#main-content .app-toolbar-search {
+  margin-left: auto !important;
+  min-width: 200px;
+  flex: 0 1 280px;
+}
+
+main#main-content .app-toolbar-search .app-search-input {
+  min-height: 44px;
+}
+
+main#main-content .app-toolbar-search .app-tool {
+  height: 44px;
+}
+
+/* ---- Media list: .media.app-media ------------------------------------ */
+
+main#main-content .app-media .media-object {
+  width: 64px;
+  height: 64px;
+}
+
+main#main-content .app-media .media-heading {
+  font-weight: 700;
+  color: #182b49;
+}
+
+main#main-content .app-media-meta {
+  color: #595959;
+  font-size: 13px;
+}
+
+/* ---- Modal: .modal.app-modal ----------------------------------------- */
+
+main#main-content .app-modal .modal-header {
+  background: #182b49;
+  color: #fff;
+  border-radius: 5px 5px 0 0;
+}
+
+main#main-content .app-modal .modal-title {
+  font-weight: 700;
+}
+
+main#main-content .app-modal .app-modal-close {
+  color: #fff;
+  opacity: 1;
+  text-shadow: none;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -12px -12px 0 0;
+  font-size: 28px;
+}
+
+main#main-content .app-modal .app-modal-close:focus {
+  outline: 3px solid #ffcd00;
+}
+
+/* ---- App shell composite -------------------------------------------- */
+
+main#main-content .app-shell {
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+main#main-content .app-shell > .app-toolbar {
+  margin-bottom: 12px;
+}
+
+/* ---- Menu-style links: no underline; hover and focus carry the cue --- */
+
+main#main-content .app-sidemenu a.list-group-item,
+main#main-content .app-list a.list-group-item,
+main#main-content .app-tabs > li > a,
+main#main-content .app-pagination > li > a {
+  text-decoration: none;
+}
+
+main#main-content .app-list a.list-group-item:hover .list-group-item-heading,
+main#main-content .app-list a.list-group-item:focus .list-group-item-heading {
+  text-decoration: underline;
+}
+
+main#main-content .app-list .list-group-item-text {
+  color: #595959;
+}
+
+/* ==================================================================== *
+ * App shells — pieces used by the composite examples                   *
+ * ==================================================================== */
+
+/* View title inside a shell (an h4, so it nests under the page's h3) */
+main#main-content .app-view-title {
+  font-weight: 700;
+  font-size: 20px;
+  color: #182b49;
+  margin: 4px 0 12px;
+}
+
+main#main-content .app-view-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+main#main-content .app-view-head .app-view-title {
+  margin: 0;
+}
+
+main#main-content .app-muted {
+  color: #595959;
+  font-size: 13px;
+}
+
+/* ---- Stat boxes: div.styled.app-stat (Decorator sand box) ----------- */
+
+main#main-content .app-stat {
+  margin-bottom: 12px;
+}
+
+main#main-content .app-stat-value {
+  display: block;
+  font-family: "Teko-SemiBold", sans-serif;
+  font-size: 44px;
+  line-height: 1;
+  color: #00629b;
+}
+
+main#main-content .app-stat-label {
+  display: block;
+  font-weight: 700;
+  color: #182b49;
+}
+
+/* ---- Step indicator: ol.app-steps ----------------------------------- */
+
+main#main-content .app-steps {
+  list-style: none;
+  counter-reset: app-step;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+  margin: 0 0 16px;
+}
+
+main#main-content .app-steps li {
+  counter-increment: app-step;
+  flex: 1 1 140px;
+  padding: 10px 12px 10px 44px;
+  position: relative;
+  border: 1px solid #d6d6d6;
+  border-radius: 6px;
+  color: #595959;
+  min-height: 44px;
+}
+
+main#main-content .app-steps li::before {
+  content: counter(app-step);
+  position: absolute;
+  left: 10px;
+  top: 9px;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  border-radius: 50%;
+  border: 2px solid #595959;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+main#main-content .app-steps li[data-state="done"] {
+  color: #182b49;
+}
+
+main#main-content .app-steps li[data-state="done"]::before {
+  content: "\2713";
+  background: #182b49;
+  border-color: #182b49;
+  color: #fff;
+}
+
+main#main-content .app-steps li[aria-current="step"] {
+  border-color: #00629b;
+  color: #182b49;
+  font-weight: 700;
+  box-shadow: inset 0 -3px 0 #00629b;
+}
+
+main#main-content .app-steps li[aria-current="step"]::before {
+  background: #00629b;
+  border-color: #00629b;
+  color: #fff;
+}
+
+/* ---- Sticky action bar for forms: .app-savebar ---------------------- */
+
+main#main-content .app-savebar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 0 0;
+  margin-top: 8px;
+  border-top: 1px solid #d6d6d6;
+}
+
+main#main-content .app-savebar .btn {
+  margin-bottom: 0;
+}
+
+/* ---- Filter facets: fieldset.app-facet ------------------------------ */
+
+main#main-content .app-facet {
+  border: 1px solid #d6d6d6;
+  border-radius: 6px;
+  padding: 8px 12px 4px;
+  margin-bottom: 12px;
+}
+
+main#main-content .app-facet legend {
+  font-size: 14px;
+  font-weight: 700;
+  color: #182b49;
+  border: 0;
+  width: auto;
+  padding: 0 4px;
+  margin: 0;
+}
+
+main#main-content .app-facet .checkbox label {
+  min-height: 32px;
+  padding-top: 4px;
+}
+
+/* ---- Record details: dl.app-details --------------------------------- */
+
+main#main-content .app-details dt {
+  color: #595959;
+  font-weight: 700;
+}
+
+main#main-content .app-details dd {
+  margin-bottom: 8px;
+  color: #182b49;
+}
+
+/* ---- Data table helpers --------------------------------------------- */
+
+main#main-content .app-table {
+  width: 100%;
+}
+
+main#main-content .app-table td,
+main#main-content .app-table th {
+  vertical-align: middle;
+}
+
+main#main-content .app-table input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+}
+
+/* ---- Empty state ---------------------------------------------------- */
+
+main#main-content .app-empty {
+  text-align: center;
+  padding: 24px 12px;
+  border: 2px dashed #d6d6d6;
+  border-radius: 8px;
+  color: #595959;
+}
+
+main#main-content .app-empty .glyphicon {
+  font-size: 32px;
+  color: #00629b;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* ---- Paired buttons: give secondary buttons the same size as the primary
+        one (the Decorator only sizes .btn-primary / .jumbotron .btn) ---- */
+
+main#main-content .app-savebar .btn,
+main#main-content .app-modal .modal-footer .btn {
+  min-height: 44px;
+  min-width: 120px;
+  padding: 0.8em 1.5em;
+  font-size: 0.9375em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 8px;
+}
+
+/* ---- Count badge on a tab ------------------------------------------- */
+
+main#main-content .app-tabs .badge {
+  background: #182b49;
+}
+
+/* ---- Readable item-list titles at any heading level ----------------- */
+
+main#main-content .app-list .list-group-item-heading {
+  font-size: 16px;
+}
+
+/* ==================================================================== *
+ * Dashboard building blocks                                            *
+ * ==================================================================== */
+
+/* ---- Panel: a bordered region inside a dashboard ------------------- */
+
+main#main-content .app-panel {
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: #fff;
+}
+
+main#main-content .app-panel-title {
+  font-family: Roboto, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #182b49;
+  letter-spacing: 0.02em;
+  margin: 0 0 10px;
+}
+
+/* ---- KPI with trend: div.styled.app-stat + .app-trend -------------- */
+
+main#main-content .app-trend {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: #182b49;
+}
+
+main#main-content .app-trend .glyphicon {
+  font-size: 11px;
+  margin-right: 2px;
+}
+
+/* ---- Data bars: ul.app-bars --------------------------------------- */
+
+main#main-content .app-bars {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+main#main-content .app-bars li {
+  display: grid;
+  grid-template-columns: minmax(90px, 34%) 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+}
+
+main#main-content .app-bar-label {
+  color: #182b49;
+  font-size: 14px;
+}
+
+main#main-content .app-bar-track {
+  display: block;
+  height: 14px;
+  background: #ececec;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+main#main-content .app-bar-fill {
+  display: block;
+  height: 100%;
+  background: #00629b;
+  border-radius: 7px;
+}
+
+main#main-content .app-bar-fill.app-bar-alt {
+  background: #182b49;
+}
+
+main#main-content .app-bar-fill.app-bar-attn {
+  background: #ffcd00;
+}
+
+main#main-content .app-bar-value {
+  font-weight: 700;
+  color: #182b49;
+  font-size: 14px;
+  min-width: 3.5em;
+  text-align: right;
+}
+
+/* Width steps for .app-bar-fill (5% increments) */
+main#main-content .app-w-0 { width: 0%; }
+main#main-content .app-w-5 { width: 5%; }
+main#main-content .app-w-10 { width: 10%; }
+main#main-content .app-w-15 { width: 15%; }
+main#main-content .app-w-20 { width: 20%; }
+main#main-content .app-w-25 { width: 25%; }
+main#main-content .app-w-30 { width: 30%; }
+main#main-content .app-w-35 { width: 35%; }
+main#main-content .app-w-40 { width: 40%; }
+main#main-content .app-w-45 { width: 45%; }
+main#main-content .app-w-50 { width: 50%; }
+main#main-content .app-w-55 { width: 55%; }
+main#main-content .app-w-60 { width: 60%; }
+main#main-content .app-w-65 { width: 65%; }
+main#main-content .app-w-70 { width: 70%; }
+main#main-content .app-w-75 { width: 75%; }
+main#main-content .app-w-80 { width: 80%; }
+main#main-content .app-w-85 { width: 85%; }
+main#main-content .app-w-90 { width: 90%; }
+main#main-content .app-w-95 { width: 95%; }
+main#main-content .app-w-100 { width: 100%; }
+
+/* ---- Status badge: span.app-status[data-status] -------------------- */
+
+main#main-content .app-status {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+main#main-content .app-status[data-status="ok"] {
+  color: #00629b;
+  border-color: #00629b;
+  background: #fff;
+}
+
+main#main-content .app-status[data-status="warn"] {
+  color: #182b49;
+  background: #ffcd00;
+}
+
+main#main-content .app-status[data-status="down"] {
+  color: #fff;
+  background: #182b49;
+}
+
+main#main-content .app-status[data-status="info"] {
+  color: #182b49;
+  background: #f5f0e6;
+}
+
+/* ---- Status list: .list-group.app-status-list --------------------- */
+
+main#main-content .app-status-list .list-group-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 44px;
+  color: #182b49;
+}
+
+main#main-content .app-status-list .app-status-name {
+  font-weight: 700;
+}
+
+main#main-content .app-status-list .app-muted {
+  flex-basis: 100%;
+}
+
+/* ---- Deadline timeline: ol.app-timeline --------------------------- */
+
+main#main-content .app-timeline {
+  list-style: none;
+  padding: 0 0 0 16px;
+  margin: 0;
+  border-left: 3px solid #d6d6d6;
+}
+
+main#main-content .app-timeline li {
+  position: relative;
+  padding: 0 0 14px 14px;
+}
+
+main#main-content .app-timeline li::before {
+  content: "";
+  position: absolute;
+  left: -25px;
+  top: 4px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #00629b;
+}
+
+main#main-content .app-timeline li[data-urgent]::before {
+  background: #ffcd00;
+  border-color: #182b49;
+}
+
+main#main-content .app-timeline-date {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #00629b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+main#main-content .app-timeline-title {
+  display: block;
+  color: #182b49;
+  font-weight: 700;
+}
+
+/* ---- Checklist: ul.app-checklist ---------------------------------- */
+
+main#main-content .app-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+main#main-content .app-checklist li {
+  padding: 6px 0 6px 30px;
+  position: relative;
+  color: #182b49;
+  border-bottom: 1px solid #ececec;
+}
+
+main#main-content .app-checklist li .glyphicon {
+  position: absolute;
+  left: 4px;
+  top: 9px;
+  color: #00629b;
+}
+
+main#main-content .app-checklist li[data-done] {
+  color: #595959;
+}
+
+/* ---- Filter bar: form.form-inline.app-filterbar ------------------- */
+
+main#main-content .app-filterbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 14px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  background: #f5f0e6;
+  border-radius: 8px;
+}
+
+main#main-content .app-filterbar .form-group {
+  margin: 0;
+}
+
+main#main-content .app-filterbar label {
+  display: block;
+  font-size: 13px;
+  color: #182b49;
+  margin-bottom: 2px;
+}
+
+main#main-content .app-filterbar .app-filter-control {
+  min-height: 44px;
+}
+
+main#main-content .app-filterbar .btn {
+  min-height: 44px;
+  margin-bottom: 0;
+}
+
+/* ---- Grid of small tiles (rooms, locations) ----------------------- */
+
+main#main-content .app-tiles {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+main#main-content .app-tiles li {
+  border: 1px solid #d6d6d6;
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: #182b49;
+}
+
+main#main-content .app-tiles li strong {
+  display: block;
+}
+
+/* ---- Working-example extras --------------------------------------- */
+
+main#main-content .app-live-count {
+  font-weight: 700;
+  color: #182b49;
+}

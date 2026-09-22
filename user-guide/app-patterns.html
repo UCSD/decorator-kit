@@ -1,0 +1,2260 @@
+<!doctype html>
+<html class="no-js" lang="en-US">
+
+<head>
+	<title>App Patterns · Decorator Kit Developer Guide</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<meta name="robots" content="index,follow,noarchive">
+	<meta name="ORGANIZATION" content="University of California, San Diego">
+	<meta name="SITE" content="Decorator V5">
+	<meta name="PAGETITLE" content="App Patterns · Decorator Kit Developer Guide">
+	<meta name="DESCRIPTION" content="Common app patterns — tabs, side menus, toolbars, lists, pagination, dialogs, and helpers — built from Bootstrap 3.3.7 for Decorator 5, with prompts.">
+
+	<link rel="stylesheet" href="https://cdn.ucsd.edu/cms/decorator-5/styles/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdn.ucsd.edu/cms/decorator-5/styles/base.min.css">
+
+
+
+	<!-- Begin site-specific CSS files -->
+	<link rel="stylesheet" href="css/guide.css">
+	<link rel="stylesheet" href="css/app-patterns.css">
+
+	<!-- End site-specific CSS files -->
+
+	<script src="https://cdn.ucsd.edu/cms/decorator-5/scripts/modernizr.min.js"></script>
+
+
+
+</head>
+
+<body>
+
+	<header class="layout-header">
+		<a class="sr-only" href="#main-content">Skip to main content</a>
+		<div id="uc-emergency"></div>
+		<section class="layout-login">
+			<div class="layout-container"></div>
+		</section>
+
+		<section class="layout-title">
+			<div class="layout-container container">
+				<a href="index.html" class="title-header title-header-large">Decorator V5</a>
+				<a href="index.html" class="title-header title-header-short">V5</a>
+				<a href="https://www.ucsd.edu" class="title-logo">UC San Diego</a>
+			</div>
+		</section>
+	</header>
+
+	<!-- mobile offcanvas nav -->
+	<div class="navmenu navmenu-default navmenu-fixed-left offcanvas" style="">
+
+		<ul class="nav navbar-nav navbar-right">
+			<li>
+				<div class="search">
+					<button class="search-toggle btn-default">
+						<span class="glyphicon glyphicon-search"></span> <span class="caret"></span>
+					</button>
+
+					<div class="search-content" id="search">
+						<form action="https://act.ucsd.edu/cwp/tools/search-redir" method="get" id="cse-site-search">
+							<select class="search-scope" name="search-scope">
+								<option value="default_collection">All UCSD Sites</option>
+								<option value="faculty-staff">Faculty/Staff</option>
+							</select>
+
+							<div class="input-group">
+								<input placeholder="Search..." type="search" class="form-control search-term" id="q"
+									name="search-term">
+							</div>
+						</form>
+					</div>
+				</div>
+			</li>
+		</ul>
+
+
+		<ul class="nav navmenu-nav">
+			<li><a href="index.html">Developer Guide</a></li>
+			<li><a href="index.html#layouts">Layouts</a></li>
+			<li class="dropdown open active">
+				<a href="index.html#components" class="dropdown-toggle">Components <b class="caret"></b></a>
+				<ul class="dropdown-menu navmenu-nav">
+					<li><a href="index.html#components">Components</a></li>
+					<li><a href="app-patterns.html">App Patterns</a></li>
+					<li><a href="app-patterns.html#shell">App Shells</a></li>
+					<li><a href="app-patterns.html#dashboards">Dashboards by Area</a></li>
+				</ul>
+			</li>
+			<li><a href="index.html#modules">Modules</a></li>
+			<li><a href="index.html#recipes">App Recipes</a></li>
+			<li><a href="https://developer.ucsd.edu/design/v5-kitchen-sink/kitchen-sink/index.html">Kitchen Sink</a></li>
+		</ul>
+	</div>
+	<!-- end mobile offcanvas nav -->
+
+	<!-- navbar -->
+	<nav class="navbar navbar-default navbar-static-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="offcanvas" data-target=".navmenu"
+					data-canvas="body" aria-expanded="false" aria-controls="navbar">
+					<span class="sr-only">Toggle navigation</span>
+
+					<div class="col-sm-1 mobile-nav-bars">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</div>
+					<div class="col-sm-1 mobile-nav-icon">
+						MENU
+					</div>
+				</button>
+				<div class="col-sm-4 pull-right visible-xs-block">
+					<img src="http://cdn.ucsd.edu/developer/decorator/5.0.2/img/ucsd-footer-logo-white.png" alt=""
+						class="img-responsive header-logo" />
+				</div>
+			</div>
+
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li><a href="index.html">Developer Guide</a></li>
+					<li><a href="index.html#layouts">Layouts</a></li>
+					<li class="dropdown active">
+						<a href="index.html#components" class="dropdown-toggle" data-hover="dropdown" role="button"
+							aria-haspopup="true" aria-expanded="false">Components <span class="caret"></span></a>
+						<ul class="dropdown-menu">
+							<li><a href="index.html#components">Components</a></li>
+							<li><a href="app-patterns.html">App Patterns</a></li>
+							<li><a href="app-patterns.html#shell">App Shells</a></li>
+							<li><a href="app-patterns.html#dashboards">Dashboards by Area</a></li>
+						</ul>
+					</li>
+					<li><a href="index.html#modules">Modules</a></li>
+					<li><a href="index.html#recipes">App Recipes</a></li>
+					<li><a href="https://developer.ucsd.edu/design/v5-kitchen-sink/kitchen-sink/index.html">Kitchen Sink</a></li>
+				</ul>
+
+				<div class="btn-nav"></div>
+
+				<ul class="nav navbar-nav navbar-right">
+					<li>
+						<div class="search">
+							<button class="search-toggle btn-default">
+								<span class="glyphicon glyphicon-search"></span> <span class="caret"></span>
+							</button>
+
+							<div class="search-content" id="search">
+								<form action="http://act.ucsd.edu/cwp/tools/search-redir" method="get"
+									id="cse-site-search">
+									<select class="search-scope" name="search-scope">
+										<option value="default_collection">All UCSD Sites</option>
+										<option value="faculty-staff">Faculty/Staff</option>
+									</select>
+
+									<div class="input-group">
+										<input placeholder="Search..." type="search" class="form-control search-term"
+											id="q" name="search-term">
+									</div>
+								</form>
+							</div>
+						</div>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<!-- end navbar -->
+
+	<main class="layout-main" id="main-content" role="main">
+
+		<div class="container">
+			<div class="row">
+				<ol class="breadcrumb breadcrumbs-list">
+					<li><a href="index.html">Developer Guide</a></li>
+					<li><a href="index.html#components">Components</a></li>
+					<li class="active">App Patterns</li>
+				</ol>
+			</div>
+		</div>
+
+		<div class="container">
+			<div class="row">
+				<section class="col-xs-12 col-md-9 main-section pull-right">
+
+					<h1>App Patterns</h1>
+
+					<p class="guide-intro">Common app interface pieces built from Bootstrap&nbsp;3.3.7, the
+						version <code>cdn.ucsd.edu</code> serves: tabs, side menus, toolbars and item bars, action
+						menus, lists, pagination, dialogs, and responsive helpers. Each one has a live preview and
+						a prompt you can copy. Further down: dashboard building blocks, seven complete app shells,
+						and eight starter dashboards for campus areas.</p>
+
+					<div class="guide-status sr-only" role="status" aria-live="polite"></div>
+
+					<nav id="page-index" class="guide-section guide-index" aria-labelledby="page-index-heading">
+						<h2 id="page-index-heading">Jump to a section</h2>
+						<p class="guide-index-lead">Everything on this page, in four groups. Each link opens a live preview with a prompt you can copy.</p>
+						<div class="row guide-index-grid">
+							<div class="col-sm-6">
+								<section class="guide-index-card" aria-label="Patterns">
+									<div class="guide-index-head">
+										<span class="guide-index-icon" aria-hidden="true"><span class="glyphicon glyphicon-th-large"></span></span>
+										<div>
+											<h3>Patterns</h3>
+											<p>Bootstrap 3.3.7 pieces, on brand</p>
+										</div>
+										<span class="guide-index-count">6<span class="sr-only"> links</span></span>
+									</div>
+									<ul class="guide-index-list">
+										<li><a href="#how"><span class="guide-index-text"><span class="guide-index-title">Read the tags first</span><span class="guide-index-sub">What Decorator-styled, Neutral, and Brand layer mean</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#navigation"><span class="guide-index-text"><span class="guide-index-title">In-app navigation</span><span class="guide-index-sub">Tabs · Side menu · Segmented control</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#actions"><span class="guide-index-text"><span class="guide-index-title">Action bars and menus</span><span class="guide-index-sub">Toolbar · Action menu</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#lists"><span class="guide-index-text"><span class="guide-index-title">Lists and paging</span><span class="guide-index-sub">Item list · Media list · Pagination</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#overlays"><span class="guide-index-text"><span class="guide-index-title">Dialogs and disclosure</span><span class="guide-index-sub">Modal · Expand and collapse</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#helpers"><span class="guide-index-text"><span class="guide-index-title">Helpers</span><span class="guide-index-sub">Responsive utilities · Class reference</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+									</ul>
+								</section>
+							</div>
+							<div class="col-sm-6">
+								<section class="guide-index-card" aria-label="Dashboard building blocks">
+									<div class="guide-index-head">
+										<span class="guide-index-icon" aria-hidden="true"><span class="glyphicon glyphicon-stats"></span></span>
+										<div>
+											<h3>Dashboard building blocks</h3>
+											<p>Small parts every dashboard reuses</p>
+										</div>
+										<span class="guide-index-count">6<span class="sr-only"> links</span></span>
+									</div>
+									<ul class="guide-index-list">
+										<li><a href="#blk-kpi"><span class="guide-index-text"><span class="guide-index-title">Key number with trend</span><span class="guide-index-sub">A headline number and its change, in words</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#blk-bars"><span class="guide-index-text"><span class="guide-index-title">Data bars</span><span class="guide-index-sub">Compare a few values without a chart library</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#blk-status"><span class="guide-index-text"><span class="guide-index-title">Status list</span><span class="guide-index-sub">Operational · Degraded · Outage · Maintenance</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#blk-timeline"><span class="guide-index-text"><span class="guide-index-title">Deadline timeline</span><span class="guide-index-sub">Upcoming dates with urgent markers</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#blk-checklist"><span class="guide-index-text"><span class="guide-index-title">Checklist progress</span><span class="guide-index-sub">Steps done out of the total</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#blk-filter"><span class="guide-index-text"><span class="guide-index-title">Filter bar</span><span class="guide-index-sub">Term, unit, and date range</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+									</ul>
+								</section>
+							</div>
+							<div class="col-sm-6">
+								<section class="guide-index-card" aria-label="App shells">
+									<div class="guide-index-head">
+										<span class="guide-index-icon" aria-hidden="true"><span class="glyphicon glyphicon-modal-window"></span></span>
+										<div>
+											<h3>App shells</h3>
+											<p>Complete screens to start from</p>
+										</div>
+										<span class="guide-index-count">7<span class="sr-only"> links</span></span>
+									</div>
+									<ul class="guide-index-list">
+										<li><a href="#pat-shell"><span class="guide-index-text"><span class="guide-index-title">Request manager</span><span class="guide-index-sub">Queue with side menu, tabs, list</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#shell-dashboard"><span class="guide-index-text"><span class="guide-index-title">Operations dashboard</span><span class="guide-index-sub">Stats, alerts, due items, activity</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#shell-admin"><span class="guide-index-text"><span class="guide-index-title">Data admin table</span><span class="guide-index-sub">Bulk select, filter, and page</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#shell-settings"><span class="guide-index-text"><span class="guide-index-title">Settings and profile</span><span class="guide-index-sub">Sectioned form with a save bar</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#shell-steps"><span class="guide-index-text"><span class="guide-index-title">Multi-step application</span><span class="guide-index-sub">Step indicator and paged form</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#shell-record"><span class="guide-index-text"><span class="guide-index-title">Record detail</span><span class="guide-index-sub">Header, actions, tabbed details</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#shell-search"><span class="guide-index-text"><span class="guide-index-title">Search with filters</span><span class="guide-index-sub">Facets, sort, results, empty state</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+									</ul>
+								</section>
+							</div>
+							<div class="col-sm-6">
+								<section class="guide-index-card" aria-label="Dashboards by campus area">
+									<div class="guide-index-head">
+										<span class="guide-index-icon" aria-hidden="true"><span class="glyphicon glyphicon-dashboard"></span></span>
+										<div>
+											<h3>Dashboards by campus area</h3>
+											<p>Starters for common UC San Diego tools</p>
+										</div>
+										<span class="guide-index-count">9<span class="sr-only"> links</span></span>
+									</div>
+									<ul class="guide-index-list">
+										<li><a href="#dash-workflow"><span class="guide-index-text"><span class="guide-index-title">Build one in four prompts</span><span class="guide-index-sub">Scaffold → layout → data → review</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#dash-advising"><span class="guide-index-text"><span class="guide-index-title">Advisor caseload</span><span class="guide-index-sub">Student success · FERPA data</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#dash-enroll"><span class="guide-index-text"><span class="guide-index-title">Enrollment and waitlists</span><span class="guide-index-sub">Academic affairs</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#dash-research"><span class="guide-index-text"><span class="guide-index-title">Proposals and awards</span><span class="guide-index-sub">Research administration</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#dash-housing"><span class="guide-index-text"><span class="guide-index-title">Residence operations</span><span class="guide-index-sub">Housing, Dining &amp; Hospitality</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#dash-its"><span class="guide-index-text"><span class="guide-index-title">Service status board <span class="guide-index-pill">Working</span></span><span class="guide-index-sub">IT Services · try the filter and search</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#dash-energy"><span class="guide-index-text"><span class="guide-index-title">Energy and work orders</span><span class="guide-index-sub">Facilities and sustainability</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#dash-library"><span class="guide-index-text"><span class="guide-index-title">Study space availability</span><span class="guide-index-sub">UC San Diego Library</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+										<li><a href="#dash-hr"><span class="guide-index-text"><span class="guide-index-title">Onboarding tracker</span><span class="guide-index-sub">Human Resources</span></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a></li>
+									</ul>
+								</section>
+							</div>
+						</div>
+					</nav>
+
+					<section id="how" class="guide-section" aria-labelledby="how-heading">
+						<h2 id="how-heading">Read the tags first</h2>
+						<p>Bootstrap loads on every Decorator page, but the Decorator restyles only part of it.
+							Each pattern carries one of these tags:</p>
+						<ul class="list-unstyled">
+							<li><span class="guide-tag guide-tag-decorator">Decorator-styled</span> The
+								Decorator stylesheet already styles it. Use the markup as is.</li>
+							<li><span class="guide-tag guide-tag-neutral">Neutral</span> Layout, gray borders,
+								and link color only. Safe to use as is.</li>
+							<li><span class="guide-tag guide-tag-layer">Brand layer</span> Stock Bootstrap would
+								paint it <strong>#337ab7</strong> blue. Add the matching block from
+								<a href="css/app-patterns.css"><code>css/app-patterns.css</code></a>, which
+								re-colors it to the Decorator palette in the canvas only.</li>
+							<li><span class="guide-tag guide-tag-source">Bootstrap docs</span> Not in the
+								Decorator package. The markup comes from Bootstrap v3.3.7's own documentation
+								source (<code>twbs/bootstrap</code>, tag <code>v3.3.7</code>,
+								<code>docs/_includes/</code>).</li>
+						</ul>
+
+						<article class="guide-specimen" aria-labelledby="brand-layer">
+							<div class="guide-specimen-head">
+								<h3 id="brand-layer">Add the brand layer to a project</h3>
+								<p>Run this once before you use any pattern tagged <em>Brand layer</em>.</p>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-layer"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-layer">Add css/app-patterns.css to the project, copied from the Decorator Kit Developer Guide, and link it in the "site-specific CSS" block of each page that uses app patterns. Every rule must stay scoped under main#main-content plus an app-* class. Key active states on aria-current, aria-expanded, or :checked. Never target .active, .nav, .dropdown-menu, .btn-default, or any other class the header, navbar, or drawer uses.</pre>
+							</div>
+						</article>
+						<p class="guide-backtop"><a href="#page-index"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> Back to page index</a></p>
+					</section>
+
+					<!-- ============================================================ -->
+					<section id="navigation" class="guide-section" aria-labelledby="navigation-heading">
+						<h2 id="navigation-heading">In-app navigation</h2>
+						<p>These patterns move between views <em>inside</em> your app, within the canvas.
+							They don't replace the site navbar, drawer, or side nav, which are chrome.</p>
+
+						<!-- Tabs -->
+						<article class="guide-specimen" aria-labelledby="pat-tabs">
+							<div class="guide-specimen-head">
+								<h3 id="pat-tabs">Tabs</h3>
+								<p>Switch between related views without leaving the page. <code>bootstrap.min.js</code>
+									(tab.js) handles switching and sets <code>aria-expanded</code>. No custom
+									JavaScript needed.</p>
+								<p><span class="guide-tag guide-tag-neutral">Neutral</span><span class="guide-tag guide-tag-layer">Brand layer: optional</span><span class="guide-tag guide-tag-source">Bootstrap docs · js/tabs</span></p>
+								<p class="guide-classes"><code>.nav.nav-tabs.app-tabs</code><code>role="tablist"</code><code>data-toggle="tab"</code><code>.tab-content</code><code>.tab-pane.fade</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<ul class="nav nav-tabs app-tabs" role="tablist">
+									<li role="presentation" class="active"><a href="#tab-overview" id="tab-overview-tab" role="tab" data-toggle="tab" aria-controls="tab-overview" aria-expanded="true">Overview</a></li>
+									<li role="presentation"><a href="#tab-requests" id="tab-requests-tab" role="tab" data-toggle="tab" aria-controls="tab-requests">Requests</a></li>
+									<li role="presentation"><a href="#tab-settings" id="tab-settings-tab" role="tab" data-toggle="tab" aria-controls="tab-settings">Settings</a></li>
+								</ul>
+								<div class="tab-content app-tab-panels">
+									<div role="tabpanel" class="tab-pane fade in active" id="tab-overview" aria-labelledby="tab-overview-tab">
+										<p>12 open requests · 3 due this week · last sync 9:41&nbsp;a.m.</p>
+									</div>
+									<div role="tabpanel" class="tab-pane fade" id="tab-requests" aria-labelledby="tab-requests-tab">
+										<p>Your request history appears here.</p>
+									</div>
+									<div role="tabpanel" class="tab-pane fade" id="tab-settings" aria-labelledby="tab-settings-tab">
+										<p>Notification and display preferences.</p>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-tabs"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-tabs">Add Bootstrap 3.3.7 togglable tabs (the markup from the Bootstrap docs' js/tabs example) with the tabs [Overview, Requests, Settings]. Use ul.nav.nav-tabs.app-tabs with role="tablist", role="tab" on each link, and a matching div.tab-pane role="tabpanel" with aria-labelledby. Keep aria-expanded="true" on the first tab. Switching comes from data-toggle="tab", so don't write tab JavaScript. Leave out the dropdown-inside-a-tab variant.</pre>
+							</div>
+						</article>
+
+						<!-- Side menu -->
+						<article class="guide-specimen" aria-labelledby="pat-sidemenu">
+							<div class="guide-specimen-head">
+								<h3 id="pat-sidemenu">Side menu</h3>
+								<p>A vertical menu for an app's sections, built from a linked list group in a
+									<code>.col-sm-3</code> column. On phones it stacks above the content. Mark the
+									current item with <code>aria-current="page"</code>, not <code>.active</code>.</p>
+								<p><span class="guide-tag guide-tag-layer">Brand layer</span><span class="guide-tag guide-tag-source">Bootstrap docs · list-group</span></p>
+								<p class="guide-classes"><code>nav &gt; .list-group.app-sidemenu</code><code>a.list-group-item</code><code>aria-current="page"</code><code>.badge</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="row">
+									<div class="col-sm-4">
+										<nav aria-label="Requests app">
+											<div class="list-group app-sidemenu">
+												<span class="list-group-item app-sidemenu-heading">Requests</span>
+												<a href="#pat-sidemenu" class="list-group-item" aria-current="page">Inbox <span class="badge">12</span></a>
+												<a href="#pat-sidemenu" class="list-group-item">Assigned to me <span class="badge">3</span></a>
+												<a href="#pat-sidemenu" class="list-group-item">Waiting</a>
+												<a href="#pat-sidemenu" class="list-group-item">Closed</a>
+												<a href="#pat-sidemenu" class="list-group-item"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Settings</a>
+											</div>
+										</nav>
+									</div>
+									<div class="col-sm-8">
+										<p><strong>Inbox</strong></p>
+										<p>The selected view's content goes in the wider column.</p>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-sidemenu"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-sidemenu">Inside the canvas, make a two-column app layout: a .row with a .col-sm-3 side menu and a .col-sm-9 content area. The side menu is a &lt;nav aria-label="[App name]"&gt; wrapping div.list-group.app-sidemenu with a span.list-group-item.app-sidemenu-heading, then one a.list-group-item per section: [Inbox (count), Assigned to me (count), Waiting, Closed, Settings]. Mark the current item with aria-current="page", not .active. Show counts with span.badge. Include the side-menu and badge blocks from css/app-patterns.css. This is an in-app menu. Don't change article.main-content-nav.</pre>
+							</div>
+						</article>
+
+						<!-- Segmented control -->
+						<article class="guide-specimen" aria-labelledby="pat-segmented">
+							<div class="guide-specimen-head">
+								<h3 id="pat-segmented">Segmented control (view switcher)</h3>
+								<p>A single-choice toggle such as List / Grid / Calendar, or Day / Week / Month.
+									Real radio inputs keep it keyboard and screen-reader friendly.
+									<code>button.js</code> handles the toggling.</p>
+								<p><span class="guide-tag guide-tag-layer">Brand layer</span><span class="guide-tag guide-tag-source">Bootstrap docs · js/buttons</span></p>
+								<p class="guide-classes"><code>.btn-group.app-segmented</code><code>data-toggle="buttons"</code><code>label.btn &gt; input[type=radio]</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="btn-group app-segmented" data-toggle="buttons" role="group" aria-label="View">
+									<label class="btn active">
+										<input type="radio" name="demo-view" value="list" checked autocomplete="off"> <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> List
+									</label>
+									<label class="btn">
+										<input type="radio" name="demo-view" value="grid" autocomplete="off"> <span class="glyphicon glyphicon-th-large" aria-hidden="true"></span> Grid
+									</label>
+									<label class="btn">
+										<input type="radio" name="demo-view" value="calendar" autocomplete="off"> <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> Calendar
+									</label>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-segmented"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-segmented">Add a view switcher: div.btn-group.app-segmented with data-toggle="buttons", role="group", and aria-label="View". Put one label.btn with a radio input (shared name, autocomplete="off") for each option: [List, Grid, Calendar]. Pre-check the first and give its label .active. Each label gets a Glyphicon (aria-hidden) plus visible text. Include the segmented block from css/app-patterns.css. Listen for the radio change event in js/[app].js to switch the view.</pre>
+							</div>
+						</article>
+						<p class="guide-backtop"><a href="#page-index"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> Back to page index</a></p>
+					</section>
+
+					<!-- ============================================================ -->
+					<section id="actions" class="guide-section" aria-labelledby="actions-heading">
+						<h2 id="actions-heading">Action bars and menus</h2>
+
+						<!-- Toolbar / item bar -->
+						<article class="guide-specimen" aria-labelledby="pat-toolbar">
+							<div class="guide-specimen-head">
+								<h3 id="pat-toolbar">Toolbar and item bar</h3>
+								<p>A bar of grouped actions above a list or table. On the left: a selection count
+									and bulk actions. On the right: an in-app search. Icon-only buttons need an
+									<code>aria-label</code>.</p>
+								<p><span class="guide-tag guide-tag-layer">Brand layer</span><span class="guide-tag guide-tag-decorator">Dropdown: Decorator-styled</span></p>
+								<p class="guide-classes"><code>.btn-toolbar.app-toolbar</code><code>role="toolbar"</code><code>.btn-group</code><code>.btn.app-tool</code><code>.input-group</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="btn-toolbar app-toolbar" role="toolbar" aria-label="Request actions">
+									<span class="app-toolbar-count">3 selected</span>
+									<div class="btn-group" role="group" aria-label="Bulk actions">
+										<button type="button" class="btn app-tool"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve</button>
+										<button type="button" class="btn app-tool"><span class="glyphicon glyphicon-inbox" aria-hidden="true"></span> Archive</button>
+										<button type="button" class="btn app-tool" aria-label="Delete"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+									</div>
+									<div class="btn-group" role="group">
+										<button type="button" class="btn app-tool dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">More <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></button>
+										<ul class="dropdown-menu">
+											<li><a href="#pat-toolbar">Export as CSV</a></li>
+											<li><a href="#pat-toolbar">Assign to…</a></li>
+											<li role="separator" class="divider"></li>
+											<li><a href="#pat-toolbar">Mark all as read</a></li>
+										</ul>
+									</div>
+									<form class="app-toolbar-search" action="#pat-toolbar" method="get" role="search">
+										<label for="demo-toolbar-q" class="sr-only">Search requests</label>
+										<div class="input-group">
+											<input type="search" class="form-control app-search-input" id="demo-toolbar-q" name="q" placeholder="Search requests">
+											<span class="input-group-btn">
+												<button class="btn app-tool" type="submit" aria-label="Search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+											</span>
+										</div>
+									</form>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-toolbar"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-toolbar">Above the [requests table], add an item bar: div.btn-toolbar.app-toolbar with role="toolbar" and aria-label="[Request actions]". Contents, in order:
+1. span.app-toolbar-count showing "[n] selected". Update it from js/[app].js and announce changes in an aria-live region.
+2. A .btn-group of button.btn.app-tool: [Approve, Archive, Delete]. Icon-only buttons get aria-label.
+3. A "More" dropdown (btn-group + dropdown-toggle + ul.dropdown-menu, following kitchen-sink/button_dropdowns.html) with [Export as CSV, Assign to…, Mark all as read].
+4. A right-aligned form.app-toolbar-search with role="search": an .sr-only label, an input-group with input.app-search-input, and an icon submit button.
+Include the toolbar block from css/app-patterns.css. Glyphicons only. This search filters the app, not the site. Leave the chrome search forms alone.</pre>
+							</div>
+							<p class="guide-source">Sources: <code>dist/kitchen-sink/icons.html</code> (btn-toolbar), <code>dist/kitchen-sink/button_dropdowns.html</code>, <code>dist/kitchen-sink/input_groups.html</code></p>
+						</article>
+
+						<!-- Action dropdown -->
+						<article class="guide-specimen" aria-labelledby="pat-dropdown">
+							<div class="guide-specimen-head">
+								<h3 id="pat-dropdown">Action menu (dropdown)</h3>
+								<p>A compact menu of actions for one item or one page. The Decorator styles
+									<code>.dropdown-menu</code> in navy with white links.</p>
+								<p><span class="guide-tag guide-tag-decorator">Decorator-styled</span></p>
+								<p class="guide-classes"><code>.btn-group</code><code>.btn.btn-primary.dropdown-toggle</code><code>data-toggle="dropdown"</code><code>ul.dropdown-menu</code><code>li.divider</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="btn-group">
+									<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">New request <span class="caret"></span></button>
+									<ul class="dropdown-menu">
+										<li><a href="#pat-dropdown">Facilities repair</a></li>
+										<li><a href="#pat-dropdown">IT support</a></li>
+										<li><a href="#pat-dropdown">Room booking</a></li>
+										<li class="divider" role="separator"></li>
+										<li><a href="#pat-dropdown">Browse all request types</a></li>
+									</ul>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-dropdown"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-dropdown">Add a "[New request]" dropdown button using the single-button dropdown from kitchen-sink/button_dropdowns.html, with btn-primary (not btn-success or others). Add aria-haspopup="true" and aria-expanded="false" to the toggle. Menu items: [..], then a li.divider with role="separator", then [..]. Don't add CSS for .dropdown-menu — the Decorator already styles it.</pre>
+							</div>
+							<p class="guide-source">Source: <code>dist/kitchen-sink/button_dropdowns.html</code></p>
+						</article>
+						<p class="guide-backtop"><a href="#page-index"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> Back to page index</a></p>
+					</section>
+
+					<!-- ============================================================ -->
+					<section id="lists" class="guide-section" aria-labelledby="lists-heading">
+						<h2 id="lists-heading">Lists and paging</h2>
+
+						<!-- Item list -->
+						<article class="guide-specimen" aria-labelledby="pat-list">
+							<div class="guide-specimen-head">
+								<h3 id="pat-list">Item list</h3>
+								<p>Clickable rows with a title, a summary line, and a count or status. For
+									inboxes, queues, and search results.</p>
+								<p><span class="guide-tag guide-tag-layer">Brand layer</span><span class="guide-tag guide-tag-source">Bootstrap docs · list-group</span></p>
+								<p class="guide-classes"><code>.list-group.app-list</code><code>a.list-group-item</code><code>.list-group-item-heading</code><code>.list-group-item-text</code><code>.badge</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="list-group app-list">
+									<a href="#pat-list" class="list-group-item">
+										<span class="badge">2 new</span>
+										<h4 class="list-group-item-heading">RQ-1042 · Leaking sink, Geisel 2nd floor</h4>
+										<p class="list-group-item-text">Facilities · Opened Sep 18 · In progress</p>
+									</a>
+									<a href="#pat-list" class="list-group-item">
+										<h4 class="list-group-item-heading">RQ-1043 · Transcript hold</h4>
+										<p class="list-group-item-text">Registrar · Opened Sep 17 · Waiting on requester</p>
+									</a>
+									<a href="#pat-list" class="list-group-item">
+										<h4 class="list-group-item-heading">RQ-1044 · Room 107 projector</h4>
+										<p class="list-group-item-text">Library · Opened Sep 15 · Closed</p>
+									</a>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-list"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-list">Render [requests] as a linked list group: div.list-group.app-list with one a.list-group-item per item, each holding h4.list-group-item-heading "[id · title]", p.list-group-item-text "[unit · date · status]", and an optional span.badge for unread counts. State status in words — don't use list-group-item-success/-info/-warning/-danger. Include the list and badge blocks from css/app-patterns.css. Escape all data before inserting it.</pre>
+							</div>
+						</article>
+
+						<!-- Media list -->
+						<article class="guide-specimen" aria-labelledby="pat-media">
+							<div class="guide-specimen-head">
+								<h3 id="pat-media">Media list (people, comments, activity)</h3>
+								<p>An image or avatar beside a text block. For comment threads, activity feeds,
+									and people pickers.</p>
+								<p><span class="guide-tag guide-tag-neutral">Neutral</span><span class="guide-tag guide-tag-source">Bootstrap docs · media</span></p>
+								<p class="guide-classes"><code>.media.app-media</code><code>.media-left</code><code>img.media-object.img-circle</code><code>.media-body</code><code>.media-heading</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<ul class="media-list">
+									<li class="media app-media">
+										<div class="media-left">
+											<img class="media-object img-circle" src="img/avatar-a-128.jpg" alt="">
+										</div>
+										<div class="media-body">
+											<h4 class="media-heading">Jordan Lee</h4>
+											<p class="app-media-meta">Facilities · 2 hours ago</p>
+											<p>Plumber scheduled for tomorrow morning. The area is roped off.</p>
+										</div>
+									</li>
+									<li class="media app-media">
+										<div class="media-left">
+											<img class="media-object img-circle" src="img/avatar-b-128.jpg" alt="">
+										</div>
+										<div class="media-body">
+											<h4 class="media-heading">Sam Rivera</h4>
+											<p class="app-media-meta">Requester · Yesterday</p>
+											<p>Thanks! The sink on the 3rd floor has the same problem.</p>
+										</div>
+									</li>
+								</ul>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-media"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-media">Show the [comment thread] as a Bootstrap 3 media list (the markup from the Bootstrap docs' media example): ul.media-list with one li.media.app-media per entry, containing .media-left &gt; img.media-object.img-circle (64 × 64, alt="" because the name is next to it) and .media-body with h4.media-heading [name], p.app-media-meta [role · time], and the text. Include the media block from css/app-patterns.css. Escape user text before rendering it.</pre>
+							</div>
+						</article>
+
+						<!-- Pagination -->
+						<article class="guide-specimen" aria-labelledby="pat-pagination">
+							<div class="guide-specimen-head">
+								<h3 id="pat-pagination">Pagination</h3>
+								<p>Page through long lists. Stock Bootstrap paints the current page #337ab7 and
+									the links are only 34px tall. The brand layer re-colors them and makes each
+									link a 44 × 44 touch target.</p>
+								<p><span class="guide-tag guide-tag-layer">Brand layer</span></p>
+								<p class="guide-classes"><code>nav[aria-label]</code><code>ul.pagination.app-pagination</code><code>aria-current="page"</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<nav aria-label="Request pages">
+									<ul class="pagination app-pagination">
+										<li><a href="#pat-pagination" aria-label="Previous page"><span aria-hidden="true">&laquo;</span></a></li>
+										<li><a href="#pat-pagination" aria-current="page">1</a></li>
+										<li><a href="#pat-pagination">2</a></li>
+										<li><a href="#pat-pagination">3</a></li>
+										<li><a href="#pat-pagination">4</a></li>
+										<li><a href="#pat-pagination" aria-label="Next page"><span aria-hidden="true">&raquo;</span></a></li>
+									</ul>
+								</nav>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-pagination"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-pagination">Add pagination under the [list] following kitchen-sink/pagination.html: nav aria-label="[Request pages]" &gt; ul.pagination.app-pagination. Mark the current page with aria-current="page" on its link, not li.active. The previous/next links get aria-label ("Previous page", "Next page") with aria-hidden arrows. Include the pagination block from css/app-patterns.css.</pre>
+							</div>
+							<p class="guide-source">Source: <code>dist/kitchen-sink/pagination.html</code></p>
+						</article>
+						<p class="guide-backtop"><a href="#page-index"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> Back to page index</a></p>
+					</section>
+
+					<!-- ============================================================ -->
+					<section id="overlays" class="guide-section" aria-labelledby="overlays-heading">
+						<h2 id="overlays-heading">Dialogs and disclosure</h2>
+
+						<!-- Modal -->
+						<article class="guide-specimen" aria-labelledby="pat-modal">
+							<div class="guide-specimen-head">
+								<h3 id="pat-modal">Modal dialog</h3>
+								<p>A confirmation or short form that needs a decision before the user continues.
+									<code>modal.js</code> handles focus, the Esc key, and the backdrop. Keep the
+									modal markup inside the canvas.</p>
+								<p><span class="guide-tag guide-tag-neutral">Neutral</span><span class="guide-tag guide-tag-layer">Brand layer: header</span><span class="guide-tag guide-tag-source">Bootstrap docs · js/modal</span></p>
+								<p class="guide-classes"><code>data-toggle="modal"</code><code>.modal.fade.app-modal</code><code>role="dialog"</code><code>aria-labelledby</code><code>.modal-dialog</code><code>.modal-content</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#demo-modal">Close request…</button>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-modal"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-modal">Add a confirmation dialog using the Bootstrap 3.3.7 modal markup from the Bootstrap docs' js/modal example: div.modal.fade.app-modal with tabindex="-1", role="dialog", and aria-labelledby pointing at the h4.modal-title id. The close button gets aria-label="Close". Footer buttons: btn-default "[Cancel]" (data-dismiss="modal") and btn-primary "[Close request]". Open it from a button with data-toggle="modal" data-target="#[id]". Put the modal markup at the end of main#main-content, not in the chrome. Wire the confirm action in js/[app].js. Include the modal block from css/app-patterns.css.</pre>
+							</div>
+						</article>
+
+						<!-- Disclosure -->
+						<article class="guide-specimen" aria-labelledby="pat-disclosure">
+							<div class="guide-specimen-head">
+								<h3 id="pat-disclosure">Expand and collapse</h3>
+								<p>For FAQs and grouped details, use the Decorator <strong>drawer</strong>, which
+									<code>base.min.js</code> already runs. Use Bootstrap's panel-group accordion
+									only when you need its events.</p>
+								<p><span class="guide-tag guide-tag-decorator">Decorator-styled</span></p>
+								<p class="guide-classes"><code>.drawer-wrapper</code><code>.drawer</code></p>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-disclosure"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-disclosure">For the expandable [details] section, use the Decorator drawer (.drawer-wrapper &gt; .drawer with h2 &gt; a / div pairs, from templates/modules.html), not a Bootstrap panel-group accordion.</pre>
+							</div>
+						</article>
+						<p class="guide-backtop"><a href="#page-index"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> Back to page index</a></p>
+					</section>
+
+					<!-- ============================================================ -->
+					<section id="helpers" class="guide-section" aria-labelledby="helpers-heading">
+						<h2 id="helpers-heading">Helpers and responsive utilities</h2>
+
+						<article class="guide-specimen" aria-labelledby="pat-responsive">
+							<div class="guide-specimen-head">
+								<h3 id="pat-responsive">Responsive utilities</h3>
+								<p>Show or hide content by breakpoint. Resize the window to see which chip
+									shows. Bootstrap 3 breakpoints: xs &lt;768px, sm ≥768px, md ≥992px,
+									lg ≥1200px.</p>
+								<p><span class="guide-tag guide-tag-neutral">Neutral</span><span class="guide-tag guide-tag-source">Bootstrap docs · responsive-utilities</span></p>
+								<p class="guide-classes"><code>.visible-xs-inline-block</code><code>.hidden-xs</code><code>.visible-md-block</code><code>.hidden-print</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<p>
+									<span class="guide-bp visible-xs-inline-block">You're on xs (phone)</span>
+									<span class="guide-bp visible-sm-inline-block">You're on sm (tablet)</span>
+									<span class="guide-bp visible-md-inline-block">You're on md (laptop)</span>
+									<span class="guide-bp visible-lg-inline-block">You're on lg (desktop)</span>
+								</p>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-responsive"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-responsive">On phones (xs), hide the [toolbar's text labels] with .hidden-xs and keep the icons. Every icon-only button needs an aria-label. Use Bootstrap 3 responsive utilities (visible-*-block/-inline/-inline-block, hidden-*). Don't write media queries for what these classes already do.</pre>
+							</div>
+						</article>
+
+						<article class="guide-specimen" aria-labelledby="pat-helpers">
+							<div class="guide-specimen-head">
+								<h3 id="pat-helpers">Helper class reference</h3>
+								<p>Colorless Bootstrap helpers that are safe anywhere in the canvas, plus the
+									ones to avoid.</p>
+							</div>
+							<div class="guide-preview">
+								<div class="table-responsive">
+									<table class="styled">
+										<caption>Bootstrap 3.3.7 helper classes</caption>
+										<thead><tr><th scope="col">Class</th><th scope="col">Use it for</th><th scope="col">Status</th></tr></thead>
+										<tbody>
+											<tr><td><code>.sr-only</code>, <code>.sr-only-focusable</code></td><td>Text for screen readers only, such as labels for icon buttons and hidden form labels</td><td>Safe</td></tr>
+											<tr class="even"><td><code>.pull-left</code>, <code>.pull-right</code>, <code>.clearfix</code></td><td>Floating a small element and clearing it</td><td>Safe (not on the two-column split)</td></tr>
+											<tr><td><code>.center-block</code>, <code>.text-left/-center/-right</code></td><td>Centering blocks and aligning text</td><td>Safe</td></tr>
+											<tr class="even"><td><code>.list-unstyled</code>, <code>.list-inline</code></td><td>Removing bullets and inline link rows</td><td>Safe</td></tr>
+											<tr><td><code>.img-responsive</code>, <code>.img-rounded</code>, <code>.img-circle</code></td><td>Fluid images and avatars</td><td>Safe</td></tr>
+											<tr class="even"><td><code>.embed-responsive.embed-responsive-16by9</code></td><td>A true 16:9 video box inside an app. Modules use <code>.embed-video</code></td><td>Safe</td></tr>
+											<tr><td><code>.visible-*</code>, <code>.hidden-*</code>, <code>.hidden-print</code></td><td>Showing and hiding by breakpoint, and for print</td><td>Safe</td></tr>
+											<tr class="even"><td><code>.text-muted</code>, <code>.small</code></td><td>Secondary text (gray #777)</td><td>Neutral. Check contrast</td></tr>
+											<tr><td><code>.text-*/.bg-*</code> with <code>-success/-info/-warning/-danger</code></td><td>—</td><td><strong>Avoid:</strong> stock Bootstrap colors</td></tr>
+											<tr class="even"><td><code>.label-*</code>, <code>.progress-bar</code>, <code>.nav-pills</code> active</td><td>—</td><td><strong>Avoid</strong>, or add a canvas brand layer</td></tr>
+											<tr><td><code>title=""</code> tooltips (<code>tooltip.js</code>)</td><td>—</td><td><strong>Avoid:</strong> unreachable by keyboard and touch. Use visible help text</td></tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-helpers"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-helpers">Prefer Bootstrap 3.3.7 helper classes (sr-only, text-center, pull-*, clearfix, list-inline, img-circle, embed-responsive, visible-*/hidden-*) over new CSS. Don't use any -success/-info/-warning/-danger class, .label-*, .progress-bar, or title-attribute tooltips. Replace tooltips with a visible .help-block.</pre>
+							</div>
+						</article>
+						<p class="guide-backtop"><a href="#page-index"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> Back to page index</a></p>
+					</section>
+
+					<!-- ============================================================ -->
+					<section id="blocks" class="guide-section" aria-labelledby="blocks-heading">
+						<h2 id="blocks-heading">Dashboard building blocks</h2>
+						<p>Six small pieces that almost every dashboard reuses. None needs a charting library.
+							Each one shows its value as text, so it works without color and with a screen reader.
+							The styles live in <a href="css/app-patterns.css"><code>css/app-patterns.css</code></a>.</p>
+
+						<!-- KPI with trend -->
+						<article class="guide-specimen" aria-labelledby="blk-kpi">
+							<div class="guide-specimen-head">
+								<h3 id="blk-kpi">Key number with trend</h3>
+								<p>A headline number, what it measures, and how it changed. The arrow is decorative.
+									The words "up" and "down" carry the meaning.</p>
+								<p><span class="guide-tag guide-tag-decorator">div.styled</span><span class="guide-tag guide-tag-layer">Brand layer</span></p>
+								<p class="guide-classes"><code>div.styled.app-stat</code><code>.app-stat-value</code><code>.app-stat-label</code><code>.app-trend</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="row">
+									<div class="col-sm-4">
+										<div class="styled app-stat">
+											<span class="app-stat-value">1,284</span>
+											<span class="app-stat-label">Tickets this month</span>
+											<span class="app-trend"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> Up 6% from August</span>
+										</div>
+									</div>
+									<div class="col-sm-4">
+										<div class="styled app-stat">
+											<span class="app-stat-value">3.1h</span>
+											<span class="app-stat-label">Median first response</span>
+											<span class="app-trend"><span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span> Down 20 min (better)</span>
+										</div>
+									</div>
+									<div class="col-sm-4">
+										<div class="styled app-stat">
+											<span class="app-stat-value">94%</span>
+											<span class="app-stat-label">Satisfaction</span>
+											<span class="app-trend"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span> No change</span>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-blk-kpi"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-blk-kpi">Add a row of [3] key numbers: .col-sm-4 columns, each a div.styled.app-stat with span.app-stat-value, span.app-stat-label, and span.app-trend. The trend is a Glyphicon arrow (aria-hidden) plus words: "Up 6% from August", "Down 20 min (better)", or "No change". Never show a trend by color alone. Include the KPI block from css/app-patterns.css.</pre>
+							</div>
+						</article>
+
+						<!-- Data bars -->
+						<article class="guide-specimen" aria-labelledby="blk-bars">
+							<div class="guide-specimen-head">
+								<h3 id="blk-bars">Data bars</h3>
+								<p>A labeled horizontal bar for comparing a few values: fill rate, occupancy, budget
+									used. The number is printed beside every bar, and the bar itself is hidden from
+									screen readers. For more than about 10 rows, or real charts, use a table or a
+									charting library from <code>canvas-components/</code>.</p>
+								<p><span class="guide-tag guide-tag-layer">Brand layer</span></p>
+								<p class="guide-classes"><code>ul.app-bars</code><code>.app-bar-label</code><code>.app-bar-track</code><code>.app-bar-fill.app-w-[0–100]</code><code>.app-bar-value</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="app-panel">
+									<p class="app-panel-title" id="blk-bars-title">Residence hall occupancy</p>
+									<ul class="app-bars" aria-labelledby="blk-bars-title">
+										<li><span class="app-bar-label">Revelle</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-95"></span></span><span class="app-bar-value">96%</span></li>
+										<li><span class="app-bar-label">Muir</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-90"></span></span><span class="app-bar-value">91%</span></li>
+										<li><span class="app-bar-label">Sixth</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-75"></span></span><span class="app-bar-value">77%</span></li>
+										<li><span class="app-bar-label">Seventh</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-bar-attn app-w-50"></span></span><span class="app-bar-value">52%</span></li>
+									</ul>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-blk-bars"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-blk-bars">Show [occupancy by college] as data bars: a div.app-panel with p.app-panel-title, then ul.app-bars labelled by that title. Each li holds span.app-bar-label, span.app-bar-track (aria-hidden="true") containing span.app-bar-fill with the nearest 5% width class (app-w-0 … app-w-100), and span.app-bar-value with the exact number. Use .app-bar-attn to highlight a row, but say why in text too. No inline style widths — set the class from JS.</pre>
+							</div>
+						</article>
+
+						<!-- Status list -->
+						<article class="guide-specimen" aria-labelledby="blk-status">
+							<div class="guide-specimen-head">
+								<h3 id="blk-status">Status list</h3>
+								<p>A list of named things, each with a status badge. Four states use only Decorator
+									colors, and every state is spelled out in words.</p>
+								<p><span class="guide-tag guide-tag-layer">Brand layer</span><span class="guide-tag guide-tag-source">list-group</span></p>
+								<p class="guide-classes"><code>.list-group.app-status-list</code><code>span.app-status[data-status="ok|warn|down|info"]</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<ul class="list-group app-status-list">
+									<li class="list-group-item"><span class="app-status-name">Canvas LMS</span><span class="app-status" data-status="ok"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Operational</span></li>
+									<li class="list-group-item"><span class="app-status-name">UCSD-PROTECTED Wi-Fi</span><span class="app-status" data-status="warn"><span class="glyphicon glyphicon-alert" aria-hidden="true"></span> Degraded</span><span class="app-muted">Slow connections in Geisel. Engineers are on site.</span></li>
+									<li class="list-group-item"><span class="app-status-name">Print stations</span><span class="app-status" data-status="down"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Outage</span></li>
+									<li class="list-group-item"><span class="app-status-name">VPN</span><span class="app-status" data-status="info"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Maintenance Sat 6&nbsp;a.m.</span></li>
+								</ul>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-blk-status"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-blk-status">List [services] as ul.list-group.app-status-list. Each li.list-group-item has span.app-status-name, a span.app-status with data-status set to ok, warn, down, or info (a Glyphicon plus the words "Operational", "Degraded", "Outage", or "Maintenance [when]"), and an optional span.app-muted detail line. Don't use label-*, list-group-item-success/-warning/-danger, or any other Bootstrap contextual class.</pre>
+							</div>
+						</article>
+
+						<!-- Timeline -->
+						<article class="guide-specimen" aria-labelledby="blk-timeline">
+							<div class="guide-specimen-head">
+								<h3 id="blk-timeline">Deadline timeline</h3>
+								<p>What's coming up, in date order. Urgent items get a gold marker plus the word
+									"urgent" for screen readers.</p>
+								<p><span class="guide-tag guide-tag-layer">Brand layer</span></p>
+								<p class="guide-classes"><code>ol.app-timeline</code><code>li[data-urgent]</code><code>.app-timeline-date</code><code>.app-timeline-title</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<ol class="app-timeline">
+									<li data-urgent><span class="app-timeline-date"><time datetime="2026-09-25">Sep 25</time> · 3 days <span class="sr-only">(urgent)</span></span><span class="app-timeline-title">NIH R01 submission</span><span class="app-muted">Dept. of Bioengineering · PI: Chen</span></li>
+									<li><span class="app-timeline-date"><time datetime="2026-10-06">Oct 6</time> · 2 weeks</span><span class="app-timeline-title">NSF CAREER internal review</span><span class="app-muted">Office of Research Affairs</span></li>
+									<li><span class="app-timeline-date"><time datetime="2026-10-31">Oct 31</time> · 5 weeks</span><span class="app-timeline-title">Quarterly effort certification</span><span class="app-muted">All sponsored projects</span></li>
+								</ol>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-blk-timeline"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-blk-timeline">Show upcoming [deadlines] as ol.app-timeline in date order. Each li has span.app-timeline-date (a &lt;time datetime&gt; plus "· [time remaining]"), span.app-timeline-title, and span.app-muted context. Items due within [7] days get data-urgent and an .sr-only "(urgent)". Compute the time remaining in js/[app].js from the datetime values.</pre>
+							</div>
+						</article>
+
+						<!-- Checklist -->
+						<article class="guide-specimen" aria-labelledby="blk-checklist">
+							<div class="guide-specimen-head">
+								<h3 id="blk-checklist">Checklist progress</h3>
+								<p>A read-only list of steps with a summary line and a data bar. For onboarding,
+									closeouts, and move-in. Use real checkboxes if people check items off on this
+									screen.</p>
+								<p><span class="guide-tag guide-tag-layer">Brand layer</span></p>
+								<p class="guide-classes"><code>ul.app-checklist</code><code>li[data-done]</code><code>ul.app-bars</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="app-panel">
+									<p class="app-panel-title" id="blk-check-title">Onboarding: Alex Kim, Programmer Analyst</p>
+									<ul class="app-bars" aria-labelledby="blk-check-title">
+										<li><span class="app-bar-label">3 of 5 done</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-60"></span></span><span class="app-bar-value">60%</span></li>
+									</ul>
+									<ul class="app-checklist">
+										<li data-done><span class="glyphicon glyphicon-check" aria-hidden="true"></span> Offer letter signed <span class="sr-only">(done)</span></li>
+										<li data-done><span class="glyphicon glyphicon-check" aria-hidden="true"></span> Background check cleared <span class="sr-only">(done)</span></li>
+										<li data-done><span class="glyphicon glyphicon-check" aria-hidden="true"></span> Active Directory account <span class="sr-only">(done)</span></li>
+										<li><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span> Cyber-security training <span class="sr-only">(to do)</span></li>
+										<li><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span> Parking permit <span class="sr-only">(to do)</span></li>
+									</ul>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-blk-checklist"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-blk-checklist">Show [onboarding] progress in a div.app-panel: p.app-panel-title "[person, role]", a one-row ul.app-bars "[n] of [total] done", then ul.app-checklist. Done items get data-done, a glyphicon-check, and an .sr-only "(done)". Open items get glyphicon-unchecked and "(to do)". If people check steps off on this screen, use real labeled checkboxes instead.</pre>
+							</div>
+						</article>
+
+						<!-- Filter bar -->
+						<article class="guide-specimen" aria-labelledby="blk-filter">
+							<div class="guide-specimen-head">
+								<h3 id="blk-filter">Filter bar</h3>
+								<p>Scopes the whole dashboard: term, unit, date range. Labels stay visible, and every
+									control is at least 44px tall.</p>
+								<p><span class="guide-tag guide-tag-decorator">Forms</span><span class="guide-tag guide-tag-layer">Brand layer</span></p>
+								<p class="guide-classes"><code>form.app-filterbar</code><code>.form-group</code><code>.form-control.app-filter-control</code></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<form class="app-filterbar" action="#blk-filter" method="get" aria-label="Dashboard filters">
+									<div class="form-group">
+										<label for="blk-f-term">Term</label>
+										<select class="form-control app-filter-control" id="blk-f-term" name="term"><option>Fall 2026</option><option>Spring 2026</option></select>
+									</div>
+									<div class="form-group">
+										<label for="blk-f-unit">College</label>
+										<select class="form-control app-filter-control" id="blk-f-unit" name="college"><option>All colleges</option><option>Revelle</option><option>Muir</option><option>Marshall</option><option>Warren</option><option>ERC</option><option>Sixth</option><option>Seventh</option><option>Eighth</option></select>
+									</div>
+									<div class="form-group">
+										<label for="blk-f-from">From</label>
+										<input type="date" class="form-control app-filter-control" id="blk-f-from" name="from" value="2026-09-01">
+									</div>
+									<div class="form-group">
+										<label for="blk-f-to">To</label>
+										<input type="date" class="form-control app-filter-control" id="blk-f-to" name="to" value="2026-09-30">
+									</div>
+									<button type="submit" class="btn btn-primary">Apply</button>
+								</form>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-blk-filter"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-blk-filter">Add a filter bar at the top of the dashboard: form.app-filterbar with aria-label="Dashboard filters". Each control is a .form-group with a visible label and a .form-control.app-filter-control: [Term select, College select, From date, To date], then a btn-primary "Apply". Keep the filters in the URL query string so views can be bookmarked, but never put personal data in it. Update the page from js/[app].js and announce "Showing [scope]" in an aria-live region.</pre>
+							</div>
+						</article>
+
+						<p class="guide-backtop"><a href="#page-index"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> Back to page index</a></p>
+					</section>
+
+					<!-- ============================================================ -->
+					<section id="shell" class="guide-section" aria-labelledby="shell-heading">
+						<h2 id="shell-heading">Putting it together: app shells</h2>
+						<p>Complete app screens, each combining several of the patterns above. Every shell has
+							a live preview, the build order from top to bottom, and one prompt that builds the whole
+							screen. Start from the closest one and change the placeholders.</p>
+
+						<nav aria-label="App shells on this page">
+							<div class="list-group app-list">
+								<a class="list-group-item" href="#pat-shell"><strong>Request manager</strong> <span class="app-muted">· queue with side menu, tabs, list</span></a>
+								<a class="list-group-item" href="#shell-dashboard"><strong>Operations dashboard</strong> <span class="app-muted">· stats, alerts, due items, activity</span></a>
+								<a class="list-group-item" href="#shell-admin"><strong>Data admin table</strong> <span class="app-muted">· bulk-select table with filters</span></a>
+								<a class="list-group-item" href="#shell-settings"><strong>Settings and profile</strong> <span class="app-muted">· sectioned form with save bar</span></a>
+								<a class="list-group-item" href="#shell-steps"><strong>Multi-step application</strong> <span class="app-muted">· step indicator and paged form</span></a>
+								<a class="list-group-item" href="#shell-record"><strong>Record detail</strong> <span class="app-muted">· header, actions, tabbed details</span></a>
+								<a class="list-group-item" href="#shell-search"><strong>Search with filters</strong> <span class="app-muted">· facets, sort, results, empty state</span></a>
+							</div>
+						</nav>
+
+						<article class="guide-specimen" aria-labelledby="pat-shell">
+							<div class="guide-specimen-head">
+								<h3 id="pat-shell">Request manager</h3>
+								<p class="guide-meta">Template: blank-slate.html</p>
+								<p><span class="guide-tag guide-tag-layer">Brand layer</span><span class="guide-tag guide-tag-decorator">Decorator dropdown</span></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="app-shell">
+									<div class="btn-toolbar app-toolbar" role="toolbar" aria-label="Request manager actions">
+										<div class="btn-group" role="group" aria-label="Create">
+											<button type="button" class="btn app-tool"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> New</button>
+										</div>
+										<div class="btn-group" role="group" aria-label="Bulk actions">
+											<button type="button" class="btn app-tool" aria-label="Archive selected"><span class="glyphicon glyphicon-inbox" aria-hidden="true"></span></button>
+											<button type="button" class="btn app-tool" aria-label="Refresh"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span></button>
+										</div>
+										<form class="app-toolbar-search" action="#pat-shell" method="get" role="search">
+											<label for="shell-q" class="sr-only">Search requests</label>
+											<div class="input-group">
+												<input type="search" class="form-control app-search-input" id="shell-q" name="q" placeholder="Search requests">
+												<span class="input-group-btn">
+													<button class="btn app-tool" type="submit" aria-label="Search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+												</span>
+											</div>
+										</form>
+									</div>
+									<div class="row">
+										<div class="col-sm-4">
+											<nav aria-label="Request views">
+												<div class="list-group app-sidemenu">
+													<a href="#pat-shell" class="list-group-item" aria-current="page">Inbox <span class="badge">12</span></a>
+													<a href="#pat-shell" class="list-group-item">Assigned to me <span class="badge">3</span></a>
+													<a href="#pat-shell" class="list-group-item">Closed</a>
+												</div>
+											</nav>
+										</div>
+										<div class="col-sm-8">
+											<ul class="nav nav-tabs app-tabs" role="tablist">
+												<li role="presentation" class="active"><a href="#shell-open" id="shell-open-tab" role="tab" data-toggle="tab" aria-controls="shell-open" aria-expanded="true">Open</a></li>
+												<li role="presentation"><a href="#shell-due" id="shell-due-tab" role="tab" data-toggle="tab" aria-controls="shell-due">Due soon</a></li>
+											</ul>
+											<div class="tab-content app-tab-panels">
+												<div role="tabpanel" class="tab-pane fade in active" id="shell-open" aria-labelledby="shell-open-tab">
+													<div class="list-group app-list">
+														<a href="#pat-shell" class="list-group-item">
+															<h4 class="list-group-item-heading">RQ-1042 · Leaking sink</h4>
+															<p class="list-group-item-text">Facilities · In progress</p>
+														</a>
+														<a href="#pat-shell" class="list-group-item">
+															<h4 class="list-group-item-heading">RQ-1043 · Transcript hold</h4>
+															<p class="list-group-item-text">Registrar · Waiting on requester</p>
+														</a>
+													</div>
+													<nav aria-label="Open request pages">
+														<ul class="pagination app-pagination">
+															<li><a href="#pat-shell" aria-current="page">1</a></li>
+															<li><a href="#pat-shell">2</a></li>
+															<li><a href="#pat-shell" aria-label="Next page"><span aria-hidden="true">&raquo;</span></a></li>
+														</ul>
+													</nav>
+												</div>
+												<div role="tabpanel" class="tab-pane fade" id="shell-due" aria-labelledby="shell-due-tab">
+													<p>Requests due in the next 3 days.</p>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-shell"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-shell">Create [requests.html] from blank-slate.html for a [request manager] app. Add it to the drawer and the navbar. Link css/app-patterns.css (copied from the Decorator Kit Developer Guide) in the site-specific CSS block.
+Canvas, inside div.app-shell:
+1. Item bar (div.btn-toolbar.app-toolbar, role="toolbar"): [New], bulk [Archive, Refresh] icon buttons with aria-labels, and a right-aligned in-app search form.
+2. A .row: a .col-sm-3 side menu (nav &gt; .list-group.app-sidemenu with [Inbox, Assigned to me, Closed] and badge counts, current item marked aria-current="page") and a .col-sm-9 work area.
+3. In the work area: Bootstrap tabs (ul.nav.nav-tabs.app-tabs, role="tablist") for [Open, Due soon]. Each tab panel holds a .list-group.app-list of requests and a nav &gt; ul.pagination.app-pagination.
+4. A "Close request" modal (.modal.fade.app-modal) at the end of the canvas.
+Load the data from [requests.json] in js/requests.js and escape every value. Use Bootstrap 3.3.7 data-api behaviors (tab, dropdown, modal, buttons) — no other JS framework. No -success/-info/-warning/-danger classes. Status is always written in words.</pre>
+							</div>
+						</article>
+
+						<!-- Shell 2: Dashboard -->
+						<article class="guide-specimen" aria-labelledby="shell-dashboard">
+							<div class="guide-specimen-head">
+								<h3 id="shell-dashboard">Operations dashboard</h3>
+								<p>The at-a-glance home screen of an internal tool: headline numbers, what needs
+									attention, and recent activity.</p>
+								<p class="guide-meta">Template: blank-slate.html</p>
+								<ol class="guide-recipe-stack">
+									<li>View header with a "last updated" line and a refresh button</li>
+									<li>Four stat boxes (<code>div.styled.app-stat</code>) in a <code>.row</code></li>
+									<li><code>.msg.alert</code> that appears only when something needs attention</li>
+									<li>Two columns: a <code>table.styled-dark</code> of items due and a media list of recent activity</li>
+								</ol>
+								<p><span class="guide-tag guide-tag-decorator">div.styled · .msg · table.styled-dark</span><span class="guide-tag guide-tag-layer">Brand layer</span></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="app-shell">
+									<div class="app-view-head">
+										<h4 class="app-view-title">Facilities Dashboard</h4>
+										<div>
+											<span class="app-muted">Updated 9:41&nbsp;a.m.</span>
+											<button type="button" class="btn app-tool" aria-label="Refresh dashboard"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span></button>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-xs-6 col-md-3">
+											<div class="styled app-stat"><span class="app-stat-value">42</span><span class="app-stat-label">Open requests</span></div>
+										</div>
+										<div class="col-xs-6 col-md-3">
+											<div class="styled app-stat"><span class="app-stat-value">7</span><span class="app-stat-label">Due today</span></div>
+										</div>
+										<div class="col-xs-6 col-md-3">
+											<div class="styled app-stat"><span class="app-stat-value">3</span><span class="app-stat-label">Overdue</span></div>
+										</div>
+										<div class="col-xs-6 col-md-3">
+											<div class="styled app-stat"><span class="app-stat-value">1.8d</span><span class="app-stat-label">Avg. time to close</span></div>
+										</div>
+									</div>
+									<div class="msg alert">
+										<h4>3 overdue</h4>
+										Three requests are past their due date. <a href="#shell-dashboard">Review overdue requests</a>.
+									</div>
+									<div class="row">
+										<div class="col-md-7">
+											<div class="table-responsive">
+												<table class="styled-dark app-table">
+													<caption>Due today</caption>
+													<thead><tr><th scope="col">Request</th><th scope="col">Building</th><th scope="col">Status</th></tr></thead>
+													<tbody>
+														<tr><td><a href="#shell-dashboard">RQ-1042</a></td><td>Geisel</td><td>In progress</td></tr>
+														<tr class="even"><td><a href="#shell-dashboard">RQ-1051</a></td><td>Price Center</td><td>Not started</td></tr>
+														<tr><td><a href="#shell-dashboard">RQ-1057</a></td><td>RIMAC</td><td>Waiting on parts</td></tr>
+													</tbody>
+												</table>
+											</div>
+										</div>
+										<div class="col-md-5">
+											<p class="app-stat-label">Recent activity</p>
+											<ul class="media-list">
+												<li class="media app-media">
+													<div class="media-left"><img class="media-object img-circle" src="img/avatar-a-128.jpg" alt=""></div>
+													<div class="media-body"><p><strong>Jordan Lee</strong> closed RQ-1039</p><p class="app-media-meta">12 minutes ago</p></div>
+												</li>
+												<li class="media app-media">
+													<div class="media-left"><img class="media-object img-circle" src="img/avatar-b-128.jpg" alt=""></div>
+													<div class="media-body"><p><strong>Sam Rivera</strong> opened RQ-1057</p><p class="app-media-meta">1 hour ago</p></div>
+												</li>
+											</ul>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-shell-dashboard"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-shell-dashboard">Create [dashboard.html] from blank-slate.html for the [Facilities] dashboard. Add it to the drawer and the navbar. Link css/app-patterns.css.
+Canvas, inside div.app-shell:
+1. div.app-view-head with h4.app-view-title "[Facilities Dashboard]", an "Updated [time]" span.app-muted, and an icon refresh button (aria-label="Refresh dashboard").
+2. A .row of four .col-xs-6.col-md-3 stat boxes, each a div.styled.app-stat with span.app-stat-value and span.app-stat-label: [Open requests, Due today, Overdue, Avg. time to close].
+3. A .msg.alert only when overdue &gt; 0, with a link to the overdue list.
+4. A .row: .col-md-7 with a table.styled-dark.app-table "Due today" (caption, th scope="col", tr.even on alternate rows) and .col-md-5 with a ul.media-list of recent activity (li.media.app-media, avatar alt="").
+Load data from [dashboard.json] in js/dashboard.js, escape every value, and announce refreshes in an aria-live region. Status is words, never color alone. No -success/-info/-warning/-danger classes, no progress bars.</pre>
+							</div>
+						</article>
+
+						<!-- Shell 3: Data admin -->
+						<article class="guide-specimen" aria-labelledby="shell-admin">
+							<div class="guide-specimen-head">
+								<h3 id="shell-admin">Data admin table</h3>
+								<p>Manage a list of records in bulk: select rows, act on them, switch views, and
+									page through.</p>
+								<p class="guide-meta">Template: blank-slate.html · for sorting and search at scale, swap in the DataTables widget</p>
+								<ol class="guide-recipe-stack">
+									<li>View header with a primary "Add" action menu</li>
+									<li>Item bar: selection count, bulk actions, view switcher, search</li>
+									<li><code>table.styled-dark</code> with a checkbox column (each with an <code>.sr-only</code> label)</li>
+									<li>Row count and pagination</li>
+								</ol>
+								<p><span class="guide-tag guide-tag-decorator">Dropdown · table.styled-dark</span><span class="guide-tag guide-tag-layer">Brand layer</span></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="app-shell">
+									<div class="app-view-head">
+										<h4 class="app-view-title">Room Inventory</h4>
+										<div class="btn-group">
+											<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Add <span class="caret"></span></button>
+											<ul class="dropdown-menu dropdown-menu-right">
+												<li><a href="#shell-admin">Single room</a></li>
+												<li><a href="#shell-admin">Import from CSV</a></li>
+											</ul>
+										</div>
+									</div>
+									<div class="btn-toolbar app-toolbar" role="toolbar" aria-label="Room actions">
+										<span class="app-toolbar-count">2 selected</span>
+										<div class="btn-group" role="group" aria-label="Bulk actions">
+											<button type="button" class="btn app-tool"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit</button>
+											<button type="button" class="btn app-tool"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Export</button>
+										</div>
+										<div class="btn-group app-segmented" data-toggle="buttons" role="group" aria-label="Show">
+											<label class="btn active"><input type="radio" name="s3-filter" value="all" checked autocomplete="off"> All</label>
+											<label class="btn"><input type="radio" name="s3-filter" value="available" autocomplete="off"> Available</label>
+										</div>
+										<form class="app-toolbar-search" action="#shell-admin" method="get" role="search">
+											<label for="s3-q" class="sr-only">Search rooms</label>
+											<div class="input-group">
+												<input type="search" class="form-control app-search-input" id="s3-q" name="q" placeholder="Search rooms">
+												<span class="input-group-btn"><button class="btn app-tool" type="submit" aria-label="Search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button></span>
+											</div>
+										</form>
+									</div>
+									<div class="table-responsive">
+										<table class="styled-dark app-table">
+											<caption class="sr-only">Rooms</caption>
+											<thead>
+												<tr>
+													<th scope="col"><label for="s3-all" class="sr-only">Select all rooms</label><input type="checkbox" id="s3-all"></th>
+													<th scope="col">Room</th><th scope="col">Building</th><th scope="col">Seats</th><th scope="col">Status</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr><td><label for="s3-r1" class="sr-only">Select Geisel 107</label><input type="checkbox" id="s3-r1" checked></td><td>107</td><td>Geisel</td><td>40</td><td>Available</td></tr>
+												<tr class="even"><td><label for="s3-r2" class="sr-only">Select Center Hall 115</label><input type="checkbox" id="s3-r2" checked></td><td>115</td><td>Center Hall</td><td>220</td><td>Booked</td></tr>
+												<tr><td><label for="s3-r3" class="sr-only">Select Price Center 2</label><input type="checkbox" id="s3-r3"></td><td>2</td><td>Price Center</td><td>12</td><td>Under repair</td></tr>
+											</tbody>
+										</table>
+									</div>
+									<div class="app-view-head">
+										<span class="app-muted">Showing 1–3 of 48 rooms</span>
+										<nav aria-label="Room pages">
+											<ul class="pagination app-pagination">
+												<li><a href="#shell-admin" aria-current="page">1</a></li>
+												<li><a href="#shell-admin">2</a></li>
+												<li><a href="#shell-admin" aria-label="Next page"><span aria-hidden="true">&raquo;</span></a></li>
+											</ul>
+										</nav>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-shell-admin"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-shell-admin">Create [rooms.html] from blank-slate.html for a [room inventory] admin tool. Add it to the drawer and the navbar. Link css/app-patterns.css.
+Canvas, inside div.app-shell:
+1. div.app-view-head: h4.app-view-title "[Room Inventory]" and a btn-primary "Add" dropdown (dropdown-menu-right) with [Single room, Import from CSV].
+2. Item bar (div.btn-toolbar.app-toolbar, role="toolbar"): span.app-toolbar-count "[n] selected", bulk [Edit, Export] app-tool buttons, a .btn-group.app-segmented radio filter [All, Available], and a right-aligned in-app search form.
+3. table.styled-dark.app-table in .table-responsive: a first column of checkboxes, each with its own .sr-only label ("Select [room]"), and a "Select all" checkbox in the header. Columns: [Room, Building, Seats, Status]. Status in words. tr.even on alternate rows.
+4. div.app-view-head with "Showing x–y of n" and nav &gt; ul.pagination.app-pagination (aria-current="page").
+In js/rooms.js: keep the selection count and "Select all" in sync, announce changes in an aria-live region, and escape every value. If sorting or search across more than ~200 rows is needed, use the DataTables widget (widgets/datatables.html) for the table instead.</pre>
+							</div>
+						</article>
+
+						<!-- Shell 4: Settings -->
+						<article class="guide-specimen" aria-labelledby="shell-settings">
+							<div class="guide-specimen-head">
+								<h3 id="shell-settings">Settings and profile</h3>
+								<p>Sectioned preferences with a side menu, grouped form fields, and one save bar.</p>
+								<p class="guide-meta">Template: two-column.html or blank-slate.html</p>
+								<ol class="guide-recipe-stack">
+									<li>Side menu of settings sections (current one marked <code>aria-current</code>)</li>
+									<li>Form grouped with <code>fieldset</code>/<code>legend</code></li>
+									<li>Segmented control for a single choice, checkboxes for toggles</li>
+									<li><code>.app-savebar</code> with Cancel / Save, and a <code>.msg.info</code> confirmation after saving</li>
+								</ol>
+								<p><span class="guide-tag guide-tag-decorator">Forms · .msg.info</span><span class="guide-tag guide-tag-layer">Brand layer</span></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="app-shell">
+									<div class="row">
+										<div class="col-sm-4">
+											<nav aria-label="Settings sections">
+												<div class="list-group app-sidemenu">
+													<span class="list-group-item app-sidemenu-heading">Settings</span>
+													<a href="#shell-settings" class="list-group-item">Profile</a>
+													<a href="#shell-settings" class="list-group-item" aria-current="page">Notifications</a>
+													<a href="#shell-settings" class="list-group-item">Accessibility</a>
+													<a href="#shell-settings" class="list-group-item">Connected apps</a>
+												</div>
+											</nav>
+										</div>
+										<div class="col-sm-8">
+											<h4 class="app-view-title">Notifications</h4>
+											<div class="msg info">
+												<h4>Saved</h4>
+												Your notification settings were updated.
+											</div>
+											<form action="#shell-settings" method="post">
+												<fieldset class="app-facet">
+													<legend>Email me when</legend>
+													<div class="checkbox"><label><input type="checkbox" name="n-assigned" checked> A request is assigned to me</label></div>
+													<div class="checkbox"><label><input type="checkbox" name="n-comment" checked> Someone comments on my request</label></div>
+													<div class="checkbox"><label><input type="checkbox" name="n-weekly"> Weekly summary</label></div>
+												</fieldset>
+												<fieldset class="app-facet">
+													<legend>Digest frequency</legend>
+													<div class="btn-group app-segmented" data-toggle="buttons" role="group" aria-label="Digest frequency">
+														<label class="btn"><input type="radio" name="s4-freq" value="off" autocomplete="off"> Off</label>
+														<label class="btn active"><input type="radio" name="s4-freq" value="daily" checked autocomplete="off"> Daily</label>
+														<label class="btn"><input type="radio" name="s4-freq" value="weekly" autocomplete="off"> Weekly</label>
+													</div>
+													<p class="help-block">Digests arrive at 7&nbsp;a.m. Pacific.</p>
+												</fieldset>
+												<div class="form-group">
+													<label for="s4-email">Send notifications to</label>
+													<input type="email" class="form-control" id="s4-email" name="email" autocomplete="email" value="jlee@ucsd.edu">
+												</div>
+												<div class="app-savebar">
+													<button type="reset" class="btn btn-default">Cancel</button>
+													<button type="submit" class="btn btn-primary">Save changes</button>
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-shell-settings"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-shell-settings">Create [settings.html] from [two-column.html] for the app's settings. Add "Settings" to the drawer, the navbar, and the side nav. Link css/app-patterns.css.
+Canvas, inside div.app-shell, as a .row:
+1. .col-sm-3: nav aria-label="Settings sections" &gt; .list-group.app-sidemenu with a heading and [Profile, Notifications, Accessibility, Connected apps]. The current section gets aria-current="page".
+2. .col-sm-9: h4.app-view-title for the section, then a form. Group related fields in fieldset.app-facet with a legend: checkboxes for on/off options, a .btn-group.app-segmented radio group for single choices, and .form-group/.form-control inputs with labels and autocomplete. Help text goes in .help-block, linked with aria-describedby.
+3. div.app-savebar at the end: btn-default "Cancel" (reset) and btn-primary "Save changes".
+After a successful save, show a .msg.info "Saved" above the form and move focus to it. Show validation errors above the form in a .msg.alert. Submit logic goes in js/settings.js, with a CSRF token.</pre>
+							</div>
+						</article>
+
+						<!-- Shell 5: Multi-step -->
+						<article class="guide-specimen" aria-labelledby="shell-steps">
+							<div class="guide-specimen-head">
+								<h3 id="shell-steps">Multi-step application</h3>
+								<p>A longer form split into steps, with a visible step indicator and
+									Back / Continue controls. For a full wizard with validation per step, use the
+									Wizard widget.</p>
+								<p class="guide-meta">Template: blank-slate.html · alternative: widgets/wizard.html</p>
+								<ol class="guide-recipe-stack">
+									<li>Step indicator (<code>ol.app-steps</code>, with the current step marked <code>aria-current="step"</code> and completed steps named in text)</li>
+									<li>The current step's fieldset</li>
+									<li>Save bar with Back, Save draft, and Continue</li>
+								</ol>
+								<p><span class="guide-tag guide-tag-decorator">Forms</span><span class="guide-tag guide-tag-layer">Brand layer</span></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview (static)</span>
+								<div class="app-shell">
+									<h4 class="app-view-title">Research Funding Application</h4>
+									<ol class="app-steps" aria-label="Application progress">
+										<li data-state="done">Applicant <span class="sr-only">(completed)</span></li>
+										<li aria-current="step">Project</li>
+										<li>Budget</li>
+										<li>Review</li>
+									</ol>
+									<form action="#shell-steps" method="post">
+										<fieldset class="app-facet">
+											<legend>Step 2 of 4: Project</legend>
+											<div class="form-group">
+												<label for="s5-title">Project title</label>
+												<input type="text" class="form-control" id="s5-title" name="title">
+											</div>
+											<div class="form-group">
+												<label for="s5-summary">Summary</label>
+												<textarea class="form-control" id="s5-summary" name="summary" rows="3" aria-describedby="s5-summary-help"></textarea>
+												<p class="help-block" id="s5-summary-help">250 words or fewer.</p>
+											</div>
+										</fieldset>
+										<div class="app-savebar">
+											<button type="button" class="btn btn-default">Back</button>
+											<button type="button" class="btn btn-default">Save draft</button>
+											<button type="submit" class="btn btn-primary">Continue</button>
+										</div>
+									</form>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-shell-steps"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-shell-steps">Create [apply.html] from blank-slate.html for a [4]-step [funding application]. Link css/app-patterns.css.
+Canvas, inside div.app-shell:
+1. h4.app-view-title "[Research Funding Application]".
+2. ol.app-steps with aria-label="Application progress" and one li per step: [Applicant, Project, Budget, Review]. The current step gets aria-current="step". Completed steps get data-state="done" plus an .sr-only "(completed)".
+3. One fieldset.app-facet per step, with legend "Step n of 4: [name]" and Bootstrap 3 form fields (labels, autocomplete, help-block linked via aria-describedby). Show only the current step's fieldset.
+4. div.app-savebar with btn-default "Back", btn-default "Save draft", and btn-primary "Continue" ("Submit" on the last step).
+In js/apply.js: validate each step before advancing, show errors above the form in a .msg.alert, move focus to the new step's legend, and update aria-current. Save drafts to [endpoint] with a CSRF token. If the steps need branching or per-step validation UI, use the Wizard widget (widgets/wizard.html) instead.</pre>
+							</div>
+						</article>
+
+						<!-- Shell 6: Record detail -->
+						<article class="guide-specimen" aria-labelledby="shell-record">
+							<div class="guide-specimen-head">
+								<h3 id="shell-record">Record detail</h3>
+								<p>A single item's page: what it is, what happened to it, and what you can do next.</p>
+								<p class="guide-meta">Template: two-column.html</p>
+								<ol class="guide-recipe-stack">
+									<li>Breadcrumb back to the list (the template's breadcrumb, pointed at real pages)</li>
+									<li>Header: title, status in words, and an Actions dropdown</li>
+									<li>Tabs: Details (<code>dl.dl-horizontal</code>), Activity (media list plus a comment form), Files (item list)</li>
+								</ol>
+								<p><span class="guide-tag guide-tag-decorator">Dropdown</span><span class="guide-tag guide-tag-neutral">dl-horizontal</span><span class="guide-tag guide-tag-layer">Brand layer</span></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="app-shell">
+									<div class="app-view-head">
+										<div>
+											<h4 class="app-view-title">RQ-1042 · Leaking sink, Geisel 2nd floor</h4>
+											<span class="app-muted">Status: <strong>In progress</strong> · Opened Sep 18 by Sam Rivera</span>
+										</div>
+										<div class="btn-group">
+											<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions <span class="caret"></span></button>
+											<ul class="dropdown-menu dropdown-menu-right">
+												<li><a href="#shell-record">Reassign…</a></li>
+												<li><a href="#shell-record">Change due date…</a></li>
+												<li class="divider" role="separator"></li>
+												<li><a href="#shell-record">Close request…</a></li>
+											</ul>
+										</div>
+									</div>
+									<ul class="nav nav-tabs app-tabs" role="tablist">
+										<li role="presentation" class="active"><a href="#s6-details" id="s6-details-tab" role="tab" data-toggle="tab" aria-controls="s6-details" aria-expanded="true">Details</a></li>
+										<li role="presentation"><a href="#s6-activity" id="s6-activity-tab" role="tab" data-toggle="tab" aria-controls="s6-activity">Activity <span class="badge">2</span></a></li>
+										<li role="presentation"><a href="#s6-files" id="s6-files-tab" role="tab" data-toggle="tab" aria-controls="s6-files">Files</a></li>
+									</ul>
+									<div class="tab-content app-tab-panels">
+										<div role="tabpanel" class="tab-pane fade in active" id="s6-details" aria-labelledby="s6-details-tab">
+											<dl class="dl-horizontal app-details">
+												<dt>Location</dt><dd>Geisel Library, 2nd floor east restroom</dd>
+												<dt>Category</dt><dd>Plumbing</dd>
+												<dt>Assigned to</dt><dd>Jordan Lee, Facilities</dd>
+												<dt>Due</dt><dd>September 23, 2026</dd>
+											</dl>
+										</div>
+										<div role="tabpanel" class="tab-pane fade" id="s6-activity" aria-labelledby="s6-activity-tab">
+											<ul class="media-list">
+												<li class="media app-media">
+													<div class="media-left"><img class="media-object img-circle" src="img/avatar-a-128.jpg" alt=""></div>
+													<div class="media-body"><h5 class="media-heading">Jordan Lee</h5><p class="app-media-meta">2 hours ago</p><p>Plumber scheduled for tomorrow morning.</p></div>
+												</li>
+											</ul>
+											<form action="#shell-record" method="post">
+												<div class="form-group">
+													<label for="s6-comment">Add a comment</label>
+													<textarea class="form-control" id="s6-comment" name="comment" rows="2"></textarea>
+												</div>
+												<button type="submit" class="btn btn-default">Post comment</button>
+											</form>
+										</div>
+										<div role="tabpanel" class="tab-pane fade" id="s6-files" aria-labelledby="s6-files-tab">
+											<div class="list-group app-list">
+												<a href="#shell-record" class="list-group-item"><span class="glyphicon glyphicon-picture" aria-hidden="true"></span> sink-photo.jpg <span class="app-muted">· 1.2&nbsp;MB</span></a>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-shell-record"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-shell-record">Create [request-detail.html] from two-column.html as the detail view for one [request]. Set the breadcrumb to Home › [Requests] › [RQ-id], resolved from this page's folder. Link css/app-patterns.css.
+Canvas, inside div.app-shell:
+1. div.app-view-head: h4.app-view-title "[id · title]", a span.app-muted line with the status in words plus who opened it and when, and a btn-primary "Actions" dropdown (dropdown-menu-right) with [Reassign…, Change due date…, divider, Close request…]. "Close request…" opens a .modal.fade.app-modal confirmation.
+2. Bootstrap tabs (ul.nav.nav-tabs.app-tabs, role="tablist"):
+   - Details: dl.dl-horizontal.app-details with [Location, Category, Assigned to, Due].
+   - Activity (with a count badge): ul.media-list of comments (li.media.app-media), then a comment form with a labeled textarea and a btn-default "Post comment".
+   - Files: .list-group.app-list of attachments with a Glyphicon and size.
+Load the record from [api/requests/:id] in js/request-detail.js. Escape all user text, and send comments with a CSRF token.</pre>
+							</div>
+						</article>
+
+						<!-- Shell 7: Search results -->
+						<article class="guide-specimen" aria-labelledby="shell-search">
+							<div class="guide-specimen-head">
+								<h3 id="shell-search">Search with filters</h3>
+								<p>Search results for a catalog, directory, or knowledge base, with filter facets,
+									a result count, and an empty state.</p>
+								<p class="guide-meta">Template: blank-slate.html</p>
+								<ol class="guide-recipe-stack">
+									<li>A large in-app search bar (not the site search)</li>
+									<li>Filter facets as checkbox fieldsets in a side column</li>
+									<li>Result count (announced to screen readers), a sort dropdown, and an item list</li>
+									<li>Pagination and an empty state for zero results</li>
+								</ol>
+								<p><span class="guide-tag guide-tag-decorator">Dropdown · forms</span><span class="guide-tag guide-tag-layer">Brand layer</span></p>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="app-shell">
+									<form action="#shell-search" method="get" role="search">
+										<label for="s7-q" class="app-stat-label">Search courses</label>
+										<div class="input-group input-group-lg">
+											<input type="search" class="form-control app-search-input" id="s7-q" name="q" value="data science">
+											<span class="input-group-btn"><button class="btn btn-primary" type="submit">Search</button></span>
+										</div>
+									</form>
+									<div class="row">
+										<div class="col-sm-4">
+											<form action="#shell-search" method="get" aria-label="Filter results">
+												<fieldset class="app-facet">
+													<legend>Level</legend>
+													<div class="checkbox"><label><input type="checkbox" name="level" value="lower" checked> Lower division (14)</label></div>
+													<div class="checkbox"><label><input type="checkbox" name="level" value="upper"> Upper division (9)</label></div>
+													<div class="checkbox"><label><input type="checkbox" name="level" value="grad"> Graduate (6)</label></div>
+												</fieldset>
+												<fieldset class="app-facet">
+													<legend>Quarter</legend>
+													<div class="checkbox"><label><input type="checkbox" name="term" value="fa26" checked> Fall 2026</label></div>
+													<div class="checkbox"><label><input type="checkbox" name="term" value="wi27"> Winter 2027</label></div>
+												</fieldset>
+											</form>
+										</div>
+										<div class="col-sm-8">
+											<div class="app-view-head">
+												<p class="app-muted" role="status">14 results for “data science”</p>
+												<div class="btn-group">
+													<button type="button" class="btn app-tool dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sort: Relevance <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></button>
+													<ul class="dropdown-menu dropdown-menu-right">
+														<li><a href="#shell-search">Relevance</a></li>
+														<li><a href="#shell-search">Course number</a></li>
+														<li><a href="#shell-search">Seats available</a></li>
+													</ul>
+												</div>
+											</div>
+											<div class="list-group app-list">
+												<a href="#shell-search" class="list-group-item">
+													<h5 class="list-group-item-heading">DSC 10 · Principles of Data Science</h5>
+													<p class="list-group-item-text">4 units · Lower division · 38 seats left</p>
+												</a>
+												<a href="#shell-search" class="list-group-item">
+													<h5 class="list-group-item-heading">DSC 20 · Programming and Data Structures</h5>
+													<p class="list-group-item-text">4 units · Lower division · Waitlist only</p>
+												</a>
+											</div>
+											<nav aria-label="Result pages">
+												<ul class="pagination app-pagination">
+													<li><a href="#shell-search" aria-current="page">1</a></li>
+													<li><a href="#shell-search">2</a></li>
+													<li><a href="#shell-search" aria-label="Next page"><span aria-hidden="true">&raquo;</span></a></li>
+												</ul>
+											</nav>
+											<div class="app-empty">
+												<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+												<p><strong>Empty state:</strong> No courses match. Try removing a filter or checking the spelling.</p>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-shell-search"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-shell-search">Create [courses.html] from blank-slate.html for [course] search. Add it to the drawer and the navbar. Link css/app-patterns.css.
+Canvas, inside div.app-shell:
+1. An in-app search form (role="search"): a visible label, then .input-group.input-group-lg with input.form-control.app-search-input and a btn-primary "Search". Leave the chrome search forms alone.
+2. A .row: .col-sm-3 holds the filter facets — a form aria-label="Filter results" with one fieldset.app-facet per facet [Level, Quarter], each a legend plus labeled checkboxes showing counts. The .col-sm-9 holds the results.
+3. Results header (div.app-view-head): a role="status" line "[n] results for “[query]”" and an app-tool "Sort" dropdown (dropdown-menu-right) with [Relevance, Course number, Seats available].
+4. .list-group.app-list results (h5.list-group-item-heading + p.list-group-item-text), then nav &gt; ul.pagination.app-pagination.
+5. With zero results, replace the list with div.app-empty: a Glyphicon (aria-hidden) and a suggestion.
+In js/courses.js: update results when filters change without a page reload, keep the query and filters in the URL, and escape every value.</pre>
+							</div>
+						</article>
+						<p class="guide-backtop"><a href="#page-index"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> Back to page index</a></p>
+					</section>
+
+					<!-- ============================================================ -->
+					<section id="dashboards" class="guide-section" aria-labelledby="dashboards-heading">
+						<h2 id="dashboards-heading">Dashboards by campus area</h2>
+						<p>Starter dashboards for the kinds of internal tools UC San Diego units build most often.
+							Each one names who it's for and the data it touches, and combines the building blocks and
+							patterns above. All names and numbers are made up.</p>
+
+						<div class="msg alert">
+							<h4>Before you connect real data</h4>
+							Many of these dashboards show protected data: FERPA student records, personnel
+							records, research budgets. Put them behind campus Single Sign-On, check authorization on
+							every request, keep personal data out of URLs and logs, and treat anything you're
+							unsure of as sensitive. Every prompt below includes these rules, so leave them in.
+						</div>
+
+						<!-- Agentic workflow -->
+						<article class="guide-specimen" id="dash-workflow" aria-labelledby="dash-workflow-title">
+							<div class="guide-specimen-head">
+								<h3 id="dash-workflow-title">Build a dashboard with an agent, in four prompts</h3>
+								<p>Don't ask for the whole app at once. Send these four prompts in order, and review
+									the result of each before you send the next. Paste the dashboard prompt of your
+									choice into step 2.</p>
+							</div>
+							<div class="guide-step-prompts">
+								<div class="guide-prompt">
+									<div class="guide-prompt-bar">
+										<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Step 1 · Scaffold</p>
+										<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-wf-1"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+									</div>
+<pre id="p-wf-1">Create [dashboard.html] from blank-slate.html (from node_modules/ucsd-decorator-v5/dist/templates). Rewrite every CSS and script path to cdn.ucsd.edu. Add "[Dashboard name]" to the drawer and the navbar, leaving both search blocks as shipped. Copy css/app-patterns.css from the Decorator Kit Developer Guide and link it in the site-specific CSS block. Create an empty js/[dashboard].js and load it after base.min.js. Stop there, and show me the diff.</pre>
+								</div>
+								<div class="guide-prompt">
+									<div class="guide-prompt-bar">
+										<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Step 2 · Static layout</p>
+										<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-wf-2"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+									</div>
+<pre id="p-wf-2">Inside main#main-content only, build the static layout below using hard-coded sample data that is obviously fake. Use the Decorator and app-patterns classes named in it. No JavaScript yet.
+[paste one dashboard prompt from the Developer Guide here]</pre>
+								</div>
+								<div class="guide-prompt">
+									<div class="guide-prompt-bar">
+										<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Step 3 · Wire the data</p>
+										<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-wf-3"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+									</div>
+<pre id="p-wf-3">In js/[dashboard].js, replace the sample data with data from [endpoint]. Keep the static markup as the no-JavaScript fallback where you can. Build DOM nodes with textContent (never innerHTML with data), set data-bar widths with app-w-* classes, and announce refreshes and filter changes in one aria-live region. The endpoint requires campus SSO. Handle 401/403 by showing a .msg.alert with a sign-in link, and handle empty results with an .app-empty state. Don't log response bodies.</pre>
+								</div>
+								<div class="guide-prompt">
+									<div class="guide-prompt-bar">
+										<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Step 4 · Review and verify</p>
+										<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-wf-4"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+									</div>
+<pre id="p-wf-4">Review [dashboard.html]:
+- Did anything change outside main#main-content? Are all Decorator assets loaded from cdn.ucsd.edu?
+- Any -success/-info/-warning/-danger, label-*, progress-bar, or title tooltips?
+- One h1, headings in order, every status and trend written in words, 44px targets, visible focus, labeled inputs?
+- No personal data in URLs, logs, or localStorage? SSO and authorization checked on every request?
+Fix what you find, then run `npx ucsd-decorator-kit verify` and report the findings. Don't run --accept.</pre>
+								</div>
+							</div>
+						</article>
+
+						<!-- D1 Advising -->
+						<article class="guide-specimen" aria-labelledby="dash-advising">
+							<div class="guide-specimen-head">
+								<span class="guide-area">Student success · College advising</span>
+								<h3 id="dash-advising">Advisor caseload</h3>
+								<p><strong>For:</strong> college academic advisors. <strong>Data:</strong> student
+									records (FERPA), appointments, holds, early alerts.</p>
+								<p class="guide-meta">Template: blank-slate.html</p>
+								<ol class="guide-recipe-stack">
+									<li>Filter bar: term and college</li>
+									<li>Four key numbers: caseload, appointments today, holds, early alerts</li>
+									<li>Today's appointments table and an early-alert status list</li>
+								</ol>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="app-shell">
+									<h4 class="app-view-title">Advisor Caseload · Muir College</h4>
+									<form class="app-filterbar" action="#dash-advising" method="get" aria-label="Caseload filters">
+										<div class="form-group"><label for="d1-term">Term</label><select class="form-control app-filter-control" id="d1-term" name="term"><option>Fall 2026</option></select></div>
+										<div class="form-group"><label for="d1-college">College</label><select class="form-control app-filter-control" id="d1-college" name="college"><option>Muir</option></select></div>
+										<button type="submit" class="btn btn-primary">Apply</button>
+									</form>
+									<div class="row">
+										<div class="col-xs-6 col-md-3"><div class="styled app-stat"><span class="app-stat-value">312</span><span class="app-stat-label">Students assigned</span></div></div>
+										<div class="col-xs-6 col-md-3"><div class="styled app-stat"><span class="app-stat-value">9</span><span class="app-stat-label">Appointments today</span></div></div>
+										<div class="col-xs-6 col-md-3"><div class="styled app-stat"><span class="app-stat-value">14</span><span class="app-stat-label">Registration holds</span><span class="app-trend"><span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span> Down 5 this week</span></div></div>
+										<div class="col-xs-6 col-md-3"><div class="styled app-stat"><span class="app-stat-value">6</span><span class="app-stat-label">New early alerts</span></div></div>
+									</div>
+									<div class="row">
+										<div class="col-md-7">
+											<div class="table-responsive">
+												<table class="styled-dark app-table">
+													<caption>Today's appointments</caption>
+													<thead><tr><th scope="col">Time</th><th scope="col">Student</th><th scope="col">Reason</th></tr></thead>
+													<tbody>
+														<tr><td>9:00</td><td><a href="#dash-advising">Student A.</a></td><td>Major declaration</td></tr>
+														<tr class="even"><td>9:30</td><td><a href="#dash-advising">Student B.</a></td><td>Academic probation</td></tr>
+														<tr><td>10:15</td><td><a href="#dash-advising">Student C.</a></td><td>Study abroad</td></tr>
+													</tbody>
+												</table>
+											</div>
+										</div>
+										<div class="col-md-5">
+											<div class="app-panel">
+												<p class="app-panel-title">Early alerts</p>
+												<ul class="list-group app-status-list">
+													<li class="list-group-item"><span class="app-status-name">Student D.</span><span class="app-status" data-status="warn">Missed 3 classes</span></li>
+													<li class="list-group-item"><span class="app-status-name">Student E.</span><span class="app-status" data-status="down">Midterm below C</span></li>
+													<li class="list-group-item"><span class="app-status-name">Student F.</span><span class="app-status" data-status="info">Advisor note</span></li>
+												</ul>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-dash-advising"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-dash-advising">Build an advisor caseload dashboard for [college] advisors in [advising.html], from blank-slate.html, with css/app-patterns.css. Canvas, inside div.app-shell:
+1. h4.app-view-title "Advisor Caseload · [College]".
+2. form.app-filterbar: Term and College selects, Apply.
+3. Four div.styled.app-stat key numbers: Students assigned, Appointments today, Registration holds (with an .app-trend), New early alerts.
+4. A .row: .col-md-7 has a table.styled-dark.app-table "Today's appointments" (Time, Student, Reason; each student name links to a detail view). .col-md-5 has a div.app-panel "Early alerts" with ul.app-status-list (status in words).
+FERPA data: require campus SSO, and return only students assigned to the signed-in advisor, checked server-side on every request. No student IDs or names in URLs, logs, or browser storage. Show preferred names. Log access to student records for audit. Data comes from [endpoint], loaded in js/advising.js.</pre>
+							</div>
+						</article>
+
+						<!-- D2 Enrollment -->
+						<article class="guide-specimen" aria-labelledby="dash-enroll">
+							<div class="guide-specimen-head">
+								<span class="guide-area">Academic affairs · Department scheduling</span>
+								<h3 id="dash-enroll">Course enrollment and waitlists</h3>
+								<p><strong>For:</strong> department schedulers and undergraduate coordinators.
+									<strong>Data:</strong> section capacity, enrollment, and waitlists, all aggregate.</p>
+								<p class="guide-meta">Template: two-column.html</p>
+								<ol class="guide-recipe-stack">
+									<li>Quarter switcher (segmented control)</li>
+									<li>Data bars: fill rate by course</li>
+									<li>Waitlist table, sorted by pressure, with an export action</li>
+								</ol>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="app-shell">
+									<div class="app-view-head">
+										<h4 class="app-view-title">Enrollment · Cognitive Science</h4>
+										<div class="btn-group app-segmented" data-toggle="buttons" role="group" aria-label="Quarter">
+											<label class="btn active"><input type="radio" name="d2-q" value="fa" checked autocomplete="off"> Fall</label>
+											<label class="btn"><input type="radio" name="d2-q" value="wi" autocomplete="off"> Winter</label>
+											<label class="btn"><input type="radio" name="d2-q" value="sp" autocomplete="off"> Spring</label>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-6">
+											<div class="app-panel">
+												<p class="app-panel-title" id="d2-bars">Seats filled</p>
+												<ul class="app-bars" aria-labelledby="d2-bars">
+													<li><span class="app-bar-label">COGS 1</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-bar-attn app-w-100"></span></span><span class="app-bar-value">100% (full)</span></li>
+													<li><span class="app-bar-label">COGS 14A</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-90"></span></span><span class="app-bar-value">92%</span></li>
+													<li><span class="app-bar-label">COGS 108</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-80"></span></span><span class="app-bar-value">81%</span></li>
+													<li><span class="app-bar-label">COGS 180</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-45"></span></span><span class="app-bar-value">46%</span></li>
+												</ul>
+											</div>
+										</div>
+										<div class="col-md-6">
+											<div class="table-responsive">
+												<table class="styled-dark app-table">
+													<caption>Largest waitlists</caption>
+													<thead><tr><th scope="col">Course</th><th scope="col">Waitlist</th><th scope="col">Cap</th></tr></thead>
+													<tbody>
+														<tr><td>COGS 1</td><td>84</td><td>400</td></tr>
+														<tr class="even"><td>COGS 14A</td><td>31</td><td>250</td></tr>
+														<tr><td>COGS 108</td><td>12</td><td>300</td></tr>
+													</tbody>
+												</table>
+											</div>
+											<div class="app-savebar"><button type="button" class="btn btn-default"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Export CSV</button></div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-dash-enroll"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-dash-enroll">Build a course enrollment dashboard for the [department] in [enrollment.html], from two-column.html, with css/app-patterns.css. Add it to the drawer, the navbar, and the side nav. Canvas, inside div.app-shell:
+1. div.app-view-head: h4.app-view-title "Enrollment · [Department]" and a .btn-group.app-segmented quarter switcher [Fall, Winter, Spring].
+2. A .row: .col-md-6 has a div.app-panel "Seats filled" with ul.app-bars per course (a full course gets .app-bar-attn, and the value text says "100% (full)"). .col-md-6 has a table.styled-dark.app-table "Largest waitlists" (Course, Waitlist, Cap), sorted by waitlist, then an .app-savebar with an "Export CSV" button.
+Aggregate data only, with no student-level rows. Load it from [endpoint] per quarter in js/enrollment.js, and announce quarter changes in an aria-live region.</pre>
+							</div>
+						</article>
+
+						<!-- D3 Research admin -->
+						<article class="guide-specimen" aria-labelledby="dash-research">
+							<div class="guide-specimen-head">
+								<span class="guide-area">Research · Department research administration</span>
+								<h3 id="dash-research">Proposals and awards</h3>
+								<p><strong>For:</strong> department research administrators and PIs.
+									<strong>Data:</strong> proposal pipeline, sponsor deadlines, award spending.</p>
+								<p class="guide-meta">Template: blank-slate.html</p>
+								<ol class="guide-recipe-stack">
+									<li>Pipeline data bars: proposals by stage</li>
+									<li>Deadline timeline for the next 30 days</li>
+									<li>Tabbed award table: Active, Ending soon</li>
+								</ol>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="app-shell">
+									<h4 class="app-view-title">Research Administration · Bioengineering</h4>
+									<div class="row">
+										<div class="col-md-6">
+											<div class="app-panel">
+												<p class="app-panel-title" id="d3-pipe">Proposal pipeline</p>
+												<ul class="app-bars" aria-labelledby="d3-pipe">
+													<li><span class="app-bar-label">Drafting</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-60"></span></span><span class="app-bar-value">12</span></li>
+													<li><span class="app-bar-label">Dept. review</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-30"></span></span><span class="app-bar-value">6</span></li>
+													<li><span class="app-bar-label">At OCGA</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-20"></span></span><span class="app-bar-value">4</span></li>
+													<li><span class="app-bar-label">Submitted</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-bar-alt app-w-100"></span></span><span class="app-bar-value">20</span></li>
+												</ul>
+											</div>
+										</div>
+										<div class="col-md-6">
+											<div class="app-panel">
+												<p class="app-panel-title">Next 30 days</p>
+												<ol class="app-timeline">
+													<li data-urgent><span class="app-timeline-date"><time datetime="2026-09-25">Sep 25</time> · 3 days <span class="sr-only">(urgent)</span></span><span class="app-timeline-title">NIH R01 · Chen</span></li>
+													<li><span class="app-timeline-date"><time datetime="2026-10-06">Oct 6</time> · 2 weeks</span><span class="app-timeline-title">NSF CAREER · Patel</span></li>
+												</ol>
+											</div>
+										</div>
+									</div>
+									<ul class="nav nav-tabs app-tabs" role="tablist">
+										<li role="presentation" class="active"><a href="#d3-active" id="d3-active-tab" role="tab" data-toggle="tab" aria-controls="d3-active" aria-expanded="true">Active awards</a></li>
+										<li role="presentation"><a href="#d3-ending" id="d3-ending-tab" role="tab" data-toggle="tab" aria-controls="d3-ending">Ending in 90 days <span class="badge">2</span></a></li>
+									</ul>
+									<div class="tab-content app-tab-panels">
+										<div role="tabpanel" class="tab-pane fade in active" id="d3-active" aria-labelledby="d3-active-tab">
+											<div class="table-responsive">
+												<table class="styled-dark app-table">
+													<caption class="sr-only">Active awards</caption>
+													<thead><tr><th scope="col">Award</th><th scope="col">Sponsor</th><th scope="col">Spent</th><th scope="col">Ends</th></tr></thead>
+													<tbody>
+														<tr><td>Tissue scaffolds</td><td>NIH</td><td>64%</td><td>Jun 2027</td></tr>
+														<tr class="even"><td>Wearable sensors</td><td>DoD</td><td>88% (ahead of plan)</td><td>Dec 2026</td></tr>
+													</tbody>
+												</table>
+											</div>
+										</div>
+										<div role="tabpanel" class="tab-pane fade" id="d3-ending" aria-labelledby="d3-ending-tab"><p>Awards needing closeout or no-cost extension decisions.</p></div>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-dash-research"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-dash-research">Build a research administration dashboard for [department] in [research.html], from blank-slate.html, with css/app-patterns.css. Canvas, inside div.app-shell:
+1. h4.app-view-title "Research Administration · [Department]".
+2. A .row: .col-md-6 has a div.app-panel "Proposal pipeline" with ul.app-bars per stage [Drafting, Dept. review, At OCGA, Submitted] showing counts. .col-md-6 has a div.app-panel "Next 30 days" with ol.app-timeline of sponsor deadlines (data-urgent within 7 days).
+3. Bootstrap tabs (.app-tabs): "Active awards" and "Ending in 90 days" (with a count badge). Each is a table.styled-dark.app-table (Award, Sponsor, Spent %, Ends). Explain over- or under-spending in words.
+Budget data is confidential: SSO, show only awards where the user is PI or a department admin (checked server-side), no amounts in URLs or logs. Data from [endpoint], in js/research.js.</pre>
+							</div>
+						</article>
+
+						<!-- D4 HDH -->
+						<article class="guide-specimen" aria-labelledby="dash-housing">
+							<div class="guide-specimen-head">
+								<span class="guide-area">Housing, Dining &amp; Hospitality</span>
+								<h3 id="dash-housing">Residence operations</h3>
+								<p><strong>For:</strong> residential life and operations staff. <strong>Data:</strong>
+									occupancy by neighborhood, maintenance tickets, dining location status.</p>
+								<p class="guide-meta">Template: blank-slate.html</p>
+								<ol class="guide-recipe-stack">
+									<li>Key numbers: beds filled, open work orders, move-in checklist</li>
+									<li>Occupancy data bars by college</li>
+									<li>Dining locations status list</li>
+								</ol>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="app-shell">
+									<h4 class="app-view-title">Residence Operations · Fall move-in</h4>
+									<div class="row">
+										<div class="col-sm-4"><div class="styled app-stat"><span class="app-stat-value">15,240</span><span class="app-stat-label">Beds filled</span><span class="app-trend"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> Up 310 today</span></div></div>
+										<div class="col-sm-4"><div class="styled app-stat"><span class="app-stat-value">87</span><span class="app-stat-label">Open work orders</span></div></div>
+										<div class="col-sm-4"><div class="styled app-stat"><span class="app-stat-value">4 of 6</span><span class="app-stat-label">Move-in tasks done</span></div></div>
+									</div>
+									<div class="row">
+										<div class="col-md-7">
+											<div class="app-panel">
+												<p class="app-panel-title" id="d4-occ">Occupancy by college</p>
+												<ul class="app-bars" aria-labelledby="d4-occ">
+													<li><span class="app-bar-label">Revelle</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-95"></span></span><span class="app-bar-value">97%</span></li>
+													<li><span class="app-bar-label">Warren</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-95"></span></span><span class="app-bar-value">95%</span></li>
+													<li><span class="app-bar-label">Eighth</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-85"></span></span><span class="app-bar-value">86%</span></li>
+													<li><span class="app-bar-label">Seventh</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-bar-attn app-w-65"></span></span><span class="app-bar-value">66% (check-ins open)</span></li>
+												</ul>
+											</div>
+										</div>
+										<div class="col-md-5">
+											<div class="app-panel">
+												<p class="app-panel-title">Dining locations</p>
+												<ul class="list-group app-status-list">
+													<li class="list-group-item"><span class="app-status-name">64 Degrees</span><span class="app-status" data-status="ok">Open</span></li>
+													<li class="list-group-item"><span class="app-status-name">Pines</span><span class="app-status" data-status="warn">Long line</span></li>
+													<li class="list-group-item"><span class="app-status-name">Club Med</span><span class="app-status" data-status="down">Closed</span></li>
+												</ul>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-dash-housing"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-dash-housing">Build a residence operations dashboard in [housing.html], from blank-slate.html, with css/app-patterns.css. Canvas, inside div.app-shell:
+1. h4.app-view-title "Residence Operations · [event]".
+2. Three .col-sm-4 div.styled.app-stat: Beds filled (with an .app-trend), Open work orders, Move-in tasks done ("4 of 6").
+3. A .row: .col-md-7 has a div.app-panel "Occupancy by college" with ul.app-bars for [Revelle … Eighth] (explain the highlighted row in its value text). .col-md-5 has a div.app-panel "Dining locations" with ul.app-status-list (Open / Long line / Closed).
+Refresh every [5] minutes in js/housing.js and announce "Updated [time]" in an aria-live region, without moving focus. Aggregate data only — no resident names on this screen.</pre>
+							</div>
+						</article>
+
+						<!-- D5 ITS — working example -->
+						<article class="guide-specimen" aria-labelledby="dash-its">
+							<div class="guide-specimen-head">
+								<span class="guide-area">IT Services · Working example</span>
+								<h3 id="dash-its">Service status board</h3>
+								<p><strong>For:</strong> the service desk and anyone checking campus systems.
+									<strong>Data:</strong> public service status. <strong>This one works:</strong>
+									filter to issues, search by name, and the count updates for screen readers.
+									The script is <a href="js/status-board.js"><code>js/status-board.js</code></a>,
+									about 60 lines of plain JavaScript.</p>
+								<p class="guide-meta">Template: blank-slate.html</p>
+								<ol class="guide-recipe-stack">
+									<li>Key numbers: operational, degraded, outages</li>
+									<li>Item bar: an All / Needs attention filter, search, and a live count</li>
+									<li>Status list with detail lines, plus an empty state</li>
+								</ol>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview · try it</span>
+								<div class="app-shell" id="its-board">
+									<div class="app-view-head">
+										<h4 class="app-view-title">Campus Service Status</h4>
+										<span class="app-muted">Updated 9:41&nbsp;a.m.</span>
+									</div>
+									<div class="row">
+										<div class="col-xs-4"><div class="styled app-stat"><span class="app-stat-value">9</span><span class="app-stat-label">Operational</span></div></div>
+										<div class="col-xs-4"><div class="styled app-stat"><span class="app-stat-value">2</span><span class="app-stat-label">Degraded</span></div></div>
+										<div class="col-xs-4"><div class="styled app-stat"><span class="app-stat-value">1</span><span class="app-stat-label">Outage</span></div></div>
+									</div>
+									<div class="btn-toolbar app-toolbar" role="toolbar" aria-label="Filter services">
+										<div class="btn-group app-segmented" data-toggle="buttons" role="group" aria-label="Show">
+											<label class="btn active"><input type="radio" name="its-show" value="all" checked autocomplete="off"> All</label>
+											<label class="btn"><input type="radio" name="its-show" value="issues" autocomplete="off"> Needs attention</label>
+										</div>
+										<span class="app-live-count" role="status">12 services shown</span>
+										<form class="app-toolbar-search" action="#dash-its" method="get" role="search">
+											<label for="its-q" class="sr-only">Search services</label>
+											<div class="input-group">
+												<input type="search" class="form-control app-search-input" id="its-q" name="q" placeholder="Search services" autocomplete="off">
+												<span class="input-group-btn"><button class="btn app-tool" type="submit" aria-label="Search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button></span>
+											</div>
+										</form>
+									</div>
+									<ul class="list-group app-status-list">
+										<li class="list-group-item" data-service="Canvas LMS" data-status="ok"><span class="app-status-name">Canvas LMS</span><span class="app-status" data-status="ok"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Operational</span></li>
+										<li class="list-group-item" data-service="UCSD-PROTECTED Wi-Fi" data-status="warn"><span class="app-status-name">UCSD-PROTECTED Wi-Fi</span><span class="app-status" data-status="warn"><span class="glyphicon glyphicon-alert" aria-hidden="true"></span> Degraded</span><span class="app-muted">Slow connections in Geisel Library. Engineers are on site.</span></li>
+										<li class="list-group-item" data-service="Email and Calendar" data-status="ok"><span class="app-status-name">Email and Calendar</span><span class="app-status" data-status="ok"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Operational</span></li>
+										<li class="list-group-item" data-service="Print stations" data-status="down"><span class="app-status-name">Print stations</span><span class="app-status" data-status="down"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Outage</span><span class="app-muted">Card readers offline campus-wide. Next update 11&nbsp;a.m.</span></li>
+										<li class="list-group-item" data-service="VPN" data-status="ok"><span class="app-status-name">VPN</span><span class="app-status" data-status="ok"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Operational</span></li>
+										<li class="list-group-item" data-service="Single Sign-On" data-status="ok"><span class="app-status-name">Single Sign-On</span><span class="app-status" data-status="ok"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Operational</span></li>
+										<li class="list-group-item" data-service="Zoom" data-status="ok"><span class="app-status-name">Zoom</span><span class="app-status" data-status="ok"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Operational</span></li>
+										<li class="list-group-item" data-service="Library catalog" data-status="warn"><span class="app-status-name">Library catalog</span><span class="app-status" data-status="warn"><span class="glyphicon glyphicon-alert" aria-hidden="true"></span> Degraded</span><span class="app-muted">Searches may time out. The vendor is investigating.</span></li>
+										<li class="list-group-item" data-service="TritonLink" data-status="ok"><span class="app-status-name">TritonLink</span><span class="app-status" data-status="ok"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Operational</span></li>
+										<li class="list-group-item" data-service="Campus phones" data-status="ok"><span class="app-status-name">Campus phones</span><span class="app-status" data-status="ok"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Operational</span></li>
+										<li class="list-group-item" data-service="Research storage" data-status="ok"><span class="app-status-name">Research storage</span><span class="app-status" data-status="ok"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Operational</span></li>
+										<li class="list-group-item" data-service="Concur" data-status="ok"><span class="app-status-name">Concur</span><span class="app-status" data-status="ok"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Operational</span></li>
+									</ul>
+									<div class="app-empty hidden">
+										<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+										<p>No services match. Clear the search or choose "All".</p>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-dash-its"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-dash-its">Build a campus service status board in [status.html], from blank-slate.html, with css/app-patterns.css, following the working example in the Decorator Kit Developer Guide (js/status-board.js). Canvas, inside div#its-board.app-shell:
+1. div.app-view-head: h4.app-view-title "Campus Service Status" and an "Updated [time]" span.app-muted.
+2. Three .col-xs-4 div.styled.app-stat counts: Operational, Degraded, Outage.
+3. div.btn-toolbar.app-toolbar: a .btn-group.app-segmented radio filter [All, Needs attention], a span.app-live-count with role="status", and a right-aligned search form (.sr-only label).
+4. ul.app-status-list with one li per service, carrying data-service and data-status, a status badge, and an optional detail line. Then a hidden div.app-empty.
+Render the full list in HTML so it works without JavaScript. In js/status-board.js, filter by toggling Bootstrap's .hidden class. Listen for filter changes with jQuery ($(board).on('change', ...)), because button.js fires them through jQuery. Search on input. Update the count text on every change. Load statuses from [status feed] on an interval.</pre>
+							</div>
+						</article>
+
+						<!-- D6 Facilities & sustainability -->
+						<article class="guide-specimen" aria-labelledby="dash-energy">
+							<div class="guide-specimen-head">
+								<span class="guide-area">Facilities management · Sustainability</span>
+								<h3 id="dash-energy">Energy and work orders</h3>
+								<p><strong>For:</strong> facilities managers and sustainability staff.
+									<strong>Data:</strong> building energy use against targets, work orders by priority.</p>
+								<p class="guide-meta">Template: blank-slate.html</p>
+								<ol class="guide-recipe-stack">
+									<li>Filter bar: date range</li>
+									<li>Key numbers with trends against last year</li>
+									<li>Energy use against target as data bars, and a work-order tab set</li>
+								</ol>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="app-shell">
+									<h4 class="app-view-title">Energy &amp; Work Orders · September</h4>
+									<div class="row">
+										<div class="col-sm-4"><div class="styled app-stat"><span class="app-stat-value">18.2</span><span class="app-stat-label">GWh used</span><span class="app-trend"><span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span> Down 4% from last year</span></div></div>
+										<div class="col-sm-4"><div class="styled app-stat"><span class="app-stat-value">71%</span><span class="app-stat-label">From on-site generation</span></div></div>
+										<div class="col-sm-4"><div class="styled app-stat"><span class="app-stat-value">243</span><span class="app-stat-label">Open work orders</span><span class="app-trend"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> Up 12 this week</span></div></div>
+									</div>
+									<div class="app-panel">
+										<p class="app-panel-title" id="d6-energy">Energy use against monthly target (top buildings)</p>
+										<ul class="app-bars" aria-labelledby="d6-energy">
+											<li><span class="app-bar-label">Jacobs Hall</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-bar-attn app-w-100"></span></span><span class="app-bar-value">108% (over)</span></li>
+											<li><span class="app-bar-label">Geisel Library</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-90"></span></span><span class="app-bar-value">92%</span></li>
+											<li><span class="app-bar-label">Price Center</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-80"></span></span><span class="app-bar-value">79%</span></li>
+										</ul>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-dash-energy"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-dash-energy">Build an energy and work-order dashboard in [energy.html], from blank-slate.html, with css/app-patterns.css. Canvas, inside div.app-shell:
+1. h4.app-view-title "Energy &amp; Work Orders · [period]" and a form.app-filterbar with From/To dates.
+2. Three .col-sm-4 div.styled.app-stat with .app-trend compared to last year: GWh used, % from on-site generation, Open work orders.
+3. A div.app-panel "Energy use against monthly target" with ul.app-bars for the top [10] buildings. Cap the bar at app-w-100 and say "[n]% (over)" in the value text when a building is over target.
+4. Bootstrap tabs (.app-tabs) for work orders by priority [Emergency, Urgent, Routine]. Each is a table.styled-dark.app-table.
+If a real chart is needed, add a charting library under canvas-components/ with its README, and keep the data table as the accessible alternative. Data from [endpoint], in js/energy.js.</pre>
+							</div>
+						</article>
+
+						<!-- D7 Library -->
+						<article class="guide-specimen" aria-labelledby="dash-library">
+							<div class="guide-specimen-head">
+								<span class="guide-area">UC San Diego Library</span>
+								<h3 id="dash-library">Study space availability</h3>
+								<p><strong>For:</strong> students (public view) and library staff.
+									<strong>Data:</strong> room status, occupancy by floor, busy hours.</p>
+								<p class="guide-meta">Template: blank-slate.html</p>
+								<ol class="guide-recipe-stack">
+									<li>Floor switcher (segmented control)</li>
+									<li>Room tiles with status words and a "Book" link</li>
+									<li>Busy-hours data bars</li>
+								</ol>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="app-shell">
+									<div class="app-view-head">
+										<h4 class="app-view-title">Geisel Study Rooms</h4>
+										<div class="btn-group app-segmented" data-toggle="buttons" role="group" aria-label="Floor">
+											<label class="btn"><input type="radio" name="d7-floor" value="1" autocomplete="off"> 1</label>
+											<label class="btn active"><input type="radio" name="d7-floor" value="2" checked autocomplete="off"> 2</label>
+											<label class="btn"><input type="radio" name="d7-floor" value="8" autocomplete="off"> 8</label>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-7">
+											<ul class="app-tiles">
+												<li><strong>Room 2070</strong><span class="app-status" data-status="ok">Available</span> <a href="#dash-library">Book<span class="sr-only"> room 2070</span></a></li>
+												<li><strong>Room 2071</strong><span class="app-status" data-status="down">In use until 3&nbsp;p.m.</span></li>
+												<li><strong>Room 2072</strong><span class="app-status" data-status="ok">Available</span> <a href="#dash-library">Book<span class="sr-only"> room 2072</span></a></li>
+												<li><strong>Room 2073</strong><span class="app-status" data-status="info">Reserved at 2&nbsp;p.m.</span></li>
+											</ul>
+										</div>
+										<div class="col-md-5">
+											<div class="app-panel">
+												<p class="app-panel-title" id="d7-busy">Usually busy</p>
+												<ul class="app-bars" aria-labelledby="d7-busy">
+													<li><span class="app-bar-label">10&nbsp;a.m.</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-55"></span></span><span class="app-bar-value">55%</span></li>
+													<li><span class="app-bar-label">2&nbsp;p.m.</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-bar-attn app-w-90"></span></span><span class="app-bar-value">90% (peak)</span></li>
+													<li><span class="app-bar-label">8&nbsp;p.m.</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-70"></span></span><span class="app-bar-value">70%</span></li>
+												</ul>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-dash-library"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-dash-library">Build a study room availability page in [rooms.html], from blank-slate.html, with css/app-patterns.css. Canvas, inside div.app-shell:
+1. div.app-view-head: h4.app-view-title "[Building] Study Rooms" and a .btn-group.app-segmented floor switcher.
+2. A .row: .col-md-7 has ul.app-tiles with one li per room — the room name, a span.app-status in words ("Available", "In use until 3 p.m.", "Reserved at 2 p.m."), and for available rooms a "Book" link with .sr-only room context. .col-md-5 has a div.app-panel "Usually busy" with ul.app-bars by hour.
+Students are anonymous on this page — show no booker names. "Book" goes to [booking system] and needs SSO there. Refresh statuses every [2] minutes in js/rooms.js and announce changes politely.</pre>
+							</div>
+						</article>
+
+						<!-- D8 HR onboarding -->
+						<article class="guide-specimen" aria-labelledby="dash-hr">
+							<div class="guide-specimen-head">
+								<span class="guide-area">Human Resources · Department HR</span>
+								<h3 id="dash-hr">New-hire onboarding tracker</h3>
+								<p><strong>For:</strong> department HR contacts and hiring managers.
+									<strong>Data:</strong> personnel records and onboarding task status.</p>
+								<p class="guide-meta">Template: two-column.html</p>
+								<ol class="guide-recipe-stack">
+									<li>Side menu of new hires with progress counts</li>
+									<li>The selected hire's checklist progress</li>
+									<li>Upcoming start dates timeline (in the prompt; not shown in the preview)</li>
+								</ol>
+							</div>
+							<div class="guide-preview">
+								<span class="guide-preview-label">Live preview</span>
+								<div class="app-shell">
+									<div class="row">
+										<div class="col-sm-4">
+											<nav aria-label="New hires">
+												<div class="list-group app-sidemenu">
+													<span class="list-group-item app-sidemenu-heading">Starting soon</span>
+													<a href="#dash-hr" class="list-group-item" aria-current="page">Alex Kim <span class="badge">3/5</span></a>
+													<a href="#dash-hr" class="list-group-item">Priya Shah <span class="badge">5/5</span></a>
+													<a href="#dash-hr" class="list-group-item">Luis Ortega <span class="badge">1/5</span></a>
+												</div>
+											</nav>
+										</div>
+										<div class="col-sm-8">
+											<div class="app-panel">
+												<p class="app-panel-title" id="d8-title">Alex Kim · Programmer Analyst · starts Oct 1</p>
+												<ul class="app-bars" aria-labelledby="d8-title">
+													<li><span class="app-bar-label">3 of 5 done</span><span class="app-bar-track" aria-hidden="true"><span class="app-bar-fill app-w-60"></span></span><span class="app-bar-value">60%</span></li>
+												</ul>
+												<ul class="app-checklist">
+													<li data-done><span class="glyphicon glyphicon-check" aria-hidden="true"></span> Offer letter signed <span class="sr-only">(done)</span></li>
+													<li data-done><span class="glyphicon glyphicon-check" aria-hidden="true"></span> Background check <span class="sr-only">(done)</span></li>
+													<li data-done><span class="glyphicon glyphicon-check" aria-hidden="true"></span> Active Directory account <span class="sr-only">(done)</span></li>
+													<li><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span> Cyber-security training <span class="sr-only">(to do)</span></li>
+													<li><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span> Equipment request <span class="sr-only">(to do)</span></li>
+												</ul>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy prompt" data-copy-target="p-dash-hr"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-dash-hr">Build a new-hire onboarding tracker in [onboarding.html], from two-column.html, with css/app-patterns.css. Add it to the drawer, the navbar, and the side nav. Canvas, inside div.app-shell, as a .row:
+1. .col-sm-3: nav aria-label="New hires" &gt; .list-group.app-sidemenu with a heading "Starting soon" and one link per hire with a "[done]/[total]" badge. The selected hire gets aria-current="page".
+2. .col-sm-9: a div.app-panel titled "[name] · [title] · starts [date]", a one-row ul.app-bars "[n] of [total] done", and ul.app-checklist (data-done plus .sr-only "(done)" / "(to do)").
+3. Below it, a div.app-panel "Start dates" with ol.app-timeline (data-urgent for starts within 7 days where tasks are still open).
+Personnel data: SSO, show only hires in the user's department (checked server-side), no names or employee IDs in URLs, and audit-log every view. Data from [endpoint], in js/onboarding.js.</pre>
+							</div>
+						</article>
+
+						<p class="guide-backtop"><a href="#page-index"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> Back to page index</a></p>
+					</section>
+
+					<!-- Modal markup lives at the end of the canvas -->
+					<div class="modal fade app-modal" id="demo-modal" tabindex="-1" role="dialog" aria-labelledby="demo-modal-title">
+						<div class="modal-dialog" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close app-modal-close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+									<h4 class="modal-title" id="demo-modal-title">Close request RQ-1042?</h4>
+								</div>
+								<div class="modal-body">
+									<p>The requester will be notified and the request moves to <strong>Closed</strong>.
+										You can reopen it within 30 days.</p>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+									<button type="button" class="btn btn-primary" data-dismiss="modal">Close request</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</section>
+
+				<section class="col-xs-12 col-md-3 sidebar-section">
+					<article class="main-content-nav">
+						<h2>App Patterns</h2>
+						<ul class="navbar-list">
+							<li>
+								<a href="index.html">Developer Guide</a>
+							</li>
+							<li>
+								<a href="index.html#components">Components</a>
+							</li>
+							<li class="active">
+								App Patterns
+								<ul>
+									<li><a href="#page-index">Page index</a></li>
+									<li><a href="#how">Read the tags first</a></li>
+									<li><a href="#navigation">In-app navigation</a></li>
+									<li><a href="#actions">Action bars and menus</a></li>
+									<li><a href="#lists">Lists and paging</a></li>
+									<li><a href="#overlays">Dialogs and disclosure</a></li>
+									<li><a href="#helpers">Helpers</a></li>
+									<li><a href="#blocks">Dashboard building blocks</a></li>
+									<li><a href="#shell">App shells (7)</a></li>
+									<li><a href="#dashboards">Dashboards by area (8)</a></li>
+								</ul>
+							</li>
+							<li>
+								<a href="index.html#modules">Modules</a>
+							</li>
+							<li>
+								<a href="index.html#recipes">App recipes</a>
+							</li>
+						</ul>
+					</article>
+				</section>
+			</div>
+		</div>
+	</main>
+
+	<footer class="footer">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-8">
+					<p>
+						<span>UC San Diego 9500 Gilman Dr. La Jolla, CA 92093 (858) 534-2230</span>
+						<br />
+						<span>
+							Copyright © <span class="footer-copyright-year"></span> Regents of the University of
+							California.
+							All rights reserved.
+						</span>
+					</p>
+					<ul class="footer-links">
+						<li><a href="https://www.ucsd.edu/_about/legal/index.html">Terms &amp; Conditions</a></li>
+						<li><a href="mailto:youremail@xyz.ucsd.edu">Feedback</a></li>
+					</ul>
+				</div>
+				<div class="col-sm-4">
+					<img src="http://cdn.ucsd.edu/developer/decorator/5.0.2/img/ucsd-footer-logo-white.png" alt=""
+						class="img-responsive footer-logo" />
+				</div>
+			</div>
+		</div>
+	</footer>
+
+	<script src="https://cdn.ucsd.edu/cms/decorator-5/scripts/jquery.min.js"></script>
+
+	<script src="https://cdn.ucsd.edu/cms/decorator-5/scripts/bootstrap.min.js"></script>
+
+	<script src="https://www.ucsd.edu/common/_emergency-broadcast/message.js"></script>
+
+
+	<script src="https://cdn.ucsd.edu/cms/decorator-5/scripts/vendor.min.js"></script>
+	<script src="https://cdn.ucsd.edu/cms/decorator-5/scripts/base.min.js"></script>
+	<script src="js/guide.js"></script>
+	<script src="js/status-board.js"></script>
+
+</body>
+
+</html>
