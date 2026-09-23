@@ -55,7 +55,7 @@
     },
     "requirement": {
       "type": "object",
-      "description": "Either a count assertion (selector + count) or an attribute assertion (attribute + equals/equalsUrl/absent, optionally targeted by selector).",
+      "description": "A count assertion (selector + count), an attribute assertion (attribute + equals/equalsUrl/absent, optionally targeted by selector), or a text assertion (selector + hasText).",
       "properties": {
         "selector": { "type": "string" },
         "count": {
@@ -75,6 +75,10 @@
         "absent": {
           "type": "boolean",
           "description": "The attribute must not be present."
+        },
+        "hasText": {
+          "type": "boolean",
+          "description": "Every element matching selector must contain non-whitespace text. Pairs with a region's ignoreTextOf: tier 2 lets the wording change, and this keeps it from being emptied."
         }
       },
       "anyOf": [{ "required": ["selector"] }, { "required": ["attribute"] }]

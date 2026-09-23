@@ -1,6 +1,6 @@
 {
   "name": "ucsd-decorator",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "license": "MIT",
   "description": "Build and edit UC San Diego web pages on the Decorator 5 design system without damaging the shared page chrome. Provides one writable canvas, a pinned source of truth for markup, and a CI-checkable chrome contract.",
   "author": {

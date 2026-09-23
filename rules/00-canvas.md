@@ -20,11 +20,44 @@ All new content, components, markup, and application logic go inside the canvas.
 
 **Chrome is not yours to edit.** That means the header, the title band, the
 `#uc-emergency` container, the desktop navbar, the mobile offcanvas drawer, both
-search forms, the footer, and any embedded campus widget.
+search forms, the footer, and any embedded campus widget. The one exception is
+the wording of the site name in the title band, below.
 
 If a task appears to require a chrome change: **stop and say so.** Name the
 region, explain why the task seems to need it, and let a human decide. Do not
 reshape the shell so a content change fits.
+
+## The site name is the one piece of chrome text you may change
+
+The title band carries the site's own name twice — a long form for tablet and
+desktop, and a short form that replaces it below 480px:
+
+```html
+<a href="index.html" class="title-header title-header-large">Decorator V5</a>
+<a href="index.html" class="title-header title-header-short">V5</a>
+```
+
+When asked to change the site name or title, change the **text** of these two
+links and nothing else. Keep both elements, their classes, and their `href`.
+Do not touch `a.title-logo` — its destination is fixed at
+`https://www.ucsd.edu` on every Decorator site — and do not add markup inside
+either link: no `<span>`, image, icon, or inline style.
+
+**Always propose the short form.** If the request names only the long title,
+suggest a short one and say you did. The short form renders uppercase, with
+letter spacing, at 20px on the smallest phones, so keep it to a word or an
+acronym — roughly a dozen characters at most. "Decorator V5" becomes "V5";
+"Division of Physical Sciences" becomes "Physical Sciences" or "DPS". Never
+leave it as the old site's name, and never leave it empty.
+
+Change it on **every page**, identically. If the project builds its header
+from a data file, edit the data file, not the rendered markup.
+
+`verify` is built for this: tier 2 ignores the text of `a.title-header`, so
+no `--accept` is needed. Tier 1 still fails if one page's name differs from
+another's, and tier 3 fails if either link is left empty. Any other change in
+the title band — an `href`, a class, an added element — is still a chrome
+edit, and is still not yours to make.
 
 ## The chrome integrity gate is not yours to satisfy
 

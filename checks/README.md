@@ -273,6 +273,17 @@ project added its first one. `contracts/chrome-regions.json` already declares
 `ignoreChildrenOf` for the drawer's and navbar's nav-link lists, so this is
 handled by default rather than something each project has to discover.
 
+**Drop site-owned text, not the markup around it.** The site name in the title
+band is the site's to set, but the two `a.title-header` links carrying it are
+chrome. The `site-title` region declares `ignoreTextOf: ["a.title-header"]`:
+tier 2 drops the text inside those links and keeps everything else, so a
+rename passes without `--accept` while an added `<span>` or a changed `href`
+still fails. Tier 1 compares the text, so every page must agree, and tier 3's
+`hasText` requirement keeps either link from being emptied. Tier 2 also
+re-canonicalizes the recorded tree under the current region options instead
+of trusting its stored hash, so a golden accepted before a region gained an
+ignore option keeps passing.
+
 **Exclude routes that carry no chrome.** Standalone pages (a presentation deck,
 a bare redirect) will otherwise report total chrome loss. `discoverRoutes`
 only walks `*.html`; a route with no chrome markup at all needs to live

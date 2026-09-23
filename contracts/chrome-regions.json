@@ -4,7 +4,11 @@
   "regions": [
     { "id": "skip-link", "selector": "header.layout-header > a.sr-only" },
     { "id": "emergency", "selector": "header.layout-header > #uc-emergency" },
-    { "id": "site-title", "selector": "header.layout-header > section.layout-title" },
+    {
+      "id": "site-title",
+      "selector": "header.layout-header > section.layout-title",
+      "ignoreTextOf": ["a.title-header"]
+    },
     {
       "id": "mobile-drawer",
       "selector": ".navmenu.navmenu-default.navmenu-fixed-left.offcanvas:not(.offcanvas-clone)",

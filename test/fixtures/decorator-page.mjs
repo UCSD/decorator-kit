@@ -9,8 +9,22 @@
 // href without touching its count, and `footerBroken` drops the footer-links
 // list and the wordmark image entirely. Both defaults match the real markup
 // pinned into vendor/decorator-5/templates/two-column.html on 2026-08-19.
+//
+// `siteName` and `siteShort` set the text of the long and short title links,
+// which a site owns; `siteNameMarkup` replaces the long link's contents with
+// raw markup, to prove that only text — not elements — is exempt.
 
-export function decoratorPage(title, { searchAsLink = false, logoHref = "https://www.ucsd.edu", footerBroken = false } = {}) {
+export function decoratorPage(
+  title,
+  {
+    searchAsLink = false,
+    logoHref = "https://www.ucsd.edu",
+    footerBroken = false,
+    siteName = "Site Name",
+    siteShort = "Short",
+    siteNameMarkup = null,
+  } = {},
+) {
   const footerContent = footerBroken
     ? `<p>&copy; 2026 UC San Diego</p>`
     : `<ul class="footer-links"><li><a href="https://www.ucsd.edu/_about/legal/index.html">Terms &amp; Conditions</a></li></ul>
@@ -34,8 +48,8 @@ export function decoratorPage(title, { searchAsLink = false, logoHref = "https:/
   <a class="sr-only" href="#main-content">Skip to main content</a>
   <div id="uc-emergency"></div>
   <section class="layout-title">
-    <a href="index.html" class="title-header title-header-large">Site Name</a>
-    <a href="index.html" class="title-header title-header-short">Short</a>
+    <a href="index.html" class="title-header title-header-large">${siteNameMarkup ?? siteName}</a>
+    <a href="index.html" class="title-header title-header-short">${siteShort}</a>
     <a href="${logoHref}" class="title-logo">UC San Diego</a>
   </section>
 </header>
