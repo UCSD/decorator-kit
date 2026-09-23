@@ -1,5 +1,41 @@
 # Changelog
 
+## 2.2.0
+
+### Changed
+
+- **Sites can change their own site name.** Renaming the site — the text of
+  `a.title-header.title-header-large` and `a.title-header.title-header-short`
+  in the title band — used to fail `verify` at tier 2, so every rename needed
+  a human `--accept`. The `site-title` region now declares
+  `ignoreTextOf: ["a.title-header"]`: tier 2 drops the text inside those two
+  links and still pins their elements, classes, and `href`, and everything
+  else in the band, `a.title-logo` included. Tier 1 still compares the text,
+  so the name must match on every page.
+- **Rule: "The site name is the one piece of chrome text you may change"** in
+  `rules/00-canvas.md`, with matching guidance in the skill and in
+  `references/protected-regions.md`. Agents change only the text, on every
+  page, and always propose a short form for the link that shows below 480px —
+  a word or an acronym ("Decorator V5" → "V5") — even when only the long name
+  was given.
+
+### Added
+
+- **`ignoreTextOf` on a chrome region** (`contracts/chrome-regions.json` and
+  its schema, and `chrome-regions.local.json` overlays). Like
+  `ignoreChildrenOf`, but drops only text, so an element added inside a
+  matching node still fails tier 2.
+- **`hasText` requirement in tier 3 rules.** `site-title.branding` now
+  requires exactly one long and one short title link, each with text. An
+  emptied site name fails, and `--accept` cannot clear it.
+
+### Fixed
+
+- Tier 2 now re-canonicalizes the golden's recorded tree under the current
+  region options instead of comparing its stored hash. A golden accepted with
+  2.1.0 or earlier keeps passing after the upgrade, and its recorded site name
+  no longer pins the new one. No project needs to re-run `--accept`.
+
 ## 2.1.0
 
 ### Added

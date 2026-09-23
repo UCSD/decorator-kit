@@ -328,6 +328,34 @@ UC San Diego logo.
 `#uc-emergency` is populated by the campus emergency broadcast. It is empty in
 source and must stay in the document.
 
+### The site name is the site's own
+
+The text of the two `a.title-header` links is the one piece of chrome a site
+sets for itself. Change it when asked to rename the site — the text only:
+
+| Link | Shows | Keep it |
+|---|---|---|
+| `a.title-header.title-header-large` | 480px and wider | the full site name |
+| `a.title-header.title-header-short` | below 480px | a word or an acronym, roughly a dozen characters at most |
+
+The widths come from `base.css`: `.title-header-short` is `display: none` until
+`max-width: 479px`, where it replaces the large link, and at 360px and below
+it renders at 20px, uppercase, with 1px letter spacing. A long short name
+wraps there.
+
+Always propose the short form alongside a new long one, even if the request
+named only the long one: "Decorator V5" → "V5".
+
+Everything else in the band stays as shipped — both elements, their classes,
+their `href`, and `a.title-logo` with its fixed `https://www.ucsd.edu`
+destination. No markup goes inside either title link.
+
+`verify` enforces that split. Tier 2 drops the text of `a.title-header` before
+comparing against the golden (`ignoreTextOf` in `contracts/chrome-regions.json`),
+so a rename needs no `--accept`. Tier 1 still compares the text across pages,
+so the name must match on every page, and tier 3's `site-title.branding` rule
+fails if either link is left empty.
+
 > **Known upstream inconsistency.** `base.css` still carries a
 > `.skip-to-main:focus, .skip-to-main:active` rule, but no shipped template
 > applies that class — the skip link is `a.sr-only` in every one of the 11

@@ -104,10 +104,13 @@ export function normalizeUrl(value, basePath) {
  * attributes emitted as a name-sorted array of pairs. `ignoreChildrenOf`
  * empties the children of any descendant (relative to `root`) matching one of
  * the given selectors — for build-generated content, like a data-driven nav
- * list, whose wrapper is chrome but whose contents are not.
+ * list, whose wrapper is chrome but whose contents are not. `ignoreTextOf`
+ * drops only the text inside a matching descendant and keeps its elements —
+ * for a link whose wording belongs to the site but whose markup does not,
+ * like the title band's site name.
  */
-export function canonicalize(root, { basePath = "", ignoreChildrenOf = [] } = {}) {
-  function canonElement(node) {
+export function canonicalize(root, { basePath = "", ignoreChildrenOf = [], ignoreTextOf = [] } = {}) {
+  function canonElement(node, inIgnoredText = false) {
     const attrs = [];
     for (const [name, rawValue] of node.attrs) {
       if (DROP_ATTRS.has(name)) continue;
@@ -125,18 +128,43 @@ export function canonicalize(root, { basePath = "", ignoreChildrenOf = [] } = {}
     }
     attrs.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
     const emptied = ignoreChildrenOf.some((selector) => matches(node, selector));
-    const children = emptied ? [] : node.children.map(canonAny).filter(Boolean);
+    const textIgnored = inIgnoredText || ignoreTextOf.some((selector) => matches(node, selector));
+    const children = emptied ? [] : node.children.map((child) => canonAny(child, textIgnored)).filter(Boolean);
     return { tag: node.tag, attrs, children };
   }
-  function canonAny(node) {
+  function canonAny(node, inIgnoredText) {
     if (node.type === "comment") return null;
     if (node.type === "text") {
+      if (inIgnoredText) return null;
       const text = node.value.replace(/\s+/g, " ").trim();
       return text ? { text } : null;
     }
-    return canonElement(node);
+    return canonElement(node, inIgnoredText);
   }
   return canonElement(root);
+}
+
+/**
+ * Rebuild a parsed-element tree from a canonical one, so a golden recorded by
+ * an earlier release can be canonicalized again under today's region options.
+ * Without this, adding an ignore option to a region would fail every existing
+ * project's golden on the day it upgraded.
+ */
+export function fromCanonical(canonical, parent = null) {
+  if (canonical.text !== undefined) return { type: "text", value: canonical.text, parent };
+  const node = { type: "element", tag: canonical.tag, attrs: canonical.attrs.map(([k, v]) => [k, v]), children: [], parent };
+  node.children = canonical.children.map((child) => fromCanonical(child, node));
+  return node;
+}
+
+/** Tier 1 compares routes with each other, so it keeps text a site owns: the site name must still match on every page. */
+function consistencyOptions(region) {
+  return { ignoreChildrenOf: region.ignoreChildrenOf ?? [] };
+}
+
+/** Tier 2 compares against a recorded golden, so it also drops text a site owns. */
+function goldenOptions(region) {
+  return { ignoreChildrenOf: region.ignoreChildrenOf ?? [], ignoreTextOf: region.ignoreTextOf ?? [] };
 }
 
 export function hashCanonical(canonical) {
@@ -208,12 +236,12 @@ export function checkConsistency(pages, regions) {
   for (const region of regions) {
     const refNode = reference.found[region.id];
     if (!refNode) continue;
-    const refCanon = canonicalize(refNode, { ignoreChildrenOf: region.ignoreChildrenOf ?? [] });
+    const refCanon = canonicalize(refNode, consistencyOptions(region));
     const refHash = hashCanonical(refCanon);
     for (const page of rest) {
       const node = page.found[region.id];
       if (!node) continue;
-      const canon = canonicalize(node, { ignoreChildrenOf: region.ignoreChildrenOf ?? [] });
+      const canon = canonicalize(node, consistencyOptions(region));
       if (hashCanonical(canon) !== refHash) {
         findings.push({
           kind: "chrome/consistent",
@@ -234,7 +262,7 @@ export function checkGolden(pages, regions, golden) {
   for (const region of regions) {
     const page = pages.find((p) => p.found[region.id]);
     if (!page) continue;
-    const canon = canonicalize(page.found[region.id], { ignoreChildrenOf: region.ignoreChildrenOf ?? [] });
+    const canon = canonicalize(page.found[region.id], goldenOptions(region));
     const hash = hashCanonical(canon);
     const recorded = golden?.regions?.[region.id];
     if (!recorded) {
@@ -248,12 +276,16 @@ export function checkGolden(pages, regions, golden) {
       });
       continue;
     }
-    if (recorded.hash !== hash) {
+    // Re-canonicalize the recorded tree under today's options rather than
+    // trusting its stored hash, so a golden accepted before a region gained
+    // ignoreTextOf still matches — and its old site name does not pin the new one.
+    const expected = recorded.tree ? canonicalize(fromCanonical(recorded.tree), goldenOptions(region)) : null;
+    if ((expected ? hashCanonical(expected) : recorded.hash) !== hash) {
       findings.push({
         kind: "chrome/golden",
         id: region.id,
         route: page.route,
-        detail: diffCanonical(recorded.tree, canon) ?? "chrome no longer matches the recorded contract",
+        detail: (expected && diffCanonical(expected, canon)) ?? "chrome no longer matches the recorded contract",
         remedy: "If a human intended this presentation change, they should run --accept --reason \"…\" themselves after reviewing the diff. If you are an AI agent, do not run --accept — surface this finding and stop. If this was not intended, revert — the shell was edited by accident.",
         clearableByAccept: true,
       });
@@ -267,7 +299,19 @@ function resolveScope(regionNode, rule) {
   return querySelector(regionNode, rule.within);
 }
 
+function textContent(node) {
+  if (node.type === "text") return node.value;
+  return (node.children ?? []).map(textContent).join("");
+}
+
 function checkRequirement(scope, requirement, basePath) {
+  if (requirement.hasText) {
+    const targets = querySelectorAll(scope, requirement.selector);
+    if (!targets.length) return `no element matched "${requirement.selector}" to check its text`;
+    const blank = targets.filter((target) => !textContent(target).trim());
+    if (blank.length) return `${blank.length} × "${requirement.selector}" has no text`;
+    return null;
+  }
   if (requirement.attribute) {
     const targets = requirement.selector ? querySelectorAll(scope, requirement.selector) : [scope];
     if (!targets.length) {
@@ -373,7 +417,7 @@ export async function writeGolden(cwd, pages, regions, { reason } = {}) {
   for (const region of regions) {
     const page = pages.find((p) => p.found[region.id]);
     if (!page) continue;
-    const canon = canonicalize(page.found[region.id], { ignoreChildrenOf: region.ignoreChildrenOf ?? [] });
+    const canon = canonicalize(page.found[region.id], goldenOptions(region));
     record.regions[region.id] = { hash: hashCanonical(canon), route: page.route, tree: canon };
   }
   await writeFile(path.join(cwd, GOLDEN_FILE), `${JSON.stringify(record, null, 2)}\n`);
@@ -407,6 +451,9 @@ export function explain(config) {
     lines.push(`  ${region.id.padEnd(14)} ${region.selector}`);
     if (region.ignoreChildrenOf?.length) {
       lines.push(`  ${" ".repeat(14)} (tier 2 ignores children of ${region.ignoreChildrenOf.join(", ")})`);
+    }
+    if (region.ignoreTextOf?.length) {
+      lines.push(`  ${" ".repeat(14)} (tier 2 ignores the text of ${region.ignoreTextOf.join(", ")}; tier 1 still compares it)`);
     }
   }
   lines.push("", `structural rules (tier 3): ${config.rules.length}`);

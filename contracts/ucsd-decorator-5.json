@@ -61,10 +61,13 @@
       "source": "vendor/decorator-5/templates/two-column.html",
       "require": [
         { "selector": "a.title-header", "count": 2 },
+        { "selector": "a.title-header.title-header-large", "count": 1 },
+        { "selector": "a.title-header.title-header-short", "count": 1 },
+        { "selector": "a.title-header", "hasText": true },
         { "selector": "a.title-logo", "count": 1 },
         { "selector": "a.title-logo", "attribute": "href", "equalsUrl": "https://www.ucsd.edu" }
       ],
-      "remedy": "The title band carries the long and short site title links plus the UC San Diego logo link, which always points to https://www.ucsd.edu on every Decorator site. A different destination — including a mascot page, a custom brand, or another domain — means the logo link was swapped."
+      "remedy": "The title band carries the long and short site title links plus the UC San Diego logo link, which always points to https://www.ucsd.edu on every Decorator site. The wording of the two site title links is the site's own and may change; both must keep their text, and the short one is what shows below 480px. A different logo destination — including a mascot page, a custom brand, or another domain — means the logo link was swapped."
     },
     {
       "id": "footer.branding",

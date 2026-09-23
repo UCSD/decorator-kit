@@ -11,6 +11,7 @@ import {
   canonicalize,
   diffCanonical,
   discoverRoutes,
+  fromCanonical,
   hashCanonical,
   loadConfig,
   readGolden,
@@ -100,6 +101,91 @@ describe("canonicalize", () => {
     const canon = canonicalize(querySelector(doc, ".drawer"), { ignoreChildrenOf: ["ul.navmenu-nav"] });
     const ul = canon.children.find((c) => c.tag === "ul");
     assert.equal(ul.children.length, 0);
+  });
+});
+
+describe("canonicalize: ignoreTextOf", () => {
+  it("drops text inside a matching descendant and keeps its elements and attributes", () => {
+    const doc = parseHTML(`<section><a class="t" href="/">Long <b>name</b></a><p>kept</p></section>`);
+    const canon = canonicalize(querySelector(doc, "section"), { ignoreTextOf: ["a.t"] });
+    assert.deepEqual(canon.children[0], {
+      tag: "a",
+      attrs: [["class", "t"], ["href", "/"]],
+      children: [{ tag: "b", attrs: [], children: [] }],
+    });
+    assert.deepEqual(canon.children[1].children, [{ text: "kept" }]);
+  });
+
+  it("fromCanonical round-trips, so a recorded tree can be canonicalized again", () => {
+    const doc = parseHTML(`<nav class="b a"><a href="/x">X</a> <!-- c --></nav>`);
+    const canon = canonicalize(querySelector(doc, "nav"));
+    assert.deepEqual(canonicalize(fromCanonical(canon)), canon);
+  });
+});
+
+describe("site-title: the site name is the site's to set", () => {
+  async function accepted() {
+    const dir = await project();
+    await writePages(dir);
+    const clean = await runStructural(dir);
+    await writeGolden(dir, clean.pages, clean.config.regions);
+    return dir;
+  }
+
+  it("renaming the long and short title on every page leaves all tiers green", async () => {
+    const dir = await accepted();
+    await writePages(dir, { siteName: "Decorator V5", siteShort: "V5" });
+    const { findings } = await runStructural(dir);
+    assert.deepEqual(findings, []);
+  });
+
+  it("tier 1 still requires the same site name on every page", async () => {
+    const dir = await accepted();
+    await writeFile(path.join(dir, "about.html"), decoratorPage("About", { siteName: "Decorator V5" }));
+    const { findings } = await runStructural(dir);
+    assert.ok(findings.some((f) => f.kind === "chrome/consistent" && f.id === "site-title"));
+    assert.ok(!findings.some((f) => f.kind === "chrome/golden"));
+  });
+
+  it("an element inside a title link is still a golden change", async () => {
+    const dir = await accepted();
+    await writePages(dir, { siteNameMarkup: `<img src="brand.png" alt="Brand">` });
+    const { findings } = await runStructural(dir);
+    assert.ok(findings.some((f) => f.kind === "chrome/golden" && f.id === "site-title"));
+  });
+
+  it("a changed title link href is still a golden change", async () => {
+    const dir = await accepted();
+    const page = decoratorPage("Home").replace(`href="index.html" class="title-header title-header-short"`, `href="/elsewhere/" class="title-header title-header-short"`);
+    await writeFile(path.join(dir, "index.html"), page);
+    await writeFile(path.join(dir, "about.html"), page);
+    const { findings } = await runStructural(dir);
+    assert.ok(findings.some((f) => f.kind === "chrome/golden" && f.id === "site-title"));
+  });
+
+  it("an emptied title link fails tier 3, which --accept cannot clear", async () => {
+    const dir = await accepted();
+    await writePages(dir, { siteShort: "" });
+    const { findings } = await runStructural(dir);
+    const hit = findings.find((f) => f.id === "site-title.branding");
+    assert.ok(hit);
+    assert.match(hit.detail, /has no text/);
+    assert.equal(hit.clearableByAccept, false);
+  });
+
+  it("a golden recorded before ignoreTextOf existed still passes, before and after a rename", async () => {
+    const dir = await project();
+    await writePages(dir);
+    const { pages, config } = await runStructural(dir);
+    // What 2.1.0 wrote: the site-title tree with its text still in it.
+    const legacyRegions = config.regions.map(({ ignoreTextOf, ...region }) => region);
+    await writeGolden(dir, pages, legacyRegions);
+    const legacy = await readGolden(dir);
+    assert.match(JSON.stringify(legacy.regions["site-title"].tree), /Site Name/);
+
+    assert.deepEqual((await runStructural(dir)).findings, []);
+    await writePages(dir, { siteName: "Decorator V5", siteShort: "V5" });
+    assert.deepEqual((await runStructural(dir)).findings, []);
   });
 });
 

@@ -1,6 +1,6 @@
 {
   "name": "ucsd-decorator-kit",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "type": "module",
   "description": "Agent-facing contract for building on the UC San Diego Decorator 5 design system.",
   "keywords": [

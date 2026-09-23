@@ -86,6 +86,15 @@ canvas**. The header, title band, navbar, mobile offcanvas drawer, both search
 forms, the footer, and any embedded campus widget are **outside** it, and are
 not yours to edit.
 
+**One exception: the site name.** When asked to change the site's name or
+title, change only the text of `a.title-header.title-header-large` and
+`a.title-header.title-header-short` in the title band, identically on every
+page. Keep the elements, classes, and `href`; leave `a.title-logo` alone. The
+short link is what shows below 480px, so always propose a short form — a word
+or an acronym, roughly a dozen characters at most ("Decorator V5" → "V5") —
+even when only the long name was given. `verify` allows this without
+`--accept`. See `references/protected-regions.md`, "Header and title band".
+
 Run `npx ucsd-decorator-kit verify --explain` (or, without the CLI,
 `node node_modules/ucsd-decorator-kit/checks/chrome-contract.mjs --explain`)
 to print the exact canvas and chrome selectors for this project.

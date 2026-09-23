@@ -40,7 +40,8 @@ since — unlike the canvas — they hold for any Decorator site without change:
   "regions": [
     { "id": "skip-link",     "selector": "header.layout-header > a.sr-only" },
     { "id": "emergency",     "selector": "header.layout-header > #uc-emergency" },
-    { "id": "site-title",    "selector": "header.layout-header > section.layout-title" },
+    { "id": "site-title",    "selector": "header.layout-header > section.layout-title",
+      "ignoreTextOf": ["a.title-header"] },
     { "id": "mobile-drawer", "selector": ".navmenu.navmenu-default.navmenu-fixed-left.offcanvas:not(.offcanvas-clone)",
       "ignoreChildrenOf": ["ul.navmenu-nav"] },
     { "id": "navbar",        "selector": "nav.navbar.navbar-default.navbar-static-top",
@@ -54,6 +55,12 @@ since — unlike the canvas — they hold for any Decorator site without change:
 adds its first nav link: the drawer's and navbar's page-navigation `<ul>` are
 chrome, but every project's own `<li>` links inside them are not, so their
 children are emptied before hashing.
+
+`ignoreTextOf` does the same for the site name, more narrowly: tier 2 drops
+the text inside `a.title-header` but keeps the elements and their attributes,
+so a site can set its long and short name without an `--accept`, while an
+added element or a changed `href` still fails. Tier 1 keeps the text, so the
+name must still match on every page.
 
 A project whose chrome genuinely differs from this — an extra region, a
 different selector — adds `chrome-regions.local.json` at its root, same
