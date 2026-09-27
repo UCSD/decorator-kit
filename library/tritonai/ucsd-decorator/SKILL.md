@@ -1,6 +1,6 @@
 ---
 name: ucsd-decorator
-description: Build and edit UC San Diego web pages on the Decorator 5 design system without damaging the page chrome. Use when working on any ucsd.edu site, campus page shell, Decorator template, or kitchen-sink component — and specifically when a task touches the header, navbar, mobile offcanvas drawer, search forms, footer, or an embedded UCSD widget. Enforces one writable canvas, a pinned source of truth for markup, and a CI-checkable chrome contract.
+description: Build and edit UC San Diego web pages on the Decorator 5 design system without damaging the page chrome. Use when working on any ucsd.edu site, campus page shell, Decorator template, or kitchen-sink component — and specifically when a task touches the header, navbar, mobile offcanvas drawer, search forms, footer, or an embedded UCSD widget. Also use when a developer asks to get started or start a new Decorator project ("help me get started", "where do I begin") — run the kickoff interview before building. Enforces one writable canvas, a pinned source of truth for markup, and a CI-checkable chrome contract.
 ---
 
 # UC San Diego Decorator 5
@@ -170,6 +170,17 @@ template, never from recall.
   stick. `#chat-bubble` is the TritonGPT launcher; reshaping it into a circle on
   phones clipped the "Ask TritonGPT" label in production. Load `tgpt-loader.js`
   and take what it renders.
+
+## Starting a new project
+
+When a developer asks to get started — "help me get started", "where do I
+begin", "start a new project" — run the kickoff interview in the project
+rules ("Getting started — the kickoff interview", from
+`rules/60-getting-started.md`) before writing any markup. Ask its six questions
+in one message, recommend a layout and modules with links to the Decorator Kit
+Developer Guide at `https://developer.ucsd.edu/design/decorator/user-guide/`,
+let the developer pick the layout, save `BRIEF.md`, then build. Where
+`AskUserQuestion` is available, use it for the multiple-choice questions — it takes up to four per call.
 
 ## Building a page
 

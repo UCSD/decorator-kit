@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.3.0
+
+### Added
+
+- **Kickoff interview: "help me get started."** New rule
+  `rules/60-getting-started.md`, compiled into `CLAUDE.md`, `AGENTS.md`,
+  `.cursorrules`, and the Copilot instructions, so any agent runs it. When a
+  developer asks to get started, the agent asks six multiple-choice questions
+  (what, who and the one task, campus area, stack, data, site name), maps the
+  answers to layouts, modules, and patterns in the Decorator Kit Developer
+  Guide, links each card, lets the developer pick the layout, saves a
+  `BRIEF.md`, and only then builds. The skill's description now triggers on it.
+- **Starter interview prompt** in the guide's "Start here" section, for chat
+  AIs with no kit installed.
+
 ## 2.2.0
 
 ### Changed

@@ -201,6 +201,15 @@
 					<section id="start" class="guide-section" aria-labelledby="start-heading">
 						<h2 id="start-heading">Start here</h2>
 
+						<div class="msg info">
+							<h2>Not sure what it should look like yet?</h2>
+							Let your AI interview you first. With the kit installed, tell Claude Code, Cursor,
+							Copilot, or any agent that reads <code>AGENTS.md</code>: <strong>help me get started</strong>.
+							Using a chat AI with no kit? Paste the <a href="#starter-prompt">starter interview prompt</a>
+							below. Either way you answer six quick questions, get a layout and modules to look at on
+							this page, pick one, and get a first build that's close to your goal.
+						</div>
+
 						<p>The kit's rules already tell the agent to stay inside the canvas, read markup from the
 							npm package, and load the Decorator from the CDN. A good prompt adds the four decisions
 							the agent is not allowed to make for you:</p>
@@ -235,6 +244,35 @@ In the canvas, build:
 Images: [real paths + alt text, or "use placeholders at the module's documented size"].
 Custom behavior goes in js/[name].js. Styles go in css/[name].css, scoped to main#main-content.
 Don't use Bootstrap -success/-info/-warning/-danger classes. Keep every chrome region as shipped.</pre>
+							</div>
+						</article>
+
+						<article class="guide-specimen" aria-labelledby="starter-prompt">
+							<div class="guide-specimen-head">
+								<h3 id="starter-prompt">Starter interview prompt</h3>
+								<p>For any AI chat. It asks you six questions, then recommends cards from this guide.</p>
+							</div>
+							<div class="guide-prompt">
+								<div class="guide-prompt-bar">
+									<p class="guide-prompt-title"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Prompt</p>
+									<button type="button" class="guide-copy" aria-label="Copy starter interview prompt" data-copy-target="p-start"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+								</div>
+<pre id="p-start">I'm building a web app on UC San Diego's Decorator 5 design system and I'm not sure how it should look. Before writing any code, interview me.
+
+Ask these six questions in one message, as a numbered list with lettered options, so I can answer in one reply:
+1. What am I building? (a) department or information site (b) request, intake, or multi-step application form (c) dashboard or status board (d) directory, search, or records admin tool (e) knowledge base or help articles (f) something else
+2. Who uses it, and what is the one thing they must be able to do?
+3. Which campus area? (a) advising (b) enrollment and courses (c) research (d) housing (e) IT services (f) facilities and energy (g) library (h) HR (i) other
+4. How will it be built and hosted? (a) static HTML (b) a JavaScript framework (c) server-rendered templates (d) Cascade CMS (e) not sure
+5. What data does it touch? (a) public information only (b) it needs campus sign-in (c) student records, personal, or health data (d) not sure
+6. The site name, and a short form for phones (a word or an acronym).
+
+Then recommend a layout (blank-slate, two-column, three-column, or homepage) and the modules and patterns to use, linking each to its card in the Decorator Kit Developer Guide:
+- https://developer.ucsd.edu/design/decorator/user-guide/ (layouts, components, modules, widgets, recipes)
+- https://developer.ucsd.edu/design/decorator/user-guide/app-patterns.html (app shells, dashboard blocks, dashboards by campus area)
+Let me pick the layout. Then write a short build brief: what, who, the one task, layout, stack, data, and the canvas sections top to bottom.
+
+Build rules: markup comes from the ucsd-decorator-v5 npm package, CSS and JS load from cdn.ucsd.edu, and only the content inside main#main-content changes. The header, navbar, mobile drawer, both search forms, and footer stay exactly as shipped. No Bootstrap -success/-info/-warning/-danger classes. If I handle student or personal data, use campus sign-in and no real records in placeholders.</pre>
 							</div>
 						</article>
 					</section>
