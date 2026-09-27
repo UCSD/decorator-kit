@@ -38,6 +38,47 @@ The agent will ask which layout to start from rather than picking one. That is
 deliberate — choosing a template unasked is exactly the class of decision this
 kit exists to prevent.
 
+### Not sure what it should look like? Say "help me get started"
+
+If you know what the app has to do but not how it should look, tell your agent:
+
+```
+help me get started
+```
+
+Instead of writing markup, the agent interviews you first — six questions in
+one message, each with lettered options, so you can reply `1b, 2 students
+checking waitlists, 3b…`:
+
+1. What are you building — an information site, a request or application form,
+   a dashboard, a directory or admin tool, a knowledge base?
+2. Who uses it, and what is the one thing they must be able to do?
+3. Which campus area — advising, enrollment, research, housing, IT, facilities,
+   library, HR?
+4. How will it be built and hosted — static HTML, a JavaScript framework,
+   server-rendered templates, Cascade CMS?
+5. What data does it touch — public only, campus sign-in, student or personal
+   records?
+6. The site name, and a short form for phones.
+
+From your answers it recommends a layout and the modules and patterns to use,
+each linked to its card in the
+[Decorator Kit Developer Guide](https://developer.ucsd.edu/design/decorator/user-guide/)
+so you can see it first. You pick the layout; the agent writes a `BRIEF.md` at
+the project root with the plan, then builds a first version from it inside the
+canvas, runs `verify`, and suggests next prompts. Later sessions read
+`BRIEF.md` before changing the page.
+
+It works in Claude Code, Cursor, Copilot, and any agent that reads `AGENTS.md`,
+because the interview is a rule — `rules/60-getting-started.md` — compiled into
+every instruction file. For a chat AI with no kit installed, such as TritonGPT,
+paste the **Starter interview prompt** from the guide's
+[Start here](https://developer.ucsd.edu/design/decorator/user-guide/#start)
+section instead.
+
+Skip it when you already know the template, the page name, and the pieces you
+want: the agent only asks for what your request leaves out.
+
 ### Already have a project
 
 ```bash
