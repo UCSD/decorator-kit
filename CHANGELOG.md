@@ -1,5 +1,37 @@
 # Changelog
 
+## 2.4.0
+
+### Changed
+
+- **`CLAUDE.md` is half the size, and its detail moved to a new
+  `DECORATOR.md`.** The generated `CLAUDE.md` had grown to 49,901 characters,
+  past the 40,000 at which Claude Code warns that a memory file will impact
+  performance, and Claude Code loads all of it in every session. The rule files
+  now hold what must apply in every session, 24,739 characters. A section that
+  also carries measurements, tables, or a procedure for one kind of task keeps
+  its rule and ends with a line naming that task: "Before you copy a template,
+  read this section in full in `DECORATOR.md`." `DECORATOR.md` holds those
+  sections whole. Nothing imports it, because an `@` import loads at launch too
+  and would not have shrunk anything. `AGENTS.md`, `.cursorrules`, and the
+  Copilot instructions shrink the same way.
+- **Component library READMEs compile into `DECORATOR.md`.** The rule files
+  keep the "Project component libraries" section, with what a library relaxes
+  and what it never does, and list each library with a pointer to its README.
+- `sync` adds `DECORATOR.md` to a project an earlier release set up, where the
+  manifest does not list it yet.
+
+### Added
+
+- **On-demand markers in `rules/`.** `<!-- on-demand: before you … -->` inside a
+  section moves what follows it to `DECORATOR.md`. Above a rule's first
+  section, it moves the rest of the rule. `test/rules.test.mjs` checks that
+  every pointer lands on a section, and holds the compiled `CLAUDE.md` to
+  25,000 characters.
+- `sync` and `check` print a note when a project's `canvas-rules/` push
+  `CLAUDE.md` past 40,000 characters. A marker in a project's canvas rule fails
+  `sync`, because those rules load in full.
+
 ## 2.3.0
 
 ### Added

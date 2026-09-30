@@ -13,14 +13,17 @@ file.
 Locate the precise variation requested — usually inside a `.bs-example` wrapper
 — and extract **only that block**. Never copy a whole kitchen-sink file.
 
+After extracting, fix relative asset paths for the new location, and confirm the
+accessibility attributes that came with the component are still intact. A class
+the kitchen sink demonstrates is not on brand until `base.css` styles it.
+
+<!-- on-demand: before you extract a component from the kitchen sink -->
+
 Available: `alerts` · `badges` · `breadcrumbs` · `buttons` ·
 `button_dropdowns` · `code` · `dropdowns` · `equal_column_layout` · `forms` ·
 `helper_classes` · `icons` · `images` · `input_groups` ·
 `javascript_components` · `pagination` · `panels` · `progress_bars` · `tables` ·
 `typography`
-
-After extracting, fix relative asset paths for the new location, and confirm the
-accessibility attributes that came with the component are still intact.
 
 **Presence in the kitchen sink is not brand endorsement.** These pages are
 Bootstrap 3's own component documentation, vendored — that is why they carry
@@ -33,6 +36,11 @@ Bootstrap can do; `base.css` decides what is on brand. Check the class against
 brand" in the brand rules.
 
 ## Widgets — bring the dependencies
+
+A widget needs its own `<link>` and `<script>` tags, not only its markup, and
+its initialization goes in a named file under `js/`.
+
+<!-- on-demand: before you add a DataTables, FullCalendar, Wizard, or MaxChar widget -->
 
 `widgets/*.html` (DataTables, FullCalendar, Wizard, MaxChar) need more than
 markup:
@@ -61,6 +69,12 @@ and auto-populated), event listings, tiles with links, contact and map, social
 icons.
 
 ## Every module is designed for one image size
+
+Each module crops its images to one published size, and an image at another
+size loses whatever the crop takes off. Supply images at that size, one size
+throughout a module, and never bake text into an image.
+
+<!-- on-demand: before you choose, size, or place an image or background in a module, "grit" backgrounds included -->
 
 Modules crop and zoom their images to fit; they do not letterbox. An image at
 the wrong size is not merely scaled, it loses whatever the crop takes off.
@@ -167,6 +181,11 @@ anything else.
 
 ## Module facts that contradict the shipped demo file
 
+`templates/modules.html` gets three things wrong: the tiles module's wrapper
+class, the tile images' missing `alt`, and the video box's aspect ratio.
+
+<!-- on-demand: before you copy anything from `templates/modules.html` -->
+
 Three things in `templates/modules.html` will mislead you if you copy them
 straight across. All three verified 2026-09 against the live
 `cdn.ucsd.edu/cms/decorator-5/styles/base.min.css`, which is the authority.
@@ -200,6 +219,11 @@ declaration says `16:9 aspect ratio (most common)`. A 16:9 video letterboxes
 inside it. That is how the module ships — do not add CSS to fight it.
 
 ## Social icon sizes fall under the touch target minimum
+
+Only `.lg-icons` clears the 44 × 44 touch target. Use it whenever the icon
+itself is what a person taps.
+
+<!-- on-demand: before you add social icons -->
 
 The social icon list has three sizes, and two of them are too small to be the
 tap target under the accessibility rules in this kit, which require 44 × 44:

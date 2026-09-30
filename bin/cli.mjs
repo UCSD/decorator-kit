@@ -3,7 +3,14 @@ import { execFileSync } from "node:child_process";
 import { cp, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { CANVAS_COMPONENTS_DIR, CANVAS_RULES_DIR, renderRuleFiles } from "../scripts/lib/rules.mjs";
+import {
+  CANVAS_COMPONENTS_DIR,
+  CANVAS_RULES_DIR,
+  MEMORY_FILE_WARN_CHARS,
+  ON_DEMAND_FILE,
+  TARGETS,
+  renderRuleFiles,
+} from "../scripts/lib/rules.mjs";
 
 // Installs the UC San Diego Decorator contract into a project.
 //
@@ -18,8 +25,9 @@ import { CANVAS_COMPONENTS_DIR, CANVAS_RULES_DIR, renderRuleFiles } from "../scr
 //
 // ── Why `add` exists, and why it will not write AGENTS.md ──────────────────
 //
-// The kit compiles one rule set into four files, one per tool. Three of those
-// names are unambiguous. `AGENTS.md` is not: it is also the conventional name
+// The kit compiles one rule set into four files, one per tool, plus the
+// DECORATOR.md all four point into. Three of those four names are
+// unambiguous. `AGENTS.md` is not: it is also the conventional name
 // for a repository's own agent contract, and a project that already has one has
 // something more specific and more important than this kit's generic rules.
 //
@@ -175,14 +183,49 @@ async function writeManifest(managed) {
 
 async function renderFor(managedOnly) {
   const exclude = managedOnly ? [] : [PROJECT_CONTRACT];
-  const { outputs } = await renderRuleFiles({
+  return renderRuleFiles({
     rulesDir: RULES_DIR,
     note: NOTE,
     exclude,
     canvasRulesDir: path.join(cwd, CANVAS_RULES_DIR),
     canvasComponentsDir: path.join(cwd, CANVAS_COMPONENTS_DIR),
   });
-  return outputs;
+}
+
+const RULE_FILES = new Set(TARGETS.map((target) => target.file));
+
+/**
+ * The paths `sync` and `check` operate on: the manifest's list, plus
+ * DECORATOR.md wherever a rule file is managed.
+ *
+ * DECORATOR.md arrived in 2.4.0, and every rule file points into it. A project
+ * an earlier release set up lists the rule files in `manages` and not this
+ * one, and `sync` touches nothing outside that list — so it would refresh
+ * CLAUDE.md and leave every pointer in it aimed at a file that isn't there.
+ */
+function managedPaths(manifest) {
+  const manages = [...manifest.manages];
+  if (!manages.includes(ON_DEMAND_FILE) && manages.some((entry) => RULE_FILES.has(entry))) {
+    manages.push(ON_DEMAND_FILE);
+  }
+  return manages;
+}
+
+/**
+ * Say so when a project's own canvas rules or libraries push CLAUDE.md past
+ * the size Claude Code warns about. It loads all of CLAUDE.md in every
+ * session; the kit's own rules stay well under this, so the rest is the
+ * project's.
+ */
+function warnIfLarge(outputs, projectChars) {
+  const size = outputs.get("CLAUDE.md")?.length ?? 0;
+  if (size <= MEMORY_FILE_WARN_CHARS) return;
+  const chars = (count) => count.toLocaleString("en-US");
+  console.log("");
+  console.log(`Note: CLAUDE.md is ${chars(size)} characters. Claude Code loads all of it in every`);
+  console.log(`session and warns about a memory file over ${chars(MEMORY_FILE_WARN_CHARS)}. Of that, ${CANVAS_RULES_DIR}/`);
+  console.log(`adds ${chars(projectChars.canvasRules)} and ${CANVAS_COMPONENTS_DIR}/ adds ${chars(projectChars.componentLibraries)}. Keep in ${CANVAS_RULES_DIR}/ only what`);
+  console.log("must hold in every session.");
 }
 
 async function scaffoldCanvasDirectories() {
@@ -399,7 +442,7 @@ async function init() {
   const decoratorInstalled = install([DECORATOR_PACKAGE]);
   const kitInstalled = install([KIT_SPEC]);
 
-  const outputs = await renderFor(true);
+  const { outputs } = await renderFor(true);
   for (const [relativePath, contents] of outputs) await put(relativePath, contents, { force: true });
   await publishSkill();
   await scaffoldCanvasDirectories();
@@ -438,7 +481,7 @@ async function init() {
 }
 
 async function add() {
-  const outputs = await renderFor(false);
+  const { outputs } = await renderFor(false);
   for (const [relativePath, contents] of outputs) await put(relativePath, contents);
   await publishSkill();
   await scaffoldCanvasDirectories();
@@ -517,34 +560,38 @@ async function managedFiles() {
 
 async function sync() {
   const manifest = await managedFiles();
-  const managesContract = manifest.manages.includes(PROJECT_CONTRACT);
-  const outputs = await renderFor(managesContract);
+  const manages = managedPaths(manifest);
+  const managesContract = manages.includes(PROJECT_CONTRACT);
+  const { outputs, projectChars } = await renderFor(managesContract);
   for (const [relativePath, contents] of outputs) {
-    if (!manifest.manages.includes(relativePath)) continue;
+    if (!manages.includes(relativePath)) continue;
     await put(relativePath, contents, { force: true, allowContract: managesContract });
   }
-  if (manifest.manages.includes(SKILL_DEST)) await publishSkill();
-  await writeManifest(manifest.manages);
+  if (manages.includes(SKILL_DEST)) await publishSkill();
+  await writeManifest(manages);
   console.log("");
   printReport();
   console.log("");
   console.log(
     `Managed files are current with ucsd-decorator-kit@${VERSION}, ${CANVAS_RULES_DIR}/, and ${CANVAS_COMPONENTS_DIR}/.`,
   );
+  warnIfLarge(outputs, projectChars);
 }
 
 async function check() {
   const manifest = await managedFiles();
-  const outputs = await renderFor(manifest.manages.includes(PROJECT_CONTRACT));
+  const manages = managedPaths(manifest);
+  const { outputs, projectChars } = await renderFor(manages.includes(PROJECT_CONTRACT));
   const stale = [];
+  warnIfLarge(outputs, projectChars);
 
   for (const [relativePath, contents] of outputs) {
-    if (!manifest.manages.includes(relativePath)) continue;
+    if (!manages.includes(relativePath)) continue;
     const current = await readFile(path.join(cwd, relativePath), "utf8").catch(() => null);
     if (current !== contents) stale.push(relativePath);
   }
 
-  if (manifest.manages.includes(SKILL_DEST)) {
+  if (manages.includes(SKILL_DEST)) {
     const destination = path.join(cwd, SKILL_DEST);
     if (!(await exists(destination))) stale.push(`${SKILL_DEST}/`);
     else {
@@ -580,7 +627,7 @@ async function check() {
     process.exitCode = 1;
     return;
   }
-  console.log(`${manifest.manages.length} managed paths are current with ucsd-decorator-kit@${VERSION}.`);
+  console.log(`${manages.length} managed paths are current with ucsd-decorator-kit@${VERSION}.`);
 }
 
 async function drift() {
