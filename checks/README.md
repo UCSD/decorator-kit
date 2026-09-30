@@ -94,7 +94,7 @@ this kit:
 
 | File | Role |
 |---|---|
-| `decorator-kit.json`'s `canvas` field | The one writable region — `main#main-content` for a plain template, `div#ag-app-canvas` for the Antigravity Code Kit. Falls back to `main#main-content` if the file is absent. |
+| `decorator-kit.json`'s `canvas` field | The one writable region — `main#main-content` for a plain template, or the selector a project with its own shell names. Falls back to `main#main-content` if the file is absent. |
 | `chrome-contract.local.json` | Tier 2's recorded golden — written by `--accept`, committed to the project, diffed against on every `--check`. |
 
 A project whose chrome genuinely differs from the six default regions or the

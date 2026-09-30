@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Removed
+
+- **References to the Antigravity Code Kit.** That project is retired. Its
+  `div#ag-app-canvas` row is gone from the canvas table in the rules and the
+  skill, and the schemas, `checks/README.md`, and the README no longer name it.
+  A project with its own shell still sets `canvas` in `decorator-kit.json`, as
+  before.
+
 ## 2.4.0
 
 ### Changed

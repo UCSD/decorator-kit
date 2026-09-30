@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/UCSD/decorator-kit/contracts/chrome-regions.schema.json",
   "title": "UCSD Decorator chrome region list",
-  "description": "The protected chrome regions tiers 1, 2, 3 and (for token derivation) 4 all operate on. `canvas` is deliberately not declared here — it is read from decorator-kit.json's `canvas` field, since it varies by project shape (main#main-content vs div#ag-app-canvas) while the regions below do not.",
+  "description": "The protected chrome regions tiers 1, 2, 3 and (for token derivation) 4 all operate on. `canvas` is deliberately not declared here — it is read from decorator-kit.json's `canvas` field, since it varies by project shape (main#main-content by default, another selector for a project with its own shell) while the regions below do not.",
   "type": "object",
   "required": ["schemaVersion", "regions"],
   "properties": {

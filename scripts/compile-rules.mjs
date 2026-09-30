@@ -7,9 +7,8 @@ import { renderRuleFiles } from "./lib/rules.mjs";
 // environment reads, DECORATOR.md with the detail they point to, and the two
 // reference pages the skill links to.
 //
-// The Antigravity Code Kit maintained CLAUDE.md, .cursorrules, and
-// .github/copilot-instructions.md as three hand-synced copies of the same text
-// (17100 / 17090 / 17090 bytes). They drift. Generate them instead.
+// CLAUDE.md, .cursorrules, and .github/copilot-instructions.md carry the same
+// text. Kept as three hand-synced copies, they drift. Generate them instead.
 //
 // The rendering itself lives in scripts/lib/rules.mjs, because bin/cli.mjs runs
 // the same code against a consumer project's root.

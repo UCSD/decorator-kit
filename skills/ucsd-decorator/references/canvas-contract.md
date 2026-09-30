@@ -30,7 +30,6 @@ file is absent:
 |---|---|
 | Plain Decorator template | `main#main-content` |
 | TritonAI site | `main#main-content` |
-| Antigravity Code Kit | `div#ag-app-canvas` |
 
 The chrome regions ship as a portable default, `contracts/chrome-regions.json`,
 since — unlike the canvas — they hold for any Decorator site without change:

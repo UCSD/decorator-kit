@@ -392,7 +392,5 @@ reads from or writes to that repository.
 - [`skills/ucsd-decorator/references/distribution.md`](skills/ucsd-decorator/references/distribution.md)
   — how Decorator is published today, the version-identity gap, and what the
   maintainers should add
-- [`chorta/antigravity-code-kit`](https://github.com/chorta/antigravity-code-kit)
-  — the Antigravity starter this kit generalizes
 - [`UCSD/Decorator`](https://github.com/UCSD/Decorator) — Decorator source
 - <https://developer.ucsd.edu/design/decorator/> — official documentation
