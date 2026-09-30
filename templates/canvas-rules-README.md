@@ -26,6 +26,9 @@ job fails if a file here changed and nobody ran `sync`.
 - Only `*.md` files directly in this directory are compiled. Subdirectories and
   this README are not.
 - Edit the files here, never the compiled section. `sync` overwrites it.
+- Agents load every rule here in full, in every session. Keep each one to what
+  must hold every time. `sync` tells you when these rules push `CLAUDE.md`
+  past the 40,000 characters at which Claude Code warns about its size.
 
 ## What belongs here
 

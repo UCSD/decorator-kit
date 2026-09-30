@@ -10,10 +10,11 @@ coding agents working in this project can build the canvas with it.
 
 1. Make a folder for it: `canvas-components/<library>/`.
 2. Put the files the page loads in it: CSS, JS, or the library's build output.
-3. Add a `README.md` to the folder. `sync` compiles it into the rule files
-   agents read, so write it for them. Say what the library is for, how the page
-   loads it, which components to reach for, and what to avoid. There's an
-   example at the end of this file.
+3. Add a `README.md` to the folder. `sync` lists the library in the rule files
+   agents read and compiles the README into `DECORATOR.md`, which they read
+   before using the library, so write it for them. Say what the library is for,
+   how the page loads it, which components to reach for, and what to avoid.
+   There's an example at the end of this file.
 4. Run `npx ucsd-decorator-kit sync`, or `npm run decorator:sync`, and commit
    the result. The `decorator:check` CI job fails if you forget.
 

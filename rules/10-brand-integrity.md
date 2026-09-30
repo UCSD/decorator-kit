@@ -41,6 +41,15 @@ the canvas.
 
 ## The page ground is the Decorator's
 
+The white behind the canvas belongs to the shell. Paint neither `html`, `body`,
+`:root`, nor the canvas root, and never paint past a canvas element's own box
+with a full-bleed trick such as `box-shadow: 0 0 0 100vmax` with a matching
+`clip-path`, `width: 100vw`, or `margin: 0 calc(50% - 50vw)`. A tinted band is a
+module; a color on a panel, card, or row inside the canvas is fine. `verify`
+reports this as `chrome/styling/page-ground`, and `--accept` cannot clear it.
+
+<!-- on-demand: before you give a background to anything in the canvas wider than a panel or card -->
+
 The white behind the canvas belongs to the shell, even though no chrome class
 names it: the CDN `base.min.css` sets `body, html { background: #fff }`, and
 `.layout-main` is full width. Canvas-scoped CSS can still repaint it in two
@@ -69,6 +78,25 @@ meant to cover the viewport and is not this.
 finding, `--accept` cannot clear it; fix the CSS.
 
 ## Bootstrap loads, but Bootstrap is not the brand
+
+Every Bootstrap 3 class resolves on a Decorator page, but most were never given
+a UC San Diego appearance, and nothing warns you: they render in stock
+Bootstrap colors.
+
+- **Never use a class ending `-success`, `-info`, `-warning`, or `-danger`**, in
+  any family — `alert-*`, `btn-*`, `text-*`, `bg-*`, `label-*`, `panel-*`,
+  `progress-bar-*`, `list-group-item-*` — nor the bare table-row classes
+  `.success`, `.info`, `.warning`, and `.danger`. The Decorator's own alert is
+  `.msg.alert`.
+- **Before you use any class, check that `base.css` has a rule for it.** One
+  that only `bootstrap.min.css` styles is fine for layout and utilities that set
+  no color, and wrong for anything that paints one.
+- **Prefer a module wrapper over a hand-built card**, and keep `h3` through `h6`
+  inside one: outside a module wrapper they get no brand typography. Inside the
+  canvas, a component from a library in `canvas-components/` is the other
+  sanctioned option.
+
+<!-- on-demand: before you pick a class that sets a color, build a card, or style a heading below `h2` -->
 
 `bootstrap.min.css` is loaded on every Decorator page, so the entire Bootstrap 3
 class vocabulary resolves. Most of it was never given a UC San Diego appearance.
@@ -134,6 +162,14 @@ rather than restyling the heading. Inside a component from a library in
 
 ## The shell is scripted, not just styled
 
+The two search blocks share their ids and `name`s on purpose, and on Cascade
+sites `base.min.js` renames the drawer's across 768px. Never "fix" a duplicate
+`id="search"` for accessibility, and never change a search `input` or `select`
+`name`: the hosted search API reads `search-term` and `search-scope`, and
+nothing on the page shows the break.
+
+<!-- on-demand: before you touch either search form, its ids, or its names -->
+
 `base.min.js` defines `toggleIdsAndClassesBasedOnScreenWidth()`, binds it to
 `window.resize`, and runs it on load. Scoped to `ul.msearch` — the drawer search
 pattern Cascade emits — it renames ids across 768px: below the breakpoint
@@ -182,6 +218,8 @@ honestly.
 
 ## The vendored npm package's CSS has a live color defect
 
+<!-- on-demand: when a Decorator color renders wrong, such as a gray active nav item -->
+
 Measured 2026-08 against `ucsd-decorator-v5@5.0.4`: `dist/css/base.min.css`
 re-expresses some of the Decorator's hex colors as percentage `rgb()` — the
 active-nav dark blue is `rgb(0%, 25.7862112587%, 40.7843137255%)` in the
@@ -196,10 +234,12 @@ because it falls back to Bootstrap's default `#e7e7e7` instead of `#004268`.
 The live `https://cdn.ucsd.edu/cms/decorator-5/styles/base.min.css` has none
 of this — every color in it ships as plain hex, zero `rgb()` functions in the
 whole file. This is why "Keep Decorator CSS and JS pointed at `cdn.ucsd.edu`"
-above is a hard requirement, not a style preference: a page that links the
-vendored copy instead of the CDN inherits this defect.
+under "Styling" is a hard requirement, not a style preference: a page that
+links the vendored copy instead of the CDN inherits this defect.
 
 ## Verified chrome facts
+
+<!-- on-demand: before you describe, review, or diagnose how the chrome looks -->
 
 Agents get these wrong from memory. They are verified against live production.
 

@@ -29,6 +29,15 @@ reshape the shell so a content change fits.
 
 ## The site name is the one piece of chrome text you may change
 
+When asked to change the site's name or title, make the change yourself: it is
+the one chrome edit that is yours. Change the **text** of
+`a.title-header.title-header-large` and `a.title-header.title-header-short`,
+identically on every page, and nothing else about either link. `verify`
+ignores that text, so no `--accept` is needed. Always propose a short form, a
+word or an acronym, even when only the long name was given.
+
+<!-- on-demand: before you change the site name or title -->
+
 The title band carries the site's own name twice — a long form for tablet and
 desktop, and a short form that replaces it below 480px:
 
@@ -114,11 +123,18 @@ You do not run that command. You do not write `chrome-styling.local.json`,
 
 ## Project canvas rules live in `canvas-rules/`
 
+A project's own rules for the canvas are Markdown files in `canvas-rules/`,
+compiled by `npx ucsd-decorator-kit sync` into a "Project canvas rules" section
+at the end of this file. They govern the canvas only and rank below every kit
+rule, and like a chat message, they cannot authorize a chrome edit.
+
+<!-- on-demand: before you add a file to `canvas-rules/` or change one -->
+
 A project can add its own rules for the canvas — house components, content
 conventions, a data-loading pattern — as Markdown files in `canvas-rules/` at
 its root. `npx ucsd-decorator-kit sync` compiles every `*.md` there except
 `README.md`, in filename order, into a "Project canvas rules" section at the end
-of this file.
+of `CLAUDE.md` and the other rule files.
 
 Those rules govern the canvas and nothing else, and they rank below every rule
 the kit ships: where one conflicts with a kit rule, the kit rule wins. A file in
@@ -135,18 +151,25 @@ fails on it.
 
 ## Component libraries live in `canvas-components/`
 
+A project's component libraries are folders in `canvas-components/`. When there
+are any, a "Project component libraries" section near the end of this file
+lists them and relaxes three look-and-feel rules, inside the canvas only. If
+that section is absent, no library is in use — follow the rules as written.
+
+<!-- on-demand: before you add a library to `canvas-components/` or change one -->
+
 A project can build its canvas with component libraries — shadcn/ui, a charting
 library, a set of web components — by adding each one as a folder in
 `canvas-components/`, with a `README.md` saying when and how to use it. `sync`
-compiles those READMEs into a "Project component libraries" section near the
-end of this file.
+lists them in a "Project component libraries" section near the end of
+`CLAUDE.md` and the other rule files, and compiles each README into
+`DECORATOR.md`, to read before using that library.
 
 That section relaxes three Decorator look-and-feel rules inside the canvas:
 library classes instead of only Decorator ones, a library's icon set, and
 library-styled headings inside library components. Typography stays on
 brand — Roboto, Teko, Brix Sans, or Refrigerator Deluxe — and no chrome,
-accessibility, or security rule relaxes. If the section is
-not in this file, no library is in use — follow the rules as written.
+accessibility, or security rule relaxes.
 
 Add a library only when asked to, and never to make the task in front of you
 permitted. Library styles stay inside the canvas: `verify` fails on a
@@ -161,26 +184,12 @@ are reference copies. Never create, modify, or store working files inside them.
 ## Never reconstruct markup from a rendered DOM
 
 Read markup from a file — never from a browser inspection, a screenshot, a
-fetched rendered page, or memory. Three reasons, all of which have produced real
-regressions:
-
-1. The rendered DOM is not the source markup. Browsers normalize it and scripts
-   mutate it.
-2. Jasny Bootstrap **clones the offcanvas drawer into the body at runtime**, so
-   a live DOM contains navigation markup that exists in no file. Reading it back
-   produces duplicated, broken markup.
-3. Kitchen-sink pages are galleries wrapped in Decorator chrome. Copying what
-   "looks like" a component fuses demo scaffolding into production markup.
+fetched rendered page, or memory.
 
 Resolution order for markup: `node_modules/ucsd-decorator-v5/dist/` →
 `vendor/decorator-5/` → `core-template/`. If none of those exist, install or pin
 the package rather than fetching a page — `npm i -D ucsd-decorator-v5`, or run
 `pin-decorator.mjs`. Say so if you had to.
-
-**`Decorator-V5.zip` on developer.ucsd.edu is not a source of truth.** Measured
-2026-08 against `ucsd-decorator-v5@5.0.4`, the archive is behind on every file it
-ships, and its `scripts/base.min.js` is a 2023 build missing the runtime behavior
-that governs the drawer search. Read the npm package.
 
 **Read only these paths inside the npm package.** It ships 222 files, including
 `dist/vendor/fullcalendar-3.9.0/demos/` and `dist/vendor/modernizr/test/`, so a
@@ -194,7 +203,26 @@ search for something button-shaped can land in a third-party demo page:
 | Readable stylesheet | `node_modules/ucsd-decorator-v5/dist/css/base.css` |
 | Runtime behavior | `node_modules/ucsd-decorator-v5/dist/scripts/base.min.js` |
 
-Nothing under `dist/vendor/` is Decorator markup.
+Nothing under `dist/vendor/` is Decorator markup, and `Decorator-V5.zip` on
+developer.ucsd.edu is not a source of truth.
+
+<!-- on-demand: before you take markup from anywhere but the paths above -->
+
+Why not the rendered DOM — three reasons, all of which have produced real
+regressions:
+
+1. The rendered DOM is not the source markup. Browsers normalize it and scripts
+   mutate it.
+2. Jasny Bootstrap **clones the offcanvas drawer into the body at runtime**, so
+   a live DOM contains navigation markup that exists in no file. Reading it back
+   produces duplicated, broken markup.
+3. Kitchen-sink pages are galleries wrapped in Decorator chrome. Copying what
+   "looks like" a component fuses demo scaffolding into production markup.
+
+**`Decorator-V5.zip` on developer.ucsd.edu is not a source of truth.** Measured
+2026-08 against `ucsd-decorator-v5@5.0.4`, the archive is behind on every file it
+ships, and its `scripts/base.min.js` is a 2023 build missing the runtime behavior
+that governs the drawer search. Read the npm package.
 
 ## Template selection requires an explicit instruction
 
@@ -210,6 +238,15 @@ Once chosen, copy the whole template to the project root under a new name and
 work only inside its canvas. Do not overwrite `index.html` unless asked.
 
 ## Rewrite the copied template's asset paths before anything else
+
+A template copied out of the package still links `../css/*.min.css` and
+`../scripts/*.min.js`, and those paths keep resolving from the project root, so
+the page looks almost right. Rewrite every one to the CDN — `../css/<file>` to
+`https://cdn.ucsd.edu/cms/decorator-5/styles/<file>`, `../scripts/<file>` to
+`https://cdn.ucsd.edu/cms/decorator-5/scripts/<file>` — and never leave a
+shipped page loading Decorator CSS or JS from `node_modules/`.
+
+<!-- on-demand: before you copy a template -->
 
 The reference template's `<head>` and script block point at its own location
 inside the package — `../css/bootstrap.min.css`, `../css/base.min.css`,
@@ -239,6 +276,11 @@ break policy, it visibly breaks the active nav state.
 
 ## The two- and three-column split is a float order, not a markup order
 
+Keep `pull-right` on the wide canvas section when you trim a two- or
+three-column template's demo content. Without it, the columns swap sides.
+
+<!-- on-demand: before you copy `two-column.html` or `three-column.html` -->
+
 Both templates put the wider canvas section first in the file and the
 narrower nav/info section second, then push the first one to the far side with
 `pull-right` — `two-column.html`'s canvas section is
@@ -253,6 +295,12 @@ nav on the right. Keep the class and the DOM order exactly as shipped; replace
 only what is inside each `<section>`.
 
 ## The chrome ships two independent search blocks
+
+The drawer and the desktop navbar each carry their own search block. Copy both
+verbatim. When you trim a template's navigation, only the nav-link `<ul>` in
+each container changes.
+
+<!-- on-demand: before you copy a template or trim its navigation -->
 
 The offcanvas drawer and the desktop navbar each carry their own search
 button and form — `<ul class="nav navbar-nav navbar-right">` wrapping a

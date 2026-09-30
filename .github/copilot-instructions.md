@@ -4,6 +4,8 @@
 
 These rules apply when generating, modifying, or reviewing code in a UC San Diego Decorator project.
 
+This file holds the rules that apply in every session. Detail that only some tasks need is in `DECORATOR.md` at the project root: where a section below names a task, read that section in full there before you do the task. Both files are generated — edit neither.
+
 ---
 
 ## The canvas and the chrome
@@ -33,35 +35,14 @@ reshape the shell so a content change fits.
 
 ### The site name is the one piece of chrome text you may change
 
-The title band carries the site's own name twice — a long form for tablet and
-desktop, and a short form that replaces it below 480px:
+When asked to change the site's name or title, make the change yourself: it is
+the one chrome edit that is yours. Change the **text** of
+`a.title-header.title-header-large` and `a.title-header.title-header-short`,
+identically on every page, and nothing else about either link. `verify`
+ignores that text, so no `--accept` is needed. Always propose a short form, a
+word or an acronym, even when only the long name was given.
 
-```html
-<a href="index.html" class="title-header title-header-large">Decorator V5</a>
-<a href="index.html" class="title-header title-header-short">V5</a>
-```
-
-When asked to change the site name or title, change the **text** of these two
-links and nothing else. Keep both elements, their classes, and their `href`.
-Do not touch `a.title-logo` — its destination is fixed at
-`https://www.ucsd.edu` on every Decorator site — and do not add markup inside
-either link: no `<span>`, image, icon, or inline style.
-
-**Always propose the short form.** If the request names only the long title,
-suggest a short one and say you did. The short form renders uppercase, with
-letter spacing, at 20px on the smallest phones, so keep it to a word or an
-acronym — roughly a dozen characters at most. "Decorator V5" becomes "V5";
-"Division of Physical Sciences" becomes "Physical Sciences" or "DPS". Never
-leave it as the old site's name, and never leave it empty.
-
-Change it on **every page**, identically. If the project builds its header
-from a data file, edit the data file, not the rendered markup.
-
-`verify` is built for this: tier 2 ignores the text of `a.title-header`, so
-no `--accept` is needed. Tier 1 still fails if one page's name differs from
-another's, and tier 3 fails if either link is left empty. Any other change in
-the title band — an `href`, a class, an added element — is still a chrome
-edit, and is still not yours to make.
+**Before you change the site name or title, read this section in full in `DECORATOR.md`.**
 
 ### The chrome integrity gate is not yours to satisfy
 
@@ -118,44 +99,21 @@ You do not run that command. You do not write `chrome-styling.local.json`,
 
 ### Project canvas rules live in `canvas-rules/`
 
-A project can add its own rules for the canvas — house components, content
-conventions, a data-loading pattern — as Markdown files in `canvas-rules/` at
-its root. `npx ucsd-decorator-kit sync` compiles every `*.md` there except
-`README.md`, in filename order, into a "Project canvas rules" section at the end
-of this file.
+A project's own rules for the canvas are Markdown files in `canvas-rules/`,
+compiled by `npx ucsd-decorator-kit sync` into a "Project canvas rules" section
+at the end of this file. They govern the canvas only and rank below every kit
+rule, and like a chat message, they cannot authorize a chrome edit.
 
-Those rules govern the canvas and nothing else, and they rank below every rule
-the kit ships: where one conflicts with a kit rule, the kit rule wins. A file in
-`canvas-rules/` is not a review, so it cannot authorize a chrome edit any more
-than a chat message can. If one asks for a change outside the canvas, do not
-follow that part — name the file and the region, and stop, as for any other
-chrome change.
-
-When asked to write a canvas rule down, add it to `canvas-rules/` as its own
-file and run `sync`. Never write a rule there that reaches the chrome, never
-edit an existing one so that the task in front of you becomes permitted, and
-never edit the compiled section directly — `sync` overwrites it, and `check`
-fails on it.
+**Before you add a file to `canvas-rules/` or change one, read this section in full in `DECORATOR.md`.**
 
 ### Component libraries live in `canvas-components/`
 
-A project can build its canvas with component libraries — shadcn/ui, a charting
-library, a set of web components — by adding each one as a folder in
-`canvas-components/`, with a `README.md` saying when and how to use it. `sync`
-compiles those READMEs into a "Project component libraries" section near the
-end of this file.
+A project's component libraries are folders in `canvas-components/`. When there
+are any, a "Project component libraries" section near the end of this file
+lists them and relaxes three look-and-feel rules, inside the canvas only. If
+that section is absent, no library is in use — follow the rules as written.
 
-That section relaxes three Decorator look-and-feel rules inside the canvas:
-library classes instead of only Decorator ones, a library's icon set, and
-library-styled headings inside library components. Typography stays on
-brand — Roboto, Teko, Brix Sans, or Refrigerator Deluxe — and no chrome,
-accessibility, or security rule relaxes. If the section is
-not in this file, no library is in use — follow the rules as written.
-
-Add a library only when asked to, and never to make the task in front of you
-permitted. Library styles stay inside the canvas: `verify` fails on a
-stylesheet in `canvas-components/` with a selector that names no class, id, or
-attribute.
+**Before you add a library to `canvas-components/` or change one, read this section in full in `DECORATOR.md`.**
 
 ### The pristine template is read-only
 
@@ -165,26 +123,12 @@ are reference copies. Never create, modify, or store working files inside them.
 ### Never reconstruct markup from a rendered DOM
 
 Read markup from a file — never from a browser inspection, a screenshot, a
-fetched rendered page, or memory. Three reasons, all of which have produced real
-regressions:
-
-1. The rendered DOM is not the source markup. Browsers normalize it and scripts
-   mutate it.
-2. Jasny Bootstrap **clones the offcanvas drawer into the body at runtime**, so
-   a live DOM contains navigation markup that exists in no file. Reading it back
-   produces duplicated, broken markup.
-3. Kitchen-sink pages are galleries wrapped in Decorator chrome. Copying what
-   "looks like" a component fuses demo scaffolding into production markup.
+fetched rendered page, or memory.
 
 Resolution order for markup: `node_modules/ucsd-decorator-v5/dist/` →
 `vendor/decorator-5/` → `core-template/`. If none of those exist, install or pin
 the package rather than fetching a page — `npm i -D ucsd-decorator-v5`, or run
 `pin-decorator.mjs`. Say so if you had to.
-
-**`Decorator-V5.zip` on developer.ucsd.edu is not a source of truth.** Measured
-2026-08 against `ucsd-decorator-v5@5.0.4`, the archive is behind on every file it
-ships, and its `scripts/base.min.js` is a 2023 build missing the runtime behavior
-that governs the drawer search. Read the npm package.
 
 **Read only these paths inside the npm package.** It ships 222 files, including
 `dist/vendor/fullcalendar-3.9.0/demos/` and `dist/vendor/modernizr/test/`, so a
@@ -198,7 +142,10 @@ search for something button-shaped can land in a third-party demo page:
 | Readable stylesheet | `node_modules/ucsd-decorator-v5/dist/css/base.css` |
 | Runtime behavior | `node_modules/ucsd-decorator-v5/dist/scripts/base.min.js` |
 
-Nothing under `dist/vendor/` is Decorator markup.
+Nothing under `dist/vendor/` is Decorator markup, and `Decorator-V5.zip` on
+developer.ucsd.edu is not a source of truth.
+
+**Before you take markup from anywhere but the paths above, read this section in full in `DECORATOR.md`.**
 
 ### Template selection requires an explicit instruction
 
@@ -215,67 +162,29 @@ work only inside its canvas. Do not overwrite `index.html` unless asked.
 
 ### Rewrite the copied template's asset paths before anything else
 
-The reference template's `<head>` and script block point at its own location
-inside the package — `../css/bootstrap.min.css`, `../css/base.min.css`,
-`../scripts/*.min.js` — because that is where the file sits inside
-`node_modules/ucsd-decorator-v5/dist/templates/`. Those paths keep resolving
-after the copy, since the same `node_modules/` tree is still there from the
-project root. That is what makes this easy to miss: the page loads and looks
-almost right.
+A template copied out of the package still links `../css/*.min.css` and
+`../scripts/*.min.js`, and those paths keep resolving from the project root, so
+the page looks almost right. Rewrite every one to the CDN — `../css/<file>` to
+`https://cdn.ucsd.edu/cms/decorator-5/styles/<file>`, `../scripts/<file>` to
+`https://cdn.ucsd.edu/cms/decorator-5/scripts/<file>` — and never leave a
+shipped page loading Decorator CSS or JS from `node_modules/`.
 
-Rewrite every one of them to the CDN instead:
-
-| Ships as | Rewrite to |
-|---|---|
-| `../css/bootstrap.min.css` | `https://cdn.ucsd.edu/cms/decorator-5/styles/bootstrap.min.css` |
-| `../css/base.min.css` | `https://cdn.ucsd.edu/cms/decorator-5/styles/base.min.css` |
-| `../scripts/modernizr.min.js` | `https://cdn.ucsd.edu/cms/decorator-5/scripts/modernizr.min.js` |
-| `../scripts/jquery.min.js` | `https://cdn.ucsd.edu/cms/decorator-5/scripts/jquery.min.js` |
-| `../scripts/bootstrap.min.js` | `https://cdn.ucsd.edu/cms/decorator-5/scripts/bootstrap.min.js` |
-| `../scripts/vendor.min.js` | `https://cdn.ucsd.edu/cms/decorator-5/scripts/vendor.min.js` |
-| `../scripts/base.min.js` | `https://cdn.ucsd.edu/cms/decorator-5/scripts/base.min.js` |
-
-Never leave a shipped page loading `node_modules/ucsd-decorator-v5/…` for its
-CSS or JS. That is not only the rule in "Brand integrity" — the package's own
-compiled `base.min.css` has a live color defect the CDN copy does not (see
-"Verified chrome facts" there), so serving the vendored copy doesn't just
-break policy, it visibly breaks the active nav state.
+**Before you copy a template, read this section in full in `DECORATOR.md`.**
 
 ### The two- and three-column split is a float order, not a markup order
 
-Both templates put the wider canvas section first in the file and the
-narrower nav/info section second, then push the first one to the far side with
-`pull-right` — `two-column.html`'s canvas section is
-`class="col-xs-12 col-md-9 main-section pull-right"`. Nothing pulls the
-nav/info section; it renders on the remaining side because the wide section no
-longer occupies it.
+Keep `pull-right` on the wide canvas section when you trim a two- or
+three-column template's demo content. Without it, the columns swap sides.
 
-Drop `pull-right` while trimming the template's demo modules down to real
-content — it reads as decorative on a section that is about to be rewritten
-anyway — and both columns fall back to plain source order: canvas on the left,
-nav on the right. Keep the class and the DOM order exactly as shipped; replace
-only what is inside each `<section>`.
+**Before you copy `two-column.html` or `three-column.html`, read this section in full in `DECORATOR.md`.**
 
 ### The chrome ships two independent search blocks
 
-The offcanvas drawer and the desktop navbar each carry their own search
-button and form — `<ul class="nav navbar-nav navbar-right">` wrapping a
-`.search-toggle` button and a `<form>`, once inside `.navmenu.offcanvas`, once
-inside `nav.navbar-default`'s `#navbar .navbar-collapse`. In the template as
-shipped, the two copies are identical: same ids, same `name` attributes, just
-in two different containers. Nothing relocates one into the other — Bootstrap's
-own collapse/offcanvas behavior is what shows only one of them at a time,
-matching the viewport. (The id-renaming behavior in "The shell is scripted,
-not just styled" is a Cascade-CMS shape that this template does not use.)
+The drawer and the desktop navbar each carry their own search block. Copy both
+verbatim. When you trim a template's navigation, only the nav-link `<ul>` in
+each container changes.
 
-Copying only the drawer's search and treating it as covering both surfaces —
-easy to do, since the two blocks look redundant — drops the desktop navbar's
-search button entirely, with nothing in the console to say so. When trimming a
-template's nav down to real content, only the nav-link `<ul>` in each
-container changes (`ul.navmenu-nav` in the drawer, the plain
-`ul.nav.navbar-nav` in the navbar — not the one carrying `navbar-right`). Both
-`ul.navbar-nav.navbar-right` search blocks are chrome: copy them verbatim,
-once per container.
+**Before you copy a template or trim its navigation, read this section in full in `DECORATOR.md`.**
 
 ---
 
@@ -318,86 +227,35 @@ the canvas.
 
 ### The page ground is the Decorator's
 
-The white behind the canvas belongs to the shell, even though no chrome class
-names it: the CDN `base.min.css` sets `body, html { background: #fff }`, and
-`.layout-main` is full width. Canvas-scoped CSS can still repaint it in two
-ways, and neither touches a chrome token:
+The white behind the canvas belongs to the shell. Paint neither `html`, `body`,
+`:root`, nor the canvas root, and never paint past a canvas element's own box
+with a full-bleed trick such as `box-shadow: 0 0 0 100vmax` with a matching
+`clip-path`, `width: 100vw`, or `margin: 0 calc(50% - 50vw)`. A tinted band is a
+module; a color on a panel, card, or row inside the canvas is fine. `verify`
+reports this as `chrome/styling/page-ground`, and `--accept` cannot clear it.
 
-- **A background on the ground itself** — `html`, `body`, `:root`, or the
-  canvas root (`main#main-content`, `div#ag-app-canvas`).
-- **A full-bleed trick** that paints past a canvas element's own box to the
-  edges of the viewport: `box-shadow: 0 0 0 100vmax` paired with
-  `clip-path: inset(0 -100vmax)`, `width: 100vw`, or
-  `margin: 0 calc(50% - 50vw)`.
-
-Measured 2026-09 on a generated app: `.student-canvas.sx-light { background:
-#f2f4f7; box-shadow: 0 0 0 100vmax #f2f4f7; clip-path: inset(0 -100vmax) }`,
-on a 1170px `.container` inside the canvas, turned the whole band between the
-navbar and the footer gray. The header, navbar, and footer were untouched, so
-it read as "the chrome is fine but the page is the wrong color."
-
-Leave the outermost canvas wrapper unpainted. A tinted band is a module —
-`.jumbotron-sand`, callout content, full-width text — whose wrapper the
-Decorator already lays out. A color on a panel, card, or row *inside* the
-canvas is fine. A `position: fixed` overlay, such as a modal backdrop, is
-meant to cover the viewport and is not this.
-
-`verify` reports both shapes as `chrome/styling/page-ground`. Like every tier 4
-finding, `--accept` cannot clear it; fix the CSS.
+**Before you give a background to anything in the canvas wider than a panel or card, read this section in full in `DECORATOR.md`.**
 
 ### Bootstrap loads, but Bootstrap is not the brand
 
-`bootstrap.min.css` is loaded on every Decorator page, so the entire Bootstrap 3
-class vocabulary resolves. Most of it was never given a UC San Diego appearance.
-When you reach for a Bootstrap class the Decorator does not style, nothing
-overrides it and nothing errors — the element simply renders in stock Bootstrap
-blue, teal, green, or red, on a UC San Diego page.
+Every Bootstrap 3 class resolves on a Decorator page, but most were never given
+a UC San Diego appearance, and nothing warns you: they render in stock
+Bootstrap colors.
 
-**Never use a class ending `-success`, `-info`, `-warning`, or `-danger`.**
-Measured 2026-09 against the live `cdn.ucsd.edu` `base.min.css` and
-`bootstrap.min.css`: across all eight contextual families — `alert-*`, `btn-*`,
-`text-*`, `bg-*`, `label-*`, `panel-*`, `progress-bar-*`, `list-group-item-*` —
-the Decorator restyles exactly two suffixes, `-primary` and `-default`, and only
-on `btn` and `panel`:
+- **Never use a class ending `-success`, `-info`, `-warning`, or `-danger`**, in
+  any family — `alert-*`, `btn-*`, `text-*`, `bg-*`, `label-*`, `panel-*`,
+  `progress-bar-*`, `list-group-item-*` — nor the bare table-row classes
+  `.success`, `.info`, `.warning`, and `.danger`. The Decorator's own alert is
+  `.msg.alert`.
+- **Before you use any class, check that `base.css` has a rule for it.** One
+  that only `bootstrap.min.css` styles is fine for layout and utilities that set
+  no color, and wrong for anything that paints one.
+- **Prefer a module wrapper over a hand-built card**, and keep `h3` through `h6`
+  inside one: outside a module wrapper they get no brand typography. Inside the
+  canvas, a component from a library in `canvas-components/` is the other
+  sanctioned option.
 
-| Class | Decorator restyles it? |
-|---|---|
-| `.btn-primary`, `.btn-default` | yes — `#00629b`, hover `#004268` |
-| `.panel-primary`, `.panel-default` | yes, inside a callout module |
-| every `-success`, `-info`, `-warning`, `-danger` in every family | **no** |
-
-So `alert alert-info` — valid Bootstrap, and demonstrated in the kitchen sink —
-paints `background:#d9edf7` with a `#bce8f1` teal border, because `.alert-info`
-has zero rules in `base.min.css`. The Decorator's own alert pattern is a
-different class entirely: `.msg.alert`, a yellow `rgba(255,205,0,.84)` panel with
-a `warning.svg` icon on its heading. The bare table-row classes `.success`,
-`.info`, `.warning`, `.danger` fall through the same way.
-
-**The test to apply before using any class:** does `base.css` contain a rule for
-it? If only `bootstrap.min.css` does, it carries no brand opinion. That is fine
-for layout and utility classes that set no color — `.row`, `.col-md-4`,
-`.img-responsive`, `.sr-only`, `.text-center`, `.pull-right`, glyphicons — and
-wrong for anything that paints one.
-
-**Prefer the module wrapper over a hand-built card.** Do not assemble a card out
-of generic Bootstrap pieces and then tune it. The sanctioned containers are the
-module wrappers — `.jumbotron-sand`, `.jumbotron.side-image-white`,
-`.jumbotron-callout-content-*`, `.jumbotron-tile-links`, `.panel.panel-default`
-inside `.jumbotron-news`. A hand-built card is how off-brand classes get in.
-Inside the canvas, a component from a library in `canvas-components/` is the
-other sanctioned option.
-
-**`h3` through `h6` have no brand typography outside a module wrapper.** The
-Decorator gives `h1` and `h2` Teko-SemiBold with a brand color and size, but its
-only unscoped rule for the rest is `h3,h4,h5,h6 { color:#333; font-weight:400;
-line-height:1.5 }` — no family, no size. Everything that makes a lower heading
-look like the Decorator is scoped to a module: `.jumbotron-tile-links .tiles h3`,
-`.jumbotron-callout-content-two h3`, `.qb-carousel .carousel-caption h3`,
-`div.styled h3`. An `h3` in a container the Decorator does not recognize falls
-back to Bootstrap's 24px default, which is why it will not match a heading
-sample rendered inside a real module. Put the heading in the module wrapper
-rather than restyling the heading. Inside a component from a library in
-`canvas-components/`, the library may style it instead.
+**Before you pick a class that sets a color, build a card, or style a heading below `h2`, read this section in full in `DECORATOR.md`.**
 
 ### JavaScript
 
@@ -411,91 +269,21 @@ rather than restyling the heading. Inside a component from a library in
 
 ### The shell is scripted, not just styled
 
-`base.min.js` defines `toggleIdsAndClassesBasedOnScreenWidth()`, binds it to
-`window.resize`, and runs it on load. Scoped to `ul.msearch` — the drawer search
-pattern Cascade emits — it renames ids across 768px: below the breakpoint
-`#search-m` → `#search`, `#search-scope-m` → `#search-scope`, `#q-m` → `#q`, and
-the term input's class and `name` from `search-term-m` to `search-term`. Above
-it, all of that reverses.
+The two search blocks share their ids and `name`s on purpose, and on Cascade
+sites `base.min.js` renames the drawer's across 768px. Never "fix" a duplicate
+`id="search"` for accessibility, and never change a search `input` or `select`
+`name`: the hosted search API reads `search-term` and `search-scope`, and
+nothing on the page shows the break.
 
-That id swap is the only thing that makes the drawer search render on phones:
-`base.min.css` lays the panel out through
-`.offcanvas > ul.nav.navbar-nav.navbar-right #search`, inside a
-`max-width: 767px` media query. Two consequences:
-
-- Below 768px the drawer panel's `id="search"` **deliberately duplicates** the
-  desktop navbar panel's id. The navbar is collapsed at that width. This is the
-  design, not a defect — code that "fixes" the duplicate for accessibility
-  silently collapses the drawer search.
-- The `name` swap is why the drawer form submits `search-term` on phones and
-  `search-term-m` on desktop. The hosted search API reads
-  `input[name="search-term"]` and `select[name="search-scope"]`, never ids.
-  Changing the input `name` breaks search with nothing visible on the page.
-
-**This is a Cascade-CMS shape, not the template's own shape.** The npm
-package's own `dist/templates/two-column.html` — the file this kit tells you
-to copy — never emits `ul.msearch` at all. It ships two independent, static
-search blocks instead: one inside `.navmenu.offcanvas`, one inside
-`nav.navbar-default`'s `#navbar .navbar-collapse`, both wrapped in
-`<ul class="nav navbar-nav navbar-right">`, both using the same ids and the
-same `search-term` name. Nothing relocates either one; Bootstrap's ordinary
-collapse/offcanvas behavior is what shows only one at a time. A page built
-from the template needs both blocks copied verbatim — dropping the desktop one
-because "the drawer already has search" removes the search button on every
-viewport above 768px, with nothing in the console to say so.
-
-Read this from `node_modules/ucsd-decorator-v5/dist/scripts/base.min.js` (or
-`vendor/decorator-5/scripts/base.min.js` if the project pins). That build differs
-from the live `cdn.ucsd.edu` copy only in minifier output style, with identical
-occurrence counts for every behavioral marker; the CDN is still the authority
-when the two disagree.
-
-**Do not read it from `Decorator-V5.zip`.** The archive ships a file by that
-name, and that is the trap: measured 2026-08 it is an 8,024-byte build stamped
-2023-01-26 with no `toggleIdsAndClassesBasedOnScreenWidth`, no `.msearch`, and no
-`search-term-m`, against 9,871 bytes on the CDN carrying all three. Reading it
-and concluding this behavior does not exist is the wrong answer arrived at
-honestly.
+**Before you touch either search form, its ids, or its names, read this section in full in `DECORATOR.md`.**
 
 ### The vendored npm package's CSS has a live color defect
 
-Measured 2026-08 against `ucsd-decorator-v5@5.0.4`: `dist/css/base.min.css`
-re-expresses some of the Decorator's hex colors as percentage `rgb()` — the
-active-nav dark blue is `rgb(0%, 25.7862112587%, 40.7843137255%)` in the
-unminified `base.css` — and the package's own minifier then strips the unit
-off a bare-zero channel, producing `rgb(0,25.7862112587%,40.7843137255%)`.
-Mixing a number and percentages in one legacy `rgb()` is invalid CSS, so a
-standards-compliant browser drops the whole declaration and falls through to
-whatever rule is next in the cascade. Eleven declarations in the file are
-corrupted this way; the active-nav background is the one that gets noticed,
-because it falls back to Bootstrap's default `#e7e7e7` instead of `#004268`.
-
-The live `https://cdn.ucsd.edu/cms/decorator-5/styles/base.min.css` has none
-of this — every color in it ships as plain hex, zero `rgb()` functions in the
-whole file. This is why "Keep Decorator CSS and JS pointed at `cdn.ucsd.edu`"
-above is a hard requirement, not a style preference: a page that links the
-vendored copy instead of the CDN inherits this defect.
+**When a Decorator color renders wrong, such as a gray active nav item, read this section in full in `DECORATOR.md`.**
 
 ### Verified chrome facts
 
-Agents get these wrong from memory. They are verified against live production.
-
-- Footer is UC San Diego Blue `#00629b`, not navy.
-- `.layout-header` is `#2b92b9`; the white band is `.layout-title` inside it.
-- There is no gold rule on the white title band.
-- The `.navbar-default` active item is dark blue `#004268`, not a gold
-  underline. Do not apply the `.layout-navbar .navbar-list` underline pattern to
-  Bootstrap `.navbar-default .navbar-nav` tabs. If it renders gray instead, the
-  page is almost certainly linking Decorator CSS from `node_modules` instead of
-  `cdn.ucsd.edu` — see "The vendored npm package's CSS has a live color defect"
-  above.
-- The mobile `MENU` label lives **inside** `button.navbar-toggle`, in
-  `.mobile-nav-icon`, alongside `.mobile-nav-bars` (exactly three
-  `span.icon-bar`).
-- The offcanvas drawer is a **sibling** of `nav.navbar`, not a child.
-- The extra-small navbar wordmark is the white footer logo asset inside
-  `.col-sm-4.pull-right.visible-xs-block`. Do not resize it or swap in another
-  UC San Diego logo.
+**Before you describe, review, or diagnose how the chrome looks, read this section in full in `DECORATOR.md`.**
 
 ### Embedded campus widgets
 
@@ -534,35 +322,18 @@ file.
 Locate the precise variation requested — usually inside a `.bs-example` wrapper
 — and extract **only that block**. Never copy a whole kitchen-sink file.
 
-Available: `alerts` · `badges` · `breadcrumbs` · `buttons` ·
-`button_dropdowns` · `code` · `dropdowns` · `equal_column_layout` · `forms` ·
-`helper_classes` · `icons` · `images` · `input_groups` ·
-`javascript_components` · `pagination` · `panels` · `progress_bars` · `tables` ·
-`typography`
-
 After extracting, fix relative asset paths for the new location, and confirm the
-accessibility attributes that came with the component are still intact.
+accessibility attributes that came with the component are still intact. A class
+the kitchen sink demonstrates is not on brand until `base.css` styles it.
 
-**Presence in the kitchen sink is not brand endorsement.** These pages are
-Bootstrap 3's own component documentation, vendored — that is why they carry
-Bootstrap's docs classes `.bs-example` and `.highlight`, and why `alerts.html`
-demonstrates `alert-info`, `alert-success`, and `alert-danger`, none of which
-the Decorator styles. Measured 2026-09: 294 of the classes these pages
-demonstrate have no rule in `base.css` at all. The kitchen sink shows you what
-Bootstrap can do; `base.css` decides what is on brand. Check the class against
-`base.css` before shipping it — see "Bootstrap loads, but Bootstrap is not the
-brand" in the brand rules.
+**Before you extract a component from the kitchen sink, read this section in full in `DECORATOR.md`.**
 
 ### Widgets — bring the dependencies
 
-`widgets/*.html` (DataTables, FullCalendar, Wizard, MaxChar) need more than
-markup:
+A widget needs its own `<link>` and `<script>` tags, not only its markup, and
+its initialization goes in a named file under `js/`.
 
-1. Extract the component markup into the canvas.
-2. Read the reference file's `<head>` and the bottom of its `<body>`; bring
-   across the widget-specific `<link>` and `<script>` tags.
-3. Fix relative paths for the new file's location.
-4. Move initialization logic into a named file under `js/`.
+**Before you add a DataTables, FullCalendar, Wizard, or MaxChar widget, read this section in full in `DECORATOR.md`.**
 
 ### Modules — preserve structure, replace content
 
@@ -583,157 +354,25 @@ icons.
 
 ### Every module is designed for one image size
 
-Modules crop and zoom their images to fit; they do not letterbox. An image at
-the wrong size is not merely scaled, it loses whatever the crop takes off.
+Each module crops its images to one published size, and an image at another
+size loses whatever the crop takes off. Supply images at that size, one size
+throughout a module, and never bake text into an image.
 
-These are the sizes the campus CMS publishes for each module. Measured 2026-09
-against the CMS example site's image library, `department.ucsd.edu/image-library/`
-— all 291 assets it ships match the size its page documents.
-
-| Module | Image size | CMS field |
-|---|---|---|
-| Hero — homepage, required | 1440 × 530 | Background Image |
-| Intro banner — article template | 1500 × 480 | Background Image |
-| Image rotator — every template but homepage | 900 × 335 | per slide |
-| Call to action | 550 × 370 | Image |
-| Call to action — inset | 1200 × 388 | Background Image |
-| Callout content | 1200 × 410 | Background — Custom Image |
-| Text block | 1200 × 410 | Module Style → Custom Background Image |
-| Tiles with links | 550 × 370 | Image |
-| News with images | 388 × 246 | Image, on each of the three items |
-| Taller callout content or text block | 1200 × 800 | as above |
-| Profile photo | 198 × 231 | Profile Image |
-
-The homepage hero and the image rotator are different modules. The rotator is
-not available on the homepage template, which has the hero built in; the hero
-size does not carry over to it.
-
-**These sizes govern images you supply** — an `img src` on a hero or rotator
-slide, or an upload into a Background Image or Custom Image field. Some module
-backgrounds instead come from a CSS class that carries its own asset:
-`.jumbotron-callout-content-one`, `.navy-orbs`, `.jumbotron-orbs-1`, and
-`.blue-navy` each reference a 1400 × 810 file from the stylesheet, and the hero
-offers built-in backgrounds the same way. Do not "correct" a preset to match the
-table.
-
-#### "Use a grit background" — pick the right file
-
-This is a common instruction and the package makes it easy to get wrong. Of the
-18 files with `grit` in the name, six are referenced by no template and no
-stylesheet — and four of those six are named `bg-grit-*`, the most
-background-sounding names in the directory. A search for a grit background finds
-the wrong file first. Verified 2026-09 against the CDN.
-
-| Where | Use | How |
-|---|---|---|
-| Hero slide | `blue-grit.jpg`, `navy-simple-grit.jpg`, `yellow-simple-grit.jpg` — all 1440 × 530 | `img src` on the slide, as `homepage.html` does |
-| Callout content | `.jumbotron-callout-content-one` (navy default), plus `.navy-yellow` or `.blue-navy` as a modifier on the same element | apply the class — the stylesheet supplies a 1400 × 810 file and its 425 × 750 mobile pair |
-| Full-width text | `.jumbotron-full-width` | apply the class |
-
-Shipped example: `class="jumbotron side-image-white jumbotron-callout-content-one
-navy-yellow"`. Do not also supply a file for those — the class is the mechanism,
-and a supplied image fights the media query that swaps in the mobile pair.
-
-**Never use these six.** Nothing in the package or on the CDN references them:
-`bg-grit-pattern.jpg`, `bg-grit-orbs-1.jpg`, `bg-grit-orbs-2.jpg`,
-`bg-grit-orbs-2-light.jpg` (all 2400 × 776), `text-mod-yellow-grit.png`, and
-`txt-navy-turquoise-grit.jpg` with its mobile pair.
-
-**Not every file in the package's `dist/img/` is a module asset.** Some are
-referenced by no template and no stylesheet — `bg-grit-pattern.jpg` and
-`bg-grit-orbs-1.jpg`, both 2400 × 776, among them. Every hero slide in the
-shipped `homepage.html` is 1440 × 530, the grit presets `blue-grit.jpg`,
-`navy-simple-grit.jpg`, and `yellow-simple-grit.jpg` included. An orphan asset at
-some other size is not evidence of another sanctioned hero size — putting one in
-a hero slide is the mistake, not a second valid option.
-
-**Reach for 1200 × 800 when the module grows.** Callout content and text block
-scale their background to a height set by how much text is in the module, and
-the 1200 × 410 crops assume the homepage template, two or three callout boxes,
-and the recommended amount of copy. A fourth box, a long text block, or another
-template makes the module taller and the crop deeper. That is what the 1200 × 800
-set is for.
-
-**One size throughout a module.** Hero slides, rotator slides, and the three
-news items each have to match each other within their own module.
-
-**Every background image gets covered by something.** Choose images that still
-read once it is:
-
-- Call to action — inset: the text box covers roughly half the image.
-- Callout content: semi-transparent dark blue boxes sit over it.
-- Tiles with links: uploaded tile images are shaded automatically so white text
-  stays readable, and the shading cannot be turned off.
-- Text block: a blue or navy overlay color.
-- Call to action overlays 1 and 2: `overlay-glow-1.png` and `overlay-glow-2.png`,
-  both exactly 550 × 370, composited over the figure with
-  `mix-blend-mode: lighten` and `background-size: cover`. An image at another
-  aspect ratio puts the glow in the wrong place.
-
-**Never bake text into the image.** It does not reflow, does not translate, does
-not survive the crop, and is invisible to a screen reader. Put the words in the
-module's headline, blurb, and link fields, which every one of these modules has.
-
-**Images go in `_images`, never `_modules`.** A module defaults to the
-`_modules` folder and its images do not go with it: an image left in `_modules`
-does not publish and will not display on the live site.
-
-**Test anything that deviates.** The published sizes were tested on the homepage
-template with the recommended amount of text. A different template, a longer
-blurb, or a custom size needs checking at several widths before it ships.
-
-Library images are licensed for official UC San Diego marketing and promotional
-material only, credited to UC San Diego Publications. Do not repurpose them for
-anything else.
+**Before you choose, size, or place an image or background in a module, "grit" backgrounds included, read this section in full in `DECORATOR.md`.**
 
 ### Module facts that contradict the shipped demo file
 
-Three things in `templates/modules.html` will mislead you if you copy them
-straight across. All three verified 2026-09 against the live
-`cdn.ucsd.edu/cms/decorator-5/styles/base.min.css`, which is the authority.
+`templates/modules.html` gets three things wrong: the tiles module's wrapper
+class, the tile images' missing `alt`, and the video box's aspect ratio.
 
-**The tiles module's wrapper class in the demo file is styled by nothing.**
-`modules.html` marks that module `class="jumbotron jumbotron-cta-blocks"`, and
-`.jumbotron-cta-blocks` appears zero times in the CDN stylesheet and zero times
-in the package's own `base.css`. The class that production pages and the
-stylesheet both use is `.jumbotron-tile-links`:
-
-```css
-.jumbotron-tile-links .background-image {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 14px;
-}
-```
-
-So a tile image is cropped to a 200px-tall, full-column-width box — keep the
-subject centered. Copying the `modules.html` block verbatim instead gives six
-800 × 540 images at natural size inside a module nothing lays out.
-
-**Those same six `<img class="background-image">` tags carry no `alt` attribute
-at all** — not `alt=""`, no attribute. Add one to each; the accessibility rules
-in this kit apply to markup you copy just as much as to markup you write.
-
-**`.embed-video` is not a 16:9 box.** It is `padding-bottom: 51.1%`, roughly
-1.96:1, on both the CDN and the package, even though the comment beside the
-declaration says `16:9 aspect ratio (most common)`. A 16:9 video letterboxes
-inside it. That is how the module ships — do not add CSS to fight it.
+**Before you copy anything from `templates/modules.html`, read this section in full in `DECORATOR.md`.**
 
 ### Social icon sizes fall under the touch target minimum
 
-The social icon list has three sizes, and two of them are too small to be the
-tap target under the accessibility rules in this kit, which require 44 × 44:
+Only `.lg-icons` clears the 44 × 44 touch target. Use it whenever the icon
+itself is what a person taps.
 
-| Class | Rendered size |
-|---|---|
-| `.social-list li` (default) | 33px tall |
-| `.md-icons li` | 40px |
-| `.lg-icons li` | 55px |
-
-Only `.lg-icons` clears 44px. Use it whenever the icon itself is what a person
-taps. `.horz-icons` lays any of the three out in a row and changes padding, not
-icon size.
+**Before you add social icons, read this section in full in `DECORATOR.md`.**
 
 ---
 
@@ -892,96 +531,8 @@ security review it was granted under.
 
 When a developer asks to get started — "help me get started", "where do I
 begin", "start a new project", "what should I build this with" — do not start
-writing markup. Run this interview first. It exists for developers who know what
-the app has to do but not what it should look like: their answers pick the
-layout, modules, and patterns, so the first iteration is already close to the
-goal and stays on brand.
+writing markup. Run this interview first. Skip it when the request already
+answers its questions — a named template, a page name, and the pieces to build —
+and ask only what is missing.
 
-Skip the interview when the request already answers these questions — a named
-template, a page name, and the pieces to build. Ask only what is missing.
-
-### The visual guide
-
-Every recommendation links a card in the Decorator Kit Developer Guide, so the
-developer can see it before agreeing to it. Base URL:
-`https://developer.ucsd.edu/design/decorator/user-guide/`. The anchors below
-are relative to it — write them out as full links.
-
-### Round 1 — ask all six at once
-
-Ask in one message, as a numbered list with lettered options, so the developer
-can reply "1b, 2 students checking waitlists, 3b…". If your environment has a
-structured multiple-choice tool, you may use it instead. Always allow a
-free-text answer.
-
-1. **What are you building?** (a) a department or information site
-   (b) a request, intake, or multi-step application form (c) a dashboard or
-   status board (d) a directory, search, or records admin tool (e) a knowledge
-   base or help articles (f) something else — describe it in a sentence.
-2. **Who uses it, and what is the one thing they must be able to do?** For
-   example: "students — check whether they got off a waitlist."
-3. **Which campus area?** (a) advising (b) enrollment and courses (c) research
-   (d) housing (e) IT services (f) facilities and energy (g) library (h) HR
-   (i) other or none.
-4. **How will it be built and hosted?** (a) static HTML (b) a JavaScript
-   framework such as React or Vue (c) server-rendered templates (d) Cascade CMS
-   (e) not sure. The Decorator is Bootstrap 3 and jQuery whatever language the
-   app is written in; this decides where the canvas lives, not the look.
-5. **What data does it touch?** (a) public information only (b) it needs campus
-   sign-in (c) student records, personal, or health data (d) not sure.
-6. **Site name**, and a short form of it for phones — a word or an acronym.
-
-### Round 2 — recommend, link, and let the developer choose
-
-Map the answers with these tables. Link every card you recommend.
-
-| Building | Suggested layout | Guide cards |
-|---|---|---|
-| (a) information site | `homepage.html` for the landing page, `two-column.html` for inner pages | `index.html#r-dept`, `#lay-home`, `#modules`, `#m-tiles`, `#m-news`, `#m-events` |
-| (b) request or application | `two-column.html` or `blank-slate.html` | `index.html#r-form`, `#c-forms`, `#w-wiz`, `app-patterns.html#pat-shell`, `#shell-steps` |
-| (c) dashboard | `blank-slate.html` | `index.html#r-dash`, `app-patterns.html#dash-workflow`, `#shell-dashboard`, `#blk-kpi`, `#blk-status`, `#blk-filter` |
-| (d) directory, search, admin | `blank-slate.html` or `two-column.html` | `index.html#r-dir`, `#w-dt`, `#c-tables`, `app-patterns.html#shell-search`, `#shell-admin`, `#shell-record` |
-| (e) knowledge base | `two-column.html` | `index.html#r-kb`, `#c-drawer`, `#c-crumbs` |
-
-| Campus area | Dashboard example to borrow from |
-|---|---|
-| advising · enrollment · research · housing | `app-patterns.html#dash-advising` · `#dash-enroll` · `#dash-research` · `#dash-housing` |
-| IT · facilities · library · HR | `app-patterns.html#dash-its` · `#dash-energy` · `#dash-library` · `#dash-hr` |
-
-- **Build (b) or (c):** the canvas is still `main#main-content`. If the
-  project uses a component library, it goes in `canvas-components/` — link
-  `app-patterns.html#brand-layer`. **(d) Cascade:** content goes into the
-  page's canvas region only. **(e):** recommend static HTML.
-- **Data (b), (c), or (d):** say that the security rules apply from the first
-  commit — campus SSO, no real records in placeholder content, nothing
-  sensitive in URLs or logs.
-
-**Recommend a layout, but do not choose it.** Link all four layout cards —
-`index.html#lay-blank`, `#lay-two`, `#lay-three`, `#lay-home` — say which one
-you suggest and why in one sentence, and wait for the developer to pick. The
-template-selection rule still holds: the choice is theirs.
-
-### Write the brief before building
-
-Once the layout is chosen, save `BRIEF.md` at the project root and show it:
-
-```markdown
-# Build brief — <site name> (<short form>)
-
-- **Building:** <one sentence>  ·  **For:** <audience>  ·  **Must do:** <the one task>
-- **Layout:** <template> saved as <file name>
-- **Stack:** <build and hosting>  ·  **Data:** <classification, sign-in>
-- **Canvas, top to bottom:** 1. <module or pattern> — <purpose> (<guide link>) …
-- **Placeholders:** <which content is not real yet>
-```
-
-Build from the brief, following every rule above: copy the chosen template,
-rewrite its asset paths to `cdn.ucsd.edu`, set the site name and its short form,
-fill only the canvas, and sync every navigation surface. Then run `verify`.
-
-### Finish with next steps
-
-End the first iteration with: what was built, `verify`'s result, the review
-prompt at `index.html#g-review`, and two or three next prompts taken from the
-guide cards you linked. Later sessions read `BRIEF.md` before changing the
-page, and update it when the plan changes.
+**Before you ask the first question, read this section in full in `DECORATOR.md`.**

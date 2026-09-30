@@ -94,6 +94,7 @@ describe("published tarball", () => {
       "CLAUDE.md",
       "AGENTS.md",
       ".cursorrules",
+      "DECORATOR.md",
       "scripts/compile-rules.mjs",
       "scripts/check-library.mjs",
       "scripts/sync-library.mjs",
@@ -115,6 +116,7 @@ describe("published tarball", () => {
     const added = await run(["add"]);
     assert.equal(added.code, 0, added.stderr);
     assert.equal(await exists(path.join(project, "CLAUDE.md")), true);
+    assert.equal(await exists(path.join(project, "DECORATOR.md")), true);
     assert.equal(await exists(path.join(project, ".claude/skills/ucsd-decorator/SKILL.md")), true);
 
     // The manifest's $schema points into this version's tarball on the CDN.

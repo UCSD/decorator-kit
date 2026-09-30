@@ -71,7 +71,7 @@ canvas, runs `verify`, and suggests next prompts. Later sessions read
 
 It works in Claude Code, Cursor, Copilot, and any agent that reads `AGENTS.md`,
 because the interview is a rule — `rules/60-getting-started.md` — compiled into
-every instruction file. For a chat AI with no kit installed, such as TritonGPT,
+every instruction file, with its full text in `DECORATOR.md`. For a chat AI with no kit installed, such as TritonGPT,
 paste the **Starter interview prompt** from the guide's
 [Start here](https://developer.ucsd.edu/design/decorator/user-guide/#start)
 section instead.
@@ -136,6 +136,11 @@ canvas rules" section at the end of `CLAUDE.md`, `.cursorrules`,
 skips the README. Every tool picks the rules up the same way it picks up the
 kit's, and `check` fails in CI if a file there changed without a `sync`.
 
+Those files load in full in every session, so keep a canvas rule to what must
+hold every time. `sync` and `check` print a note when a project's rules push
+`CLAUDE.md` past 40,000 characters, the size at which Claude Code warns that it
+will impact performance.
+
 The compiled section limits those rules to the canvas and ranks them below the
 kit's own. A rule file that anyone can add is not a review, so a chrome
 instruction in one gets refused rather than followed, just like a chrome
@@ -151,13 +156,14 @@ saying when and how to use it.
 ```
 canvas-components/
   shadcn/
-    README.md      compiled into the rule files by sync
+    README.md      compiled into DECORATOR.md by sync
     dist/app.css
     dist/app.js
 ```
 
-`sync` compiles each library's README into a "Project component libraries"
-section. That section relaxes three Decorator look-and-feel rules inside the
+`sync` lists each library in a "Project component libraries" section of the
+rule files, and compiles its README into `DECORATOR.md`, where agents read it
+before using the library. That section relaxes three Decorator look-and-feel rules inside the
 canvas: agents may use the library's components and classes, its icon set, and
 its heading styles. Typography stays on brand (Roboto, Teko, Brix Sans, or
 Refrigerator Deluxe), and no chrome,
@@ -265,7 +271,7 @@ templates/                   Dependabot config, workflow, and the canvas-rules/
                              and canvas-components/ READMEs written into projects
 scripts/lib/rules.mjs        the renderer, shared by the CLI and the compiler
 scripts/compile-rules.mjs    rules/ -> CLAUDE.md, AGENTS.md, .cursorrules,
-                             .github/copilot-instructions.md
+                             .github/copilot-instructions.md, DECORATOR.md
 scripts/check-library.mjs    validates library/ against the sync contract
 scripts/pin-decorator.mjs    dependency-free Decorator pinning, npm only
 contracts/                   portable chrome regions, selector rules, and
@@ -279,8 +285,8 @@ test/                        including the AGENTS.md refusal, the replayed
 RELEASING.md                 how a version reaches npm
 ```
 
-`CLAUDE.md`, `AGENTS.md`, `.cursorrules`, and `.github/copilot-instructions.md`
-are **generated**. Edit `rules/` and run:
+`CLAUDE.md`, `AGENTS.md`, `.cursorrules`, `.github/copilot-instructions.md`, and
+`DECORATOR.md` are **generated**. Edit `rules/` and run:
 
 ```bash
 node scripts/compile-rules.mjs
@@ -289,16 +295,38 @@ node scripts/compile-rules.mjs
 `--check` verifies the committed output is current; `npm test` runs it along with
 the library contract and the CLI tests.
 
+### What loads every session, and what loads on demand
+
+Claude Code loads all of `CLAUDE.md` at the start of every session and warns
+once it passes 40,000 characters, and an `@` import would not help, since an
+imported file loads at launch too. So the four rule files hold only what must
+hold in every session. Detail that one kind of task needs, such as measurements,
+tables, or a procedure, goes below a marker in its section of `rules/`:
+
+```md
+<!-- on-demand: before you copy `two-column.html` or `three-column.html` -->
+```
+
+The rule files keep what sits above the marker and, in place of the rest, a
+line telling the agent to read that section in full in `DECORATOR.md` before
+that task. `DECORATOR.md` gets the whole section, and nothing imports it. A
+marker above a rule's first section moves the rest of that rule. Write the
+trigger as the task, starting "before you" or "when". `test/rules.test.mjs`
+holds the compiled `CLAUDE.md` to 25,000 characters, leaving a project's
+canvas rules room under the warning. Past that, move detail behind a marker
+rather than raise the budget.
+
 ## Using the skill without the CLI
 
 **Claude Code** — install as a plugin (`/plugin marketplace add UCSD/decorator-kit`),
 or copy `skills/ucsd-decorator/` into a project's `.claude/skills/`.
 
 **Cursor, Copilot, Antigravity** — the compiled instruction files are picked up
-automatically once present at the project root.
+automatically once present at the project root, with `DECORATOR.md` beside
+them.
 
 **Any tool that reads `AGENTS.md`** — read this repository's copy in place, in a
-checkout beside your project. Do not copy it in: your repository's own
+checkout beside your project, along with the `DECORATOR.md` it points to. Do not copy it in: your repository's own
 `AGENTS.md`, if it has one, is the more specific contract and the more important
 of the two. `add` will not write that file for the same reason.
 

@@ -4,7 +4,8 @@ import { fileURLToPath } from "node:url";
 import { renderRuleFiles } from "./lib/rules.mjs";
 
 // Compiles rules/*.md into the per-tool instruction files each AI coding
-// environment reads, plus the two reference pages the skill links to.
+// environment reads, DECORATOR.md with the detail they point to, and the two
+// reference pages the skill links to.
 //
 // The Antigravity Code Kit maintained CLAUDE.md, .cursorrules, and
 // .github/copilot-instructions.md as three hand-synced copies of the same text

@@ -117,8 +117,9 @@ canvas, name the file and the region, and stop. When asked to record a canvas
 rule, add a file there and run `sync` — never edit the compiled section.
 
 **Component libraries live in `canvas-components/`,** one folder per library
-with a `README.md`, compiled in by `sync` under "Project component libraries".
-When that section exists, you may build canvas UI from those libraries — their
+with a `README.md`. `sync` lists them under "Project component libraries" in
+the rule files and compiles each README into the project's `DECORATOR.md` —
+read a library's section there before using it. When that section exists, you may build canvas UI from those libraries — their
 classes, icons, and the headings inside their components — instead of only
 Decorator ones. Typography stays on brand: Roboto, Teko, Brix Sans, or
 Refrigerator Deluxe. Library styles stay inside the
@@ -174,12 +175,13 @@ template, never from recall.
 ## Starting a new project
 
 When a developer asks to get started — "help me get started", "where do I
-begin", "start a new project" — run the kickoff interview in the project
-rules ("Getting started — the kickoff interview", from
-`rules/60-getting-started.md`) before writing any markup. Ask its six questions
-in one message, recommend a layout and modules with links to the Decorator Kit
-Developer Guide at `https://developer.ucsd.edu/design/decorator/user-guide/`,
-let the developer pick the layout, save `BRIEF.md`, then build. Where
+begin", "start a new project" — run the kickoff interview before writing any
+markup. Its full text is "Getting started — the kickoff interview" in the
+project's `DECORATOR.md`, compiled from the kit's `rules/60-getting-started.md`.
+Ask its six questions in one message, recommend a layout and modules with links
+to the Decorator Kit Developer Guide at
+`https://developer.ucsd.edu/design/decorator/user-guide/`, let the developer
+pick the layout, save `BRIEF.md`, then build. Where
 `AskUserQuestion` is available, use it for the multiple-choice questions — it takes up to four per call.
 
 ## Building a page

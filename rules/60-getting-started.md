@@ -6,13 +6,15 @@ order: 60
 
 When a developer asks to get started — "help me get started", "where do I
 begin", "start a new project", "what should I build this with" — do not start
-writing markup. Run this interview first. It exists for developers who know what
-the app has to do but not what it should look like: their answers pick the
-layout, modules, and patterns, so the first iteration is already close to the
-goal and stays on brand.
+writing markup. Run this interview first. Skip it when the request already
+answers its questions — a named template, a page name, and the pieces to build —
+and ask only what is missing.
 
-Skip the interview when the request already answers these questions — a named
-template, a page name, and the pieces to build. Ask only what is missing.
+<!-- on-demand: before you ask the first question -->
+
+The interview exists for developers who know what the app has to do but not
+what it should look like: their answers pick the layout, modules, and patterns,
+so the first iteration is already close to the goal and stays on brand.
 
 ## The visual guide
 
@@ -89,7 +91,7 @@ Once the layout is chosen, save `BRIEF.md` at the project root and show it:
 - **Placeholders:** <which content is not real yet>
 ```
 
-Build from the brief, following every rule above: copy the chosen template,
+Build from the brief, following every kit rule: copy the chosen template,
 rewrite its asset paths to `cdn.ucsd.edu`, set the site name and its short form,
 fill only the canvas, and sync every navigation surface. Then run `verify`.
 
