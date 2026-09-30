@@ -236,7 +236,7 @@ names it: the CDN `base.min.css` sets `body, html { background: #fff }`, and
 ways, and neither touches a chrome token:
 
 - **A background on the ground itself** — `html`, `body`, `:root`, or the
-  canvas root (`main#main-content`, `div#ag-app-canvas`).
+  canvas root (`main#main-content`, or whatever `decorator-kit.json` names).
 - **A full-bleed trick** that paints past a canvas element's own box to the
   edges of the viewport: `box-shadow: 0 0 0 100vmax` paired with
   `clip-path: inset(0 -100vmax)`, `width: 100vw`, or

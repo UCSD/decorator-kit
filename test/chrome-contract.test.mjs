@@ -214,9 +214,9 @@ describe("loadConfig", () => {
 
   it("reads canvas from decorator-kit.json", async () => {
     const dir = await project();
-    await writeFile(path.join(dir, "decorator-kit.json"), JSON.stringify({ canvas: "div#ag-app-canvas" }));
+    await writeFile(path.join(dir, "decorator-kit.json"), JSON.stringify({ canvas: "div#app-canvas" }));
     const config = await loadConfig(dir);
-    assert.equal(config.canvas, "div#ag-app-canvas");
+    assert.equal(config.canvas, "div#app-canvas");
     assert.equal(config.manifestFound, true);
   });
 

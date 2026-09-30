@@ -165,8 +165,7 @@ async function writeManifest(managed) {
     $schema: `https://cdn.jsdelivr.net/npm/${kitPackage.name}@${VERSION}/contracts/decorator-kit.schema.json`,
     kitVersion: VERSION,
     // The one writable region. Everything else on the page is chrome. A project
-    // with a different shell — the Antigravity Code Kit uses div#ag-app-canvas —
-    // edits this, and the chrome gate reads it from here.
+    // with a different shell edits this, and the chrome gate reads it from here.
     canvas: previous?.canvas ?? "main#main-content",
     decorator: {
       package: DECORATOR_PACKAGE,

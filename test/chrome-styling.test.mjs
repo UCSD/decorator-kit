@@ -216,9 +216,9 @@ describe("scanCssFile — shipped regression 4: canvas-scoped CSS repainting the
   });
 
   it("resolves the canvas root from the project's canvas selector", () => {
-    const css = `#ag-app-canvas { background: #eee; }\nmain { background: #eee; }\n`;
-    const agKit = pageGround(scanCssFile("css/site.css", css, new Set(), { exceptions: [], canvasSelector: "div#ag-app-canvas" }));
-    assert.deepEqual(agKit.map((f) => f.selector), ["#ag-app-canvas"], "a bare main is not the canvas root in that kit");
+    const css = `#app-canvas { background: #eee; }\nmain { background: #eee; }\n`;
+    const custom = pageGround(scanCssFile("css/site.css", css, new Set(), { exceptions: [], canvasSelector: "div#app-canvas" }));
+    assert.deepEqual(custom.map((f) => f.selector), ["#app-canvas"], "a bare main is not the canvas root in that project");
     const decorator = pageGround(scanCssFile("css/site.css", css, new Set(), { exceptions: [] }));
     assert.deepEqual(decorator.map((f) => f.selector), ["main"]);
   });

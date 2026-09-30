@@ -14,7 +14,6 @@ site.
 |---|---|
 | Plain Decorator template | `main#main-content` |
 | TritonAI site | `main#main-content` |
-| Antigravity Code Kit | `div#ag-app-canvas` |
 
 All new content, components, markup, and application logic go inside the canvas.
 

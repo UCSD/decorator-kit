@@ -39,7 +39,7 @@ So: resolve markup from a file, in this order.
 |---|---|---|
 | 1 | `node_modules/ucsd-decorator-v5/dist/…` | the package is installed |
 | 2 | `vendor/decorator-5/…` (or the project's pinned copy) | a sync script pins it |
-| 3 | `core-template/…` | Antigravity Code Kit layout |
+| 3 | `core-template/…` | the project keeps a pristine template copy |
 | 4 | install or pin the package | nothing local exists |
 
 If you reach step 4, do not fetch a page — run `npm i -D ucsd-decorator-v5` or
@@ -78,7 +78,6 @@ A Decorator project has exactly one writable region. Everything else is chrome.
 | Project shape | Canvas |
 |---|---|
 | TritonAI site (`tritonai-website`) | `main#main-content` |
-| Antigravity Code Kit | `div#ag-app-canvas` |
 | Plain Decorator template | `main#main-content` |
 
 Content, components, application logic, and generated markup go **inside the

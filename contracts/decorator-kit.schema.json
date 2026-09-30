@@ -14,8 +14,8 @@
     },
     "canvas": {
       "type": "string",
-      "description": "CSS selector for the one writable region. Everything else on the page is chrome. `main#main-content` for a plain Decorator template and for tritonai-website; `div#ag-app-canvas` for the Antigravity Code Kit.",
-      "examples": ["main#main-content", "div#ag-app-canvas"]
+      "description": "CSS selector for the one writable region. Everything else on the page is chrome. `main#main-content` for a plain Decorator template and for tritonai-website.",
+      "examples": ["main#main-content"]
     },
     "decorator": {
       "type": "object",
