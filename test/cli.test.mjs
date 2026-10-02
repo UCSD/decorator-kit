@@ -354,6 +354,20 @@ describe("sync", () => {
     assert.ok(JSON.parse(await readFile(manifestPath, "utf8")).manages.includes("DECORATOR.md"));
     assert.equal((await run(["check"], { cwd: project })).code, 0);
   });
+
+  it("carries decorator-kit.json's human-owned thirdParty list through a sync unchanged", async () => {
+    const project = path.join(workdir, "keeps-third-party");
+    await mkdir(project, { recursive: true });
+    await run(["add"], { cwd: project });
+
+    const manifestPath = path.join(project, "decorator-kit.json");
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    manifest.thirdParty = ["dist/assets/vendor-*.js"];
+    await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+
+    assert.equal((await run(["sync"], { cwd: project })).code, 0);
+    assert.deepEqual(JSON.parse(await readFile(manifestPath, "utf8")).thirdParty, ["dist/assets/vendor-*.js"]);
+  });
 });
 
 describe("init", () => {

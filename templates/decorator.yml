@@ -17,7 +17,9 @@
 #             legitimately touches these files) any change to
 #             chrome-contract.local.json, chrome-styling.local.json, or
 #             chrome-regions.local.json, and surfaces the recorded
-#             acceptedReason/acceptedAt as a check annotation. This is the one
+#             acceptedReason/acceptedAt as a check annotation. It also flags a
+#             change to decorator-kit.json's `thirdParty` list, the built
+#             third-party JS that tier 4 does not scan. This is the one
 #             layer that catches a self-accepted chrome change no matter which
 #             AI tool — or human — produced the commit, because it runs here,
 #             not inside whatever session made the change.
@@ -96,6 +98,35 @@ jobs:
               }
             '
           fi
+
+      - name: Flag PRs that change which JS tier 4 skips as third-party
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_MANIFEST_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          base_manifest=$(git show "$BASE_MANIFEST_SHA:decorator-kit.json" 2>/dev/null || echo '{}')
+          BASE_MANIFEST="$base_manifest" node -e '
+            const fs = require("node:fs");
+            const thirdParty = (text) => {
+              try {
+                return JSON.parse(text).thirdParty ?? [];
+              } catch {
+                return [];
+              }
+            };
+            const before = thirdParty(process.env.BASE_MANIFEST);
+            const after = fs.existsSync("decorator-kit.json") ? thirdParty(fs.readFileSync("decorator-kit.json", "utf8")) : [];
+            const added = after.filter((pattern) => !before.includes(pattern));
+            const removed = before.filter((pattern) => !after.includes(pattern));
+            if (!added.length && !removed.length) {
+              console.log("decorator-kit.json thirdParty is unchanged in this PR.");
+              process.exit(0);
+            }
+            if (added.length) {
+              console.log(`::warning::This PR adds decorator-kit.json thirdParty patterns, so tier 4 no longer scans the JS they match. Confirm each names built third-party code, not site code moved out of the scan: ${added.join(", ")}`);
+            }
+            if (removed.length) console.log(`::notice::This PR removes decorator-kit.json thirdParty patterns: ${removed.join(", ")}`);
+          '
 
   drift:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'

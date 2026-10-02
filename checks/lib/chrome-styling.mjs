@@ -212,10 +212,99 @@ function selectorsIn(preludeText, startLine) {
   return selectors;
 }
 
-function scanSelectorList(preludeText, startLine, file, protectedTokens, exceptions, findings) {
+// ── canvas-anchored selectors ───────────────────────────────────────────
+//
+// A selector whose leftmost compound is the canvas root, followed only by
+// descendant (space) and child (`>`) combinators, can only ever match the
+// canvas or something inside it — and the chrome lies outside the canvas. So a
+// protected token in it is the canvas's own use of a shared Bootstrap word,
+// not a reach into the shell: `main#main-content .deck-card .glyphicon` styles
+// a canvas icon, whatever the derivation decided about `.glyphicon`. This is
+// what rules/10-brand-integrity.md tells authors to write; the check agrees.
+// It holds for any project's regions: a token is only protected if it appears
+// nowhere inside the canvas, so a region a project declares inside the canvas
+// contributes nothing an anchored selector could reach.
+//
+// Still flagged: a sibling combinator anywhere after the anchor
+// (`main#main-content ~ footer .row` leaves the canvas), an anchor that is not
+// the leftmost compound (`.navbar main#main-content .row` — or
+// `body main#main-content .row`, which the scanner does not try to reason
+// about), and a leading combinator from CSS nesting. The page-ground and
+// global checks do not consult this at all.
+
+/** Top-level compounds of one complex selector and the combinators between them; `leading` is a combinator before the first compound. */
+function splitComplexSelector(selector) {
+  const compounds = [];
+  const combinators = [];
+  let leading = null;
+  let current = "";
+  let pending = null;
+  let depth = 0;
+  for (let i = 0; i < selector.length; i++) {
+    const c = selector[i];
+    if (c === "\\") {
+      current += c + (selector[i + 1] ?? "");
+      i++;
+      continue;
+    }
+    if (c === "[" || c === "(") depth++;
+    else if (c === "]" || c === ")") depth--;
+    if (depth === 0 && /[\s>+~]/.test(c)) {
+      if (current) {
+        compounds.push(current);
+        current = "";
+      }
+      if (pending === null || pending === " ") pending = /\s/.test(c) ? " " : c;
+      continue;
+    }
+    if (pending !== null) {
+      if (compounds.length) combinators.push(pending);
+      else leading = pending;
+      pending = null;
+    }
+    current += c;
+  }
+  if (current) compounds.push(current);
+  return { compounds, combinators, leading };
+}
+
+/** Tag, ids, and classes of one compound, ignoring what is inside `[...]` and `(...)`. */
+function compoundParts(compound) {
+  let bare = "";
+  let depth = 0;
+  for (const c of compound) {
+    if (c === "[" || c === "(") depth++;
+    else if (c === "]" || c === ")") depth--;
+    else if (depth === 0) bare += c;
+  }
+  return {
+    tag: /^(?:[a-z][\w-]*|\*)/i.exec(bare)?.[0].toLowerCase() ?? null,
+    ids: [...bare.matchAll(/#([\w-]+)/g)].map((m) => m[1]),
+    classes: [...bare.matchAll(/\.([\w-]+)/g)].map((m) => m[1]),
+  };
+}
+
+function compoundIsCanvasRoot(compound, root) {
+  const { tag, ids, classes } = compoundParts(compound);
+  if (root.tag && tag && tag !== "*" && tag !== root.tag) return false;
+  if (root.id) return ids.includes(root.id);
+  if (!root.classes.length) return Boolean(root.tag) && tag === root.tag;
+  return (!root.tag || tag === root.tag) && root.classes.every((cls) => classes.includes(cls));
+}
+
+/** Can this selector only match the canvas root or something inside it? */
+export function isCanvasAnchored(selector, root) {
+  const { compounds, combinators, leading } = splitComplexSelector(selector);
+  if (leading !== null || !compounds.length) return false;
+  if (!combinators.every((combinator) => combinator === " " || combinator === ">")) return false;
+  return compoundIsCanvasRoot(compounds[0], root);
+}
+
+function scanSelectorList(preludeText, startLine, file, protectedTokens, exceptions, findings, root) {
   for (const { selector, line } of selectorsIn(preludeText, startLine)) {
     const hits = findProtectedTokenHits(selector, protectedTokens);
     if (!hits.length) continue;
+    if (isCanvasAnchored(selector, root)) continue;
     pushUnlessExcepted(findings, exceptions, {
       kind: "chrome/styling/stylesheet",
       file,
@@ -297,12 +386,13 @@ function subjectCompound(selector) {
   return selector.slice(start).trim();
 }
 
-/** Tag and id of the canvas selector's own element, e.g. `main#main-content` → `{ tag: "main", id: "main-content" }`. */
+/** Tag, id, and classes of the canvas selector's own element, e.g. `main#main-content` → `{ tag: "main", id: "main-content", classes: [] }`. */
 function canvasRoot(canvasSelector) {
   const compound = subjectCompound(canvasSelector ?? "");
   return {
     tag: /^[a-z][\w-]*/i.exec(compound)?.[0].toLowerCase() ?? null,
     id: /#([\w-]+)/.exec(compound)?.[1] ?? null,
+    classes: [...compound.replace(/\[[^\]]*\]|\([^)]*\)/g, "").matchAll(/\.([\w-]+)/g)].map((m) => m[1]),
   };
 }
 
@@ -397,8 +487,9 @@ function anchorsNestedSelectors(block) {
 }
 
 /**
- * Flag any site-authored selector that hits a protected token, and any rule
- * that repaints the page ground (see "page ground" above). Handles
+ * Flag any site-authored selector that hits a protected token — unless it is
+ * anchored on the canvas root (see "canvas-anchored selectors" above) — and
+ * any rule that repaints the page ground (see "page ground" above). Handles
  * `@media`/`@supports` nesting (their prelude is never itself a selector, but
  * what is inside still gets scanned) and strings (so `content: "{"` cannot be
  * mistaken for a brace). Not a full CSS parse — selector and declaration
@@ -455,7 +546,7 @@ export function scanCssFile(
         ? { atRule: null, prelude, line: bufferStartLine, start: i + 1, globals: [] }
         : { atRule: atRule ?? "", globals: [] };
       if (isStyleRule) {
-        scanSelectorList(prelude, bufferStartLine, file, protectedTokens, exceptions, findings);
+        scanSelectorList(prelude, bufferStartLine, file, protectedTokens, exceptions, findings, root);
         if (strict && !stack.some(anchorsNestedSelectors)) {
           block.globals = selectorsIn(prelude, bufferStartLine).filter(({ selector }) => isGlobalSelector(selector));
         }
@@ -513,8 +604,11 @@ function isRegexContext(lastSignificant, outTail) {
  *
  * Regex-vs-division is genuinely ambiguous without a real parser; this uses
  * the common heuristic (what character precedes the `/`) rather than one.
+ *
+ * Pass a `literals` array to collect the `{ start, end }` span of every
+ * string and template literal, quotes included.
  */
-function stripJsNoise(source, { blankStrings = true } = {}) {
+function stripJsNoise(source, { blankStrings = true, literals = null } = {}) {
   let out = "";
   let i = 0;
   const n = source.length;
@@ -544,6 +638,7 @@ function stripJsNoise(source, { blankStrings = true } = {}) {
         j++;
       }
       const stop = Math.min(j + 1, n);
+      literals?.push({ start: i, end: stop });
       out += blankStrings ? source.slice(i, stop).replace(/[^\n]/g, " ") : source.slice(i, stop);
       i = stop;
       lastSignificant = "x";
@@ -599,21 +694,68 @@ function escapeRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-/** Gates the whole file scan: canvas scripts assign ids to their own components constantly, and that is not this rule's business. */
-function referencesProtectedTokens(withStringsIntact, protectedTokens) {
-  for (const token of protectedTokens) {
-    const bare = token.slice(1);
-    if (!bare) continue;
-    if (new RegExp(`[#.]?\\b${escapeRegExp(bare)}\\b`).test(withStringsIntact)) return true;
+// What counts as a script "referencing" a protected token. Only string
+// literals in code position, never identifiers (`location.search` is not the
+// `.search` class) and never prose: a framework bundle carries the app's copy
+// as string literals, and a slide that says "Navbar, drawer & both search
+// forms" names no selector. A literal counts when it is
+//
+//   - the first argument to a DOM selector API — querySelector(All), closest,
+//     matches, getElementById, getElementsByClassName, jQuery's `$`/`jQuery`,
+//     and `.find` — read as a selector (getElementById: as an id;
+//     getElementsByClassName: as class names);
+//   - selector-shaped on its own: it starts with `.`, `#`, or `[` and holds only
+//     selector characters, so `const DRAWER = ".navmenu"` counts wherever the
+//     constant is later used;
+//   - an id value: assigned to or compared with `.id`, or the value in
+//     `setAttribute("id", …)`.
+//
+// In the first two cases a token only counts with its sigil (`#search`,
+// `.search`), and `[...]` contents are ignored, so `a[href^='#']` names nothing.
+
+const SELECTOR_CALL =
+  /(?:\.\s*(querySelector|querySelectorAll|closest|matches|getElementById|getElementsByClassName|find)|(?<![\w$.])(\$|jQuery))\s*\(\s*$/;
+const ID_VALUE = /(?:\.id\s*(?:[!=]==?|=)|\bsetAttribute\(\s*(['"])id\1\s*,)\s*$/;
+const SELECTOR_SHAPED = /^\s*[.#[][\w\s.#\-[\]="'^$*~|:>+,()\\]*$/;
+
+/**
+ * Protected tokens one string literal names, given the code just before it —
+ * `before` from the blanked view, so an earlier string cannot pose as a call,
+ * and `beforeIntact` for `setAttribute("id", …)`, whose `"id"` is a string.
+ */
+function literalTokens(text, before, beforeIntact, protectedTokens) {
+  const call = SELECTOR_CALL.exec(before);
+  if (call) {
+    const api = call[1] ?? call[2];
+    if (api === "getElementById") return protectedTokens.has(`#${text.trim()}`) ? [`#${text.trim()}`] : [];
+    if (api === "getElementsByClassName") {
+      return text.split(/\s+/).filter(Boolean).map((cls) => `.${cls}`).filter((token) => protectedTokens.has(token));
+    }
+    return findProtectedTokenHits(text, protectedTokens);
   }
-  return false;
+  if (ID_VALUE.test(beforeIntact)) return protectedTokens.has(`#${text.trim()}`) ? [`#${text.trim()}`] : [];
+  if (SELECTOR_SHAPED.test(text)) return findProtectedTokenHits(text, protectedTokens);
+  return [];
 }
 
 /**
  * Flag `removeAttribute("id")`, `setAttribute("id", …)`, and `.id =` — but
- * only in files that reference a protected token somewhere, and keyed to the
- * enclosing function by name (not line), so reformatting a body does not
- * silently drop a reviewed exception.
+ * only where the nearest named enclosing function, or a function lexically
+ * enclosing that one (module scope included), references a protected token
+ * (see `literalTokens` above). Canvas scripts assign ids to their own
+ * components constantly, and a framework runtime sets `.id` on objects that
+ * are not elements at all (Vue's scheduler: `job.id = instance.uid`); neither
+ * is this rule's business. Findings are keyed to the enclosing function by
+ * name (not line), so reformatting a body does not silently drop a reviewed
+ * exception.
+ *
+ * The gate is lexical, which is its trade-off: an element fetched by
+ * selector in one function and mutated in another that does not enclose it —
+ * `getDrawer().removeAttribute("id")`, with `#search` named only inside
+ * `getDrawer` — is not flagged. A reference in an enclosing function or at
+ * module scope does reach every function nested inside it, which covers the
+ * common closure shape (`const panel = $("#search")` at the top, mutated in a
+ * handler below).
  *
  * Two noise-stripped views of the same source are used, and matches on one
  * are safe to look up in the other: both blank comments the same way and
@@ -622,17 +764,21 @@ function referencesProtectedTokens(withStringsIntact, protectedTokens) {
  *
  *   - `clean` blanks string/template/regex contents too — safe for brace-depth
  *     and function-name detection, which must not see a stray `{`, `}`, or
- *     quote hiding inside one.
+ *     quote hiding inside one — and for reading the code before a literal.
  *   - `withStringsIntact` keeps them — required to see the id-mutation calls
  *     themselves, since `removeAttribute("id")` *is* a string literal: a view
  *     that blanks it can never match the pattern it exists to detect.
  */
 export function scanJsFile(file, source, protectedTokens, { exceptions = [] } = {}) {
-  const withStringsIntact = stripJsNoise(source, { blankStrings: false });
-  if (!referencesProtectedTokens(withStringsIntact, protectedTokens)) return [];
-
+  const literals = [];
+  const withStringsIntact = stripJsNoise(source, { blankStrings: false, literals });
   const clean = stripJsNoise(source);
-  const boundaries = [{ index: 0, name: "<module>" }];
+
+  // Scope 0 is the module. Every named function opens a scope whose parent is
+  // the named scope around it; blocks and anonymous callbacks open none.
+  const MODULE = { name: "<module>", scope: 0 };
+  const parents = [null];
+  const boundaries = [{ index: 0, ...MODULE }];
   const stack = [];
   let bufferStart = 0;
 
@@ -642,40 +788,68 @@ export function scanJsFile(file, source, protectedTokens, { exceptions = [] } = 
   // when a file has more than one of them. Blame the named function around
   // it instead — that is what a human can find and what stays stable if the
   // callback body is reformatted.
-  function currentName() {
+  function current() {
     for (let k = stack.length - 1; k >= 0; k--) {
-      if (stack[k] && stack[k] !== "<anonymous>") return stack[k];
+      if (stack[k].scope !== null) return stack[k];
     }
-    return "<module>";
+    return MODULE;
   }
 
   for (let i = 0; i < clean.length; i++) {
     const ch = clean[i];
     if (ch === "{") {
-      stack.push(detectFunctionName(clean.slice(bufferStart, i)));
+      const name = detectFunctionName(clean.slice(bufferStart, i));
+      let scope = null;
+      if (name && name !== "<anonymous>") {
+        scope = parents.length;
+        parents.push(current().scope);
+      }
+      stack.push({ name, scope });
       bufferStart = i + 1;
-      boundaries.push({ index: i + 1, name: currentName() });
+      boundaries.push({ index: i + 1, ...current() });
     } else if (ch === "}") {
       stack.pop();
       bufferStart = i + 1;
-      boundaries.push({ index: i + 1, name: currentName() });
+      boundaries.push({ index: i + 1, ...current() });
     }
   }
 
-  function nameAt(index) {
-    let name = boundaries[0].name;
+  function scopeAt(index) {
+    let found = boundaries[0];
     for (const boundary of boundaries) {
       if (boundary.index > index) break;
-      name = boundary.name;
+      found = boundary;
     }
-    return name;
+    return found;
+  }
+
+  const referenced = new Map(); // scope → Set of protected tokens named in it
+  for (const { start, end } of literals) {
+    const text = withStringsIntact.slice(start + 1, end - 1).replace(/\$\{[^}]*\}/g, " ");
+    const from = Math.max(0, start - 64);
+    const tokens = literalTokens(text, clean.slice(from, start), withStringsIntact.slice(from, start), protectedTokens);
+    if (!tokens.length) continue;
+    const { scope } = scopeAt(start);
+    if (!referenced.has(scope)) referenced.set(scope, new Set());
+    for (const token of tokens) referenced.get(scope).add(token);
+  }
+
+  /** Protected tokens named in this scope or any scope lexically enclosing it. */
+  function tokensInReach(scope) {
+    const tokens = new Set();
+    for (let s = scope; s !== null; s = parents[s]) {
+      for (const token of referenced.get(s) ?? []) tokens.add(token);
+    }
+    return [...tokens];
   }
 
   const findings = [];
   const idMutation = /\bremoveAttribute\(\s*(['"])id\1\s*\)|\bsetAttribute\(\s*(['"])id\2\s*,|\.id\s*=(?!=)/g;
   for (const match of withStringsIntact.matchAll(idMutation)) {
+    const { name, scope } = scopeAt(match.index);
+    const tokens = tokensInReach(scope);
+    if (!tokens.length) continue;
     const line = 1 + countNewlines(withStringsIntact.slice(0, match.index));
-    const name = nameAt(match.index);
     const exception = findException(exceptions, file, `function:${name}`);
     if (exception) {
       if (isExpired(exception)) {
@@ -694,7 +868,8 @@ export function scanJsFile(file, source, protectedTokens, { exceptions = [] } = 
       file,
       line,
       function: name,
-      detail: `${match[0].trim()} in function "${name}" — this file references a protected chrome token, and the Decorator may own that id at runtime (see the drawer search breakpoint contract)`,
+      tokens,
+      detail: `${match[0].trim()} in function "${name}", which (or a function enclosing it) references ${tokens.join(", ")} — the Decorator may own that id at runtime (see the drawer search breakpoint contract)`,
     });
   }
   return findings;
@@ -722,6 +897,82 @@ export async function discoverScriptFiles(cwd) {
   return walkFiles(cwd, { exclude: DEFAULT_EXCLUDE_DIRS, matches: (name) => /\.js$/i.test(name) && !/\.min\.js$/i.test(name) });
 }
 
+// ── declared third-party scripts ─────────────────────────────────────────
+//
+// decorator-kit.json's optional `thirdParty` lists built third-party code — a
+// framework runtime split into its own chunk, a vendored component bundle —
+// that tier 4's script scan skips. JS only: third-party CSS is exactly what
+// leaks into the shell, so it is always scanned, and canvas-components/ stays
+// strict. Every run prints what was skipped (see `describeScope`), and the CI
+// workflow flags a pull request that changes the list. It is human-owned
+// scope, like chrome-styling.local.json: never an entry added to make a
+// finding go away.
+
+/** Glob → RegExp over a project-relative POSIX path: `**` any depth, `*` and `?` within one segment. A pattern without a glob matches that file, or everything under that directory. */
+function globToRegExp(pattern) {
+  if (!/[*?]/.test(pattern)) {
+    const bare = escapeRegExp(pattern.replace(/\/+$/, ""));
+    return new RegExp(`^${bare}(?:/.*)?$`);
+  }
+  let source = "";
+  for (let i = 0; i < pattern.length; i++) {
+    const c = pattern[i];
+    if (c === "*" && pattern[i + 1] === "*") {
+      if (pattern[i + 2] === "/") {
+        source += "(?:.*/)?";
+        i += 2;
+      } else {
+        source += ".*";
+        i += 1;
+      }
+    } else if (c === "*") source += "[^/]*";
+    else if (c === "?") source += "[^/]";
+    else source += escapeRegExp(c);
+  }
+  return new RegExp(`^${source}$`);
+}
+
+/**
+ * Validate decorator-kit.json's `thirdParty` and compile it. Throws on a
+ * malformed list — it is a human-authored scope declaration with a mistake in
+ * it, not something to work around. A pattern must be project-relative and
+ * start with a literal directory or file name, so `**\/*.js` cannot quietly
+ * take every script out of the scan.
+ */
+export function thirdPartyPatterns(thirdParty = []) {
+  if (!Array.isArray(thirdParty)) {
+    throw new Error('decorator-kit.json: "thirdParty" must be an array of path or glob patterns.');
+  }
+  return thirdParty.map((pattern, index) => {
+    if (typeof pattern !== "string" || pattern.trim() === "") {
+      throw new Error(`decorator-kit.json: thirdParty[${index}] must be a non-empty string.`);
+    }
+    const normalized = pattern.trim().replace(/^\.\//, "");
+    const first = normalized.split("/")[0];
+    if (normalized.startsWith("/") || normalized.split("/").includes("..") || /[*?]/.test(first) || first === "") {
+      throw new Error(
+        `decorator-kit.json: thirdParty[${index}] ("${pattern}") must be a project-relative path that starts with ` +
+          `a literal directory or file name, such as "dist/assets/vendor-*.js". This is human-owned scope — ` +
+          `see checks/README.md.`,
+      );
+    }
+    return { pattern, regex: globToRegExp(normalized) };
+  });
+}
+
+/** One line for every run: what tier 4 scanned, and what it skipped as declared third-party. */
+export function describeScope(scope) {
+  const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+  let line = `tier 4 scanned ${plural(scope.css, "CSS file")} and ${plural(scope.js, "JS file")}`;
+  if (scope.skipped.length) {
+    line += `; skipped ${plural(scope.skipped.length, "third-party JS file")} (declared in decorator-kit.json): ${scope.skipped.join(", ")}`;
+  } else {
+    line += "; skipped no third-party JS";
+  }
+  if (scope.unmatched.length) line += `\n  note: thirdParty pattern${scope.unmatched.length === 1 ? "" : "s"} matched no file: ${scope.unmatched.join(", ")}`;
+  return line;
+}
+
 /**
  * Run tier 4 against a project: derive the protected token set from already
  * loaded `pages` (see chrome-contract.mjs's `loadRoutePages`), then scan its
@@ -729,19 +980,35 @@ export async function discoverScriptFiles(cwd) {
  * `*.css`/`*.js` under `cwd` (excluding `*.min.*`, node_modules, vendor,
  * core-template), plus every `*.css` under canvas-components/ — pass explicit
  * lists to scan a narrower or different set. CSS under canvas-components/ is
- * scanned strictly however it got into the list.
+ * scanned strictly however it got into the list. JS matching a `thirdParty`
+ * pattern (decorator-kit.json) is skipped and reported in `scope`.
  */
-export async function runStyling(cwd, { pages, canvasSelector, regions, styleFiles, scriptFiles }) {
+export async function runStyling(cwd, { pages, canvasSelector, regions, styleFiles, scriptFiles, thirdParty = [] }) {
   const config = await loadStylingConfig(cwd);
+  const patterns = thirdPartyPatterns(thirdParty);
   const protectedTokens = deriveProtectedTokens(pages, canvasSelector, regions, config.widgetTokens);
+  const relativeTo = (absolute) => path.relative(cwd, absolute).split(path.sep).join("/");
 
   const css =
     styleFiles ?? [...new Set([...(await discoverStyleFiles(cwd)), ...(await discoverComponentStyleFiles(cwd))])];
-  const js = scriptFiles ?? (await discoverScriptFiles(cwd));
+  const allJs = scriptFiles ?? (await discoverScriptFiles(cwd));
+  const js = [];
+  const skipped = [];
+  const used = new Set();
+  for (const absolute of allJs) {
+    const relative = relativeTo(absolute);
+    const match = patterns.find(({ regex }) => regex.test(relative));
+    if (match) {
+      used.add(match.pattern);
+      skipped.push(relative);
+    } else {
+      js.push(absolute);
+    }
+  }
 
   const findings = [];
   for (const absolute of css) {
-    const relative = path.relative(cwd, absolute).split(path.sep).join("/");
+    const relative = relativeTo(absolute);
     const source = await readFile(absolute, "utf8");
     const strict = relative.startsWith(`${CANVAS_COMPONENTS_DIR}/`);
     findings.push(
@@ -749,9 +1016,15 @@ export async function runStyling(cwd, { pages, canvasSelector, regions, styleFil
     );
   }
   for (const absolute of js) {
-    const relative = path.relative(cwd, absolute).split(path.sep).join("/");
+    const relative = relativeTo(absolute);
     const source = await readFile(absolute, "utf8");
     findings.push(...scanJsFile(relative, source, protectedTokens, { exceptions: config.allow }));
   }
-  return { protectedTokens, findings };
+  const scope = {
+    css: css.length,
+    js: js.length,
+    skipped,
+    unmatched: patterns.map(({ pattern }) => pattern).filter((pattern) => !used.has(pattern)),
+  };
+  return { protectedTokens, findings, scope };
 }

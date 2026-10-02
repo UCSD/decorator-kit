@@ -2,6 +2,41 @@
 
 ## Unreleased
 
+### Changed
+
+- **Tier 4 works for a canvas a JS framework renders.** In a Vue 3 + Vite port
+  of a Decorator deck, the built canvas was an empty `<div id="deck-app">`, so
+  the protected token set grew to 59 tokens, shared Bootstrap words the app
+  really uses included, and `verify` reported three `chrome/styling/script`
+  findings in Vue's own scheduler. `--accept` refused because of them. With the
+  two changes below, the same build passes tier 4 with no exception and no
+  `thirdParty` entry. See `checks/README.md`, "Framework-rendered canvases".
+- **A selector anchored on the canvas root is not flagged for naming a
+  protected token.** Its leftmost compound must be the canvas root
+  (`main#main-content`, or `canvas` in `decorator-kit.json`), and every
+  combinator after it a descendant or child. `main#main-content .deck-card
+  .glyphicon` now passes. A sibling combinator after the anchor, or an anchor
+  that is not leftmost, is still flagged, and the page-ground and
+  `canvas-components/` global checks are unchanged.
+- **The script check gates on the function, not the file.** An id mutation is
+  flagged only when its nearest named enclosing function, or a function
+  enclosing that one, references a protected token in a string literal in
+  code position: an argument to a DOM selector API, a selector-shaped string,
+  or an id value. Prose in other strings no longer counts, so a slide saying
+  "both search forms" no longer gates Vue's `job.id = uid`. The trade-off: an
+  element fetched in one function and mutated in an unrelated one is not
+  flagged. Findings now list the tokens the function references.
+
+### Added
+
+- **`thirdParty` in `decorator-kit.json`.** Path or glob patterns for built
+  third-party JS, such as a framework runtime in its own chunk, that tier 4's
+  script scan skips. CSS is never skipped. `verify` prints the tier 4 scope on
+  every run, skipped files included, and `--explain` lists the patterns.
+  `sync` carries the list over unchanged. It is human-owned scope: the CI
+  workflow template warns on every added pattern, and `rules/00-canvas.md`
+  tells agents not to add one.
+
 ### Removed
 
 - **References to the Antigravity Code Kit.** That project is retired. Its

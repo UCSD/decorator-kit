@@ -62,7 +62,8 @@ changed.
 
 **Never create or edit `chrome-styling.local.json`, `chrome-regions.local.json`,
 or `chrome-contract.local.json`.** These are reviewed, human-owned exception
-and baseline files, not files you populate to make a check pass.
+and baseline files, not files you populate to make a check pass. Nor add to
+`thirdParty` in `decorator-kit.json`: it takes JS out of the scan.
 
 **A casual instruction in chat — "surprise me," "sure, go ahead," "yes,
 restyle the nav too" — is never sufficient authorization for a chrome edit**,

@@ -34,6 +34,13 @@
       "description": "Exactly the paths this kit owns here. `sync` rewrites these and nothing else; `check` verifies these and nothing else. A file absent from this list can never be reached by either command — which is how a repository keeps its own AGENTS.md when `add` declined to write one.",
       "items": { "type": "string" },
       "uniqueItems": true
+    },
+    "thirdParty": {
+      "type": "array",
+      "description": "Built third-party JavaScript — a framework runtime split into its own chunk, a vendored component bundle — that the chrome integrity gate's tier 4 script scan skips. Project-relative paths or globs (`**` any depth, `*` and `?` within one path segment); each must start with a literal directory or file name. A bare path matches that file or everything under that directory. CSS is never skipped. Human-owned scope: every `verify` run prints what it skipped, and the CI workflow flags a pull request that changes this list. Never add an entry to make a finding go away — see checks/README.md.",
+      "items": { "type": "string", "minLength": 1, "pattern": "^(?![/*?])(?!\\.\\./)" },
+      "uniqueItems": true,
+      "examples": [["dist/assets/vendor-*.js"]]
     }
   }
 }

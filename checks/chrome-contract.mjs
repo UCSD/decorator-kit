@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import readline from "node:readline/promises";
 import { loadConfig, runStructural, explain, writeGolden } from "./lib/chrome-contract.mjs";
-import { runStyling } from "./lib/chrome-styling.mjs";
+import { describeScope, runStyling } from "./lib/chrome-styling.mjs";
 
 // The chrome integrity gate, runnable on its own: `node checks/chrome-contract.mjs`.
 // No ucsd-decorator-kit CLI required — this file, checks/lib/, and contracts/
@@ -104,7 +104,10 @@ async function runAll() {
     pages: structural.pages,
     canvasSelector: structural.config.canvas,
     regions: structural.config.regions,
+    thirdParty: structural.config.thirdParty,
   });
+  // Every run says what tier 4 covered, so a reviewer sees what was not checked.
+  console.log(describeScope(styling.scope));
   return { structural, styling, findings: [...structural.findings, ...styling.findings] };
 }
 
@@ -210,8 +213,9 @@ Flags:
 Reads *.html under the current directory (excluding node_modules/, vendor/,
 core-template/) plus every *.css and *.js (excluding *.min.*) for tier 4, and
 every *.css under canvas-components/, minified included, which tier 4 also
-checks for global selectors. No server, no browser, no ucsd-decorator-kit CLI
-required.`);
+checks for global selectors. JS matching decorator-kit.json's "thirdParty"
+patterns is skipped, and every run prints what was. No server, no browser, no
+ucsd-decorator-kit CLI required.`);
 }
 
 try {

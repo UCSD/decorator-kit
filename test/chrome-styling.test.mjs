@@ -7,12 +7,14 @@ import { decoratorPage } from "./fixtures/decorator-page.mjs";
 import { discoverRoutes, loadConfig, loadRoutePages } from "../checks/lib/chrome-contract.mjs";
 import {
   deriveProtectedTokens,
+  describeScope,
   discoverComponentStyleFiles,
   discoverStyleFiles,
   loadStylingConfig,
   runStyling,
   scanCssFile,
   scanJsFile,
+  thirdPartyPatterns,
 } from "../checks/lib/chrome-styling.mjs";
 
 let workdir;
@@ -135,6 +137,68 @@ describe("scanCssFile — shipped regression 1: site CSS rebuilding the drawer s
     const malformedFindings = scanCssFile("css/site.css", css, tokens, { exceptions: malformed });
     assert.equal(malformedFindings.length, 1);
     assert.equal(malformedFindings[0].kind, "chrome/styling/expired-exception");
+  });
+});
+
+// A framework renders the canvas at runtime, so in the built HTML the canvas
+// is an empty mount point and every shared Bootstrap word (.row, .glyphicon,
+// .sr-only) derives as protected. A selector anchored on the canvas root with
+// only descendant/child combinators cannot reach the shell, whatever it names.
+describe("scanCssFile — selectors anchored on the canvas root", () => {
+  const tokens = new Set([".glyphicon", ".row", ".sr-only", "#search", ".navbar"]);
+  const selectorsFlagged = (css, options = {}) =>
+    scanCssFile("css/site.css", css, tokens, { exceptions: [], ...options })
+      .filter((f) => f.kind === "chrome/styling/stylesheet")
+      .map((f) => f.selector);
+
+  it("passes descendant and child selectors under main#main-content that name a protected token", () => {
+    const css = [
+      "main#main-content .deck-card .glyphicon { color: #00629b; }",
+      "main#main-content > .row { margin: 0; }",
+      "#main-content .row>.col-sm-4 .sr-only:focus { outline: 2px solid; }",
+      "main#main-content.is-ready .glyphicon::before { content: ''; }",
+      "main#main-content .deck:has(+ .row) .glyphicon { color: #00629b; }",
+      "@media (max-width: 767px) { main#main-content .row { margin: 0; } }",
+      "",
+    ].join("\n");
+    assert.deepEqual(selectorsFlagged(css), []);
+  });
+
+  it("still flags a sibling combinator after the anchor — that leaves the canvas", () => {
+    const css = "main#main-content ~ footer .row { margin: 0; }\nmain#main-content + .navbar { color: red; }\n";
+    assert.deepEqual(selectorsFlagged(css), ["main#main-content ~ footer .row", "main#main-content + .navbar"]);
+  });
+
+  it("still flags a selector with no canvas anchor, or one whose anchor is not leftmost", () => {
+    const css = [
+      ".deck-card .glyphicon { color: red; }",
+      ".navbar main#main-content .row { color: red; }",
+      "body main#main-content .row { color: red; }",
+      ":is(main#main-content, .navbar) .row { color: red; }",
+      "div#main-content .row { color: red; }",
+      "",
+    ].join("\n");
+    assert.deepEqual(selectorsFlagged(css), [
+      ".deck-card .glyphicon",
+      ".navbar main#main-content .row",
+      "body main#main-content .row",
+      ":is(main#main-content, .navbar) .row",
+      "div#main-content .row",
+    ]);
+  });
+
+  it("splits a selector list: the anchored half passes, the bare half is still flagged", () => {
+    assert.deepEqual(selectorsFlagged("main#main-content .row, .row { margin: 0; }"), [".row"]);
+  });
+
+  it("anchors on the project's own canvas selector", () => {
+    const css = "div#app-canvas .row { margin: 0; }\nmain#main-content .row { margin: 0; }\n";
+    assert.deepEqual(selectorsFlagged(css, { canvasSelector: "div#app-canvas" }), ["main#main-content .row"]);
+  });
+
+  it("leaves the page-ground check alone: an anchored full-bleed band is still flagged", () => {
+    const findings = scanCssFile("css/site.css", "main#main-content .row { box-shadow: 0 0 0 100vmax #eee; }", tokens);
+    assert.deepEqual(findings.map((f) => f.kind), ["chrome/styling/page-ground"]);
   });
 });
 
@@ -280,6 +344,71 @@ function dedupeIds() {
     const findings = scanJsFile("js/site.js", js, tokens, { exceptions: expired });
     assert.equal(findings.length, 1);
     assert.equal(findings[0].kind, "chrome/styling/expired-exception");
+  });
+});
+
+// A Vue/Vite bundle carries the framework runtime and the app's copy in one
+// file. Vue's scheduler sets `.id` on job objects, not elements, and the app's
+// prose mentions chrome words; neither is a reach into the shell.
+describe("scanJsFile — the gate is per function, and prose does not count", () => {
+  const tokens = new Set(["#search", ".search", ".navbar", ".navmenu"]);
+
+  it("does not flag Vue's scheduler setting ids on job objects in a file whose prose mentions search", () => {
+    const js = [
+      'const slides=[{title:"Navbar, drawer & both search forms",body:"The .search toggle stays."}];',
+      "function Bi(e,t,l){l.augmentJob=T=>{t&&(T.flags|=4),u&&(T.id=u.uid,T.i=u)};const E=()=>{R()};E.id=-1;return T}",
+      "function le(c,x){const O=c.job=x.runIfDirty.bind(x);O.i=c,O.id=c.uid,x.scheduler=()=>rn(O)}",
+      "",
+    ].join("\n");
+    assert.deepEqual(scanJsFile("dist/assets/index-abc123.js", js, tokens), []);
+  });
+
+  it("does not let a selector in one function gate an id mutation in an unrelated one", () => {
+    const js = [
+      'function onKey(v){if(v.target.closest(".navbar, .navmenu"))return}',
+      "function augment(T,u){T.id=u.uid}",
+      "",
+    ].join("\n");
+    assert.deepEqual(scanJsFile("js/app.js", js, tokens), []);
+  });
+
+  it("flags an id mutation in a function that queries #search or .navmenu", () => {
+    const js = [
+      "function fixDrawer(){ const d = document.querySelector('.navmenu'); d.removeAttribute('id'); }",
+      "function fixPanel(){ $('#search').each(function(){ this.id = 'search-panel'; }); }",
+      "",
+    ].join("\n");
+    const findings = scanJsFile("js/site.js", js, tokens);
+    assert.deepEqual(findings.map((f) => [f.function, f.tokens]), [
+      ["fixDrawer", [".navmenu"]],
+      ["fixPanel", ["#search"]],
+    ]);
+  });
+
+  it("a reference at module scope or in an enclosing function reaches the functions nested in it", () => {
+    const js = [
+      "const panel = document.getElementById('search');",
+      "function onReady(){ panel.removeAttribute('id'); }",
+      "function outer(){ const DRAWER = '.navmenu'; function inner(){ el.setAttribute('id', 'x'); } }",
+      "",
+    ].join("\n");
+    assert.deepEqual(scanJsFile("js/site.js", js, tokens).map((f) => f.function), ["onReady", "inner"]);
+  });
+
+  it("counts an id value naming a protected id: el.id = 'search' and setAttribute('id', 'search')", () => {
+    const js = "function a(){ el.id = 'search'; }\nfunction b(){ el.setAttribute('id', 'search'); }\n";
+    assert.deepEqual(scanJsFile("js/site.js", js, tokens).map((f) => f.function), ["a", "b"]);
+  });
+
+  it("does not count identifiers, comments, attribute values, or prose as references", () => {
+    const js = [
+      "function a(){ const q = location.search; el.id = q; }",
+      "function b(){ /* fixes #search */ el.id = 'x'; }",
+      "function c(){ document.querySelector(\"a[href='#search']\"); el.id = 'x'; }",
+      "function d(){ const msg = 'Open the .navmenu drawer to search'; el.id = 'x'; }",
+      "",
+    ].join("\n");
+    assert.deepEqual(scanJsFile("js/site.js", js, tokens), []);
   });
 });
 
@@ -505,5 +634,82 @@ describe("runStyling end-to-end: a component library dropped into canvas-compone
     const global = findings.filter((f) => f.kind === "chrome/styling/global");
     assert.deepEqual(global.map((f) => [f.file, f.selector]), [[library, "h1"]]);
     assert.match(global[0].remedy, /main#main-content/);
+  });
+});
+
+// decorator-kit.json's `thirdParty` takes built third-party JS out of the
+// script scan. JS only — third-party CSS is what leaks into the shell.
+describe("runStyling — declared third-party scripts", () => {
+  const replay = `function dedupeIds() {\n  document.getElementById('search');\n  el.removeAttribute('id');\n}\n`;
+
+  async function bundleProject() {
+    const dir = await project();
+    await writeFile(path.join(dir, "index.html"), decoratorPage("Home"));
+    await mkdir(path.join(dir, "dist/assets"), { recursive: true });
+    await writeFile(path.join(dir, "dist/assets/vendor-abc123.js"), replay);
+    await writeFile(path.join(dir, "dist/assets/vendor-abc123.css"), ".search-toggle { display: none; }\n");
+    return dir;
+  }
+
+  it("skips a declared JS file, reports it in the scope, and still scans CSS that matches the same pattern", async () => {
+    const dir = await bundleProject();
+    const { config, pages } = await loadPages(dir);
+    const { findings, scope } = await runStyling(dir, {
+      pages,
+      canvasSelector: config.canvas,
+      regions: config.regions,
+      thirdParty: ["dist/assets/vendor-*"],
+    });
+    assert.deepEqual(findings.filter((f) => f.kind === "chrome/styling/script"), []);
+    assert.deepEqual(scope.skipped, ["dist/assets/vendor-abc123.js"]);
+    assert.ok(findings.some((f) => f.kind === "chrome/styling/stylesheet" && f.file === "dist/assets/vendor-abc123.css"));
+    assert.match(
+      describeScope(scope),
+      /^tier 4 scanned 1 CSS file and 0 JS files; skipped 1 third-party JS file \(declared in decorator-kit\.json\): dist\/assets\/vendor-abc123\.js$/,
+    );
+  });
+
+  it("flags the same file when it is not declared", async () => {
+    const dir = await bundleProject();
+    const { config, pages } = await loadPages(dir);
+    const { findings, scope } = await runStyling(dir, { pages, canvasSelector: config.canvas, regions: config.regions });
+    assert.ok(findings.some((f) => f.kind === "chrome/styling/script" && f.file === "dist/assets/vendor-abc123.js"));
+    assert.deepEqual(scope.skipped, []);
+    assert.match(describeScope(scope), /skipped no third-party JS/);
+  });
+
+  it("reads thirdParty from decorator-kit.json, and notes a pattern that matched nothing", async () => {
+    const dir = await bundleProject();
+    await writeFile(
+      path.join(dir, "decorator-kit.json"),
+      JSON.stringify({ canvas: "main#main-content", thirdParty: ["dist/assets/vendor-abc123.js", "dist/runtime/"] }),
+    );
+    const { config, pages } = await loadPages(dir);
+    const { scope } = await runStyling(dir, {
+      pages,
+      canvasSelector: config.canvas,
+      regions: config.regions,
+      thirdParty: config.thirdParty,
+    });
+    assert.deepEqual(scope.skipped, ["dist/assets/vendor-abc123.js"]);
+    assert.deepEqual(scope.unmatched, ["dist/runtime/"]);
+    assert.match(describeScope(scope), /matched no file: dist\/runtime\//);
+  });
+
+  it("matches globs by path segment and bare paths as a file or directory", () => {
+    const [glob, deep, dir] = thirdPartyPatterns(["dist/assets/vendor-*.js", "dist/**/runtime.js", "public/lib"]);
+    assert.ok(glob.regex.test("dist/assets/vendor-abc.js"));
+    assert.ok(!glob.regex.test("dist/assets/sub/vendor-abc.js"));
+    assert.ok(deep.regex.test("dist/runtime.js") && deep.regex.test("dist/a/b/runtime.js"));
+    assert.ok(dir.regex.test("public/lib/x.js") && dir.regex.test("public/lib"));
+    assert.ok(!dir.regex.test("public/library.js"));
+  });
+
+  it("refuses a malformed list, or a pattern that does not start at a literal path", () => {
+    assert.throws(() => thirdPartyPatterns("dist/vendor.js"), /must be an array/);
+    assert.throws(() => thirdPartyPatterns([""]), /non-empty string/);
+    for (const pattern of ["**/*.js", "*.js", "/dist/vendor.js", "../vendor.js", "dist/../js/site.js"]) {
+      assert.throws(() => thirdPartyPatterns([pattern]), /project-relative path/, pattern);
+    }
   });
 });

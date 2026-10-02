@@ -175,6 +175,9 @@ async function writeManifest(managed) {
     // list and nothing else, so a file the install declined to write — AGENTS.md
     // in a project that has its own — can never be reached later.
     manages: managed,
+    // Built third-party JS the chrome gate's script scan skips. Human-owned:
+    // carried over as written, never added to by the kit.
+    ...(previous?.thirdParty !== undefined ? { thirdParty: previous.thirdParty } : {}),
   };
   await writeFile(path.join(cwd, MANIFEST), `${JSON.stringify(manifest, null, 2)}\n`);
   return manifest;
