@@ -18,8 +18,9 @@
 #             chrome-contract.local.json, chrome-styling.local.json, or
 #             chrome-regions.local.json, and surfaces the recorded
 #             acceptedReason/acceptedAt as a check annotation. It also flags a
-#             change to decorator-kit.json's `thirdParty` list, the built
-#             third-party JS that tier 4 does not scan. This is the one
+#             change to decorator-kit.json's `canvas` selector, which moves the
+#             line between canvas and chrome, and to its `thirdParty` list, the
+#             built third-party JS that tier 4 does not scan. This is the one
 #             layer that catches a self-accepted chrome change no matter which
 #             AI tool — or human — produced the commit, because it runs here,
 #             not inside whatever session made the change.
@@ -99,7 +100,7 @@ jobs:
             '
           fi
 
-      - name: Flag PRs that change which JS tier 4 skips as third-party
+      - name: Flag PRs that change the canvas selector or the JS tier 4 skips as third-party
         if: github.event_name == 'pull_request'
         env:
           BASE_MANIFEST_SHA: ${{ github.event.pull_request.base.sha }}
@@ -107,19 +108,27 @@ jobs:
           base_manifest=$(git show "$BASE_MANIFEST_SHA:decorator-kit.json" 2>/dev/null || echo '{}')
           BASE_MANIFEST="$base_manifest" node -e '
             const fs = require("node:fs");
-            const thirdParty = (text) => {
+            const read = (text) => {
               try {
-                return JSON.parse(text).thirdParty ?? [];
+                return JSON.parse(text);
               } catch {
-                return [];
+                return {};
               }
             };
-            const before = thirdParty(process.env.BASE_MANIFEST);
-            const after = fs.existsSync("decorator-kit.json") ? thirdParty(fs.readFileSync("decorator-kit.json", "utf8")) : [];
+            const base = read(process.env.BASE_MANIFEST);
+            const head = fs.existsSync("decorator-kit.json") ? read(fs.readFileSync("decorator-kit.json", "utf8")) : {};
+            // Both fall back the way the gate does: no canvas means main#main-content.
+            const canvasBefore = base.canvas ?? "main#main-content";
+            const canvasAfter = head.canvas ?? "main#main-content";
+            if (canvasBefore !== canvasAfter) {
+              console.log(`::warning::This PR changes decorator-kit.json canvas from "${canvasBefore}" to "${canvasAfter}". That moves the line between canvas and chrome for every tier 4 check — confirm it matches the shell, not a finding someone wanted gone.`);
+            }
+            const before = base.thirdParty ?? [];
+            const after = head.thirdParty ?? [];
             const added = after.filter((pattern) => !before.includes(pattern));
             const removed = before.filter((pattern) => !after.includes(pattern));
-            if (!added.length && !removed.length) {
-              console.log("decorator-kit.json thirdParty is unchanged in this PR.");
+            if (canvasBefore === canvasAfter && !added.length && !removed.length) {
+              console.log("decorator-kit.json canvas and thirdParty are unchanged in this PR.");
               process.exit(0);
             }
             if (added.length) {

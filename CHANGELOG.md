@@ -36,6 +36,12 @@
   `sync` carries the list over unchanged. It is human-owned scope: the CI
   workflow template warns on every added pattern, and `rules/00-canvas.md`
   tells agents not to add one.
+- **`decorator-kit.json` is guarded like the chrome `*.local.json` files.** Its
+  `canvas` decides what tier 4 protects and what counts as canvas-anchored, so
+  `"canvas": "body"` would empty most of the check in one line. The Claude
+  Code template (`add --with-hook`) now denies Edit and Write on the file, and
+  the CI workflow template warns when `canvas` changes, as it does for
+  `thirdParty`. The kit's own `init`, `add`, and `sync` still write it.
 
 ### Removed
 

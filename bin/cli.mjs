@@ -285,7 +285,9 @@ async function addScripts() {
  *     Hooks an earlier release installed (LEGACY_HOOK_COMMANDS) are replaced.
  *   - `permissions.deny` on Edit/Write of the three chrome `*.local.json`
  *     files — a hard block, matching rules/00-canvas.md's unconditional "never
- *     create or edit" language for the same files.
+ *     create or edit" language for the same files — and of decorator-kit.json,
+ *     whose `canvas` and `thirdParty` set what the gate checks. The kit's own
+ *     commands still write it: they run through Node, not Edit/Write.
  *   - `permissions.ask` on any Bash command matching `--accept` — forces
  *     explicit human approval in Claude Code's own UI before it runs, on top
  *     of (not instead of) the CLI-level gate in checks/chrome-contract.mjs,
@@ -546,8 +548,9 @@ async function add() {
     console.log("No Claude Code hook installed. `add --with-hook` adds a Stop hook that runs");
     console.log("`verify` in the background after each turn and wakes the agent back up — not");
     console.log("the user, and not blocking anything meanwhile — if it finds a regression. It");
-    console.log("also adds permission rules: denying edits to the chrome *.local.json files,");
-    console.log("and requiring your approval before any Bash command matching --accept. Like");
+    console.log("also adds permission rules: denying edits to the chrome *.local.json files and");
+    console.log("decorator-kit.json, and requiring your approval before any Bash command");
+    console.log("matching --accept. Like");
     console.log(`--with-ci, it adds ${kitPackage.name} as a devDependency for the hook to run.`);
   }
 }
@@ -708,7 +711,8 @@ Flags for \`add\`:
   --with-decorator   also add ${DECORATOR_PACKAGE} to package.json
   --with-ci          also write .github/dependabot.yml and a workflow
   --with-hook        also add a Claude Code Stop hook that runs \`verify\`, plus
-                     permission rules guarding the chrome *.local.json files and --accept
+                     permission rules guarding the chrome *.local.json files,
+                     decorator-kit.json, and --accept
 Each of the three also adds ${kitPackage.name} as a devDependency, and the
 decorator:* npm scripts, because what it writes runs the kit from node_modules.
 

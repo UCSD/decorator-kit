@@ -39,9 +39,10 @@ to a branch. On a pull request, this job also flags — as a check annotation,
 not a failure, since a reviewed `--accept` legitimately touches these files —
 any change to `chrome-contract.local.json`, `chrome-styling.local.json`, or
 `chrome-regions.local.json`, printing the golden's recorded `acceptedReason`
-so the reviewer sees it without opening the JSON diff. It flags a change to
-`decorator-kit.json`'s `thirdParty` list the same way — a warning for each
-added pattern, since that is JS tier 4 stops scanning. This is the layer that
+so the reviewer sees it without opening the JSON diff. It warns the same way
+on two fields of `decorator-kit.json`: a changed `canvas` selector, which moves
+the line between canvas and chrome for every tier 4 check, and each pattern
+added to `thirdParty`, since that is JS tier 4 stops scanning. This is the layer that
 catches a self-accepted chrome change no matter which AI tool — or human —
 produced the commit, since it runs on GitHub's infrastructure, not inside
 whatever session made the change.
@@ -67,7 +68,8 @@ hook earlier releases wrote.
 
 The same template
 also adds a `permissions` block: `deny` on editing the three chrome
-`*.local.json` files, and `ask` on any Bash command matching `--accept` —
+`*.local.json` files and `decorator-kit.json`, and `ask` on any Bash command
+matching `--accept` —
 this only protects a project when the person working on it is using Claude
 Code with this template installed; the CLI-level gate above is what has to
 hold for everyone else.
@@ -358,10 +360,20 @@ patterns too.
 **`thirdParty` is human-owned scope, like `chrome-styling.local.json`.** It
 removes code from the check. A human adds an entry after confirming the file is
 built third-party code, in a pull request a reviewer reads; the `verify` CI job
-flags every added pattern. **If you are an AI agent, do not add an entry to make
-a finding go away**, including one in a bundle you believe is third-party:
-surface the finding and stop. `sync` carries the list over unchanged and never
-adds to it.
+flags every added pattern, and the Claude Code template (`add --with-hook`)
+denies agent edits to `decorator-kit.json`. **If you are an AI agent, do not
+add an entry to make a finding go away**, including one in a bundle you
+believe is third-party: surface the finding and stop. `sync` carries the list
+over unchanged and never adds to it.
+
+**`canvas` is the same kind of lever.** It decides which tokens derive as
+protected and what counts as canvas-anchored: `"canvas": "body"` would put
+every class on the page inside the "canvas" and exempt every `body …`
+selector, emptying most of tier 4 in one line. The CI job warns when it
+changes, and the template denies agent edits to the file for this reason too.
+The deny covers Claude Code's Edit and Write tools only; `init`, `add`, and
+`sync` still write the file, and the CI warning is the backstop for any
+other route.
 
 ## The parts that are easy to get wrong
 
@@ -414,8 +426,8 @@ run non-interactively unless `--yes` is passed — which is documented, in both
 `--help` and `rules/00-canvas.md`, as being for a human-triggered
 non-interactive context only, never for an agent to pass itself. A project
 that installs the Claude Code template (`add --with-hook`) also gets a
-`permissions` block denying edits to the three chrome `*.local.json` files
-outright, and requiring explicit approval before any Bash command matching
+`permissions` block denying edits to the three chrome `*.local.json` files and
+`decorator-kit.json` outright, and requiring explicit approval before any Bash command matching
 `--accept` — on top of, not instead of, the CLI-level gate above, which holds
 for any caller regardless of which AI tool (or none) is involved. A PR that
 still changes one of those files gets flagged (not blocked) by the `verify`

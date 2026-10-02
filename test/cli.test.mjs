@@ -269,6 +269,8 @@ describe("add --with-hook", () => {
     const settings = JSON.parse(await readFile(path.join(project, ".claude/settings.json"), "utf8"));
     assert.ok(settings.permissions.deny.includes("Edit(chrome-styling.local.json)"));
     assert.ok(settings.permissions.deny.includes("Write(chrome-contract.local.json)"));
+    assert.ok(settings.permissions.deny.includes("Edit(decorator-kit.json)"), "canvas and thirdParty set what the gate checks");
+    assert.ok(settings.permissions.deny.includes("Write(decorator-kit.json)"));
     assert.ok(settings.permissions.ask.includes("Bash(*--accept*)"));
   });
 

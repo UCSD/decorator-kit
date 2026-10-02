@@ -6,7 +6,9 @@
       "Edit(chrome-regions.local.json)",
       "Write(chrome-regions.local.json)",
       "Edit(chrome-contract.local.json)",
-      "Write(chrome-contract.local.json)"
+      "Write(chrome-contract.local.json)",
+      "Edit(decorator-kit.json)",
+      "Write(decorator-kit.json)"
     ],
     "ask": [
       "Bash(*--accept*)"
