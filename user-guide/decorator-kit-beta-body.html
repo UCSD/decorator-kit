@@ -1,0 +1,306 @@
+<!--
+  Decorator Kit (Beta) — CMS page body.
+
+  Paste into the body of a Decorator 5 page. Canvas content only: no header,
+  navbar, footer, <style> block, or inline style.
+
+  It needs two files beside it:
+    - css/kit-beta.css  Upload it with the page and point the <link> below at
+                        it, or add it through the CMS's page or site CSS
+                        setting and delete the <link>.
+    - guide.js          The Developer Guide's copy-button script, already live
+                        on developer.ucsd.edu. Without it the page still works;
+                        the Copy buttons just do nothing.
+
+  If the CMS prints the page title as its own <h1>, change the <h1> below to a
+  <p class="kb-title">.
+-->
+<link rel="stylesheet" href="css/kit-beta.css">
+
+<div class="kb">
+
+	<div class="guide-status sr-only" role="status" aria-live="polite"></div>
+
+	<!-- ===== Hero ===== -->
+	<section class="kb-hero" aria-labelledby="kb-h1">
+		<div class="kb-hero-copy">
+			<p class="kb-kicker">For UC San Diego web developers</p>
+			<h1 id="kb-h1">Decorator Kit <span class="kb-pill">Beta</span></h1>
+			<p class="kb-lede">Build campus pages and apps with an AI coding assistant, and keep the UC San Diego look intact while you do.</p>
+			<p class="kb-actions">
+				<a class="btn btn-primary" href="https://github.com/UCSD/decorator-kit">View on GitHub</a>
+				<a class="kb-link" href="#kb-quick-start">Quick start</a>
+			</p>
+		</div>
+		<div class="kb-hero-media">
+			<figure class="kb-terminal" aria-label="Example: running the kit's setup command">
+				<div class="kb-terminal-bar" aria-hidden="true"><span></span><span></span><span></span><em>my-site</em></div>
+<pre><span class="kb-prompt">$</span> npx ucsd-decorator-kit@latest init
+<span class="kb-dim">Installing ucsd-decorator-v5 ucsd-decorator-kit…</span>
+  <span class="kb-ok">wrote</span>      CLAUDE.md
+  <span class="kb-ok">wrote</span>      AGENTS.md
+  <span class="kb-ok">wrote</span>      .cursorrules
+  <span class="kb-ok">wrote</span>      .github/copilot-instructions.md
+  <span class="kb-dim">…</span>
+Done. Open your AI tool in this directory
+and describe the site you want.</pre>
+			</figure>
+		</div>
+	</section>
+
+	<!-- ===== Beta notice ===== -->
+	<div class="kb-notice" role="note">
+		<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+		<p><strong>This is a beta.</strong> Commands, rules, and checks may change between releases. This page is a short introduction. The <a href="https://github.com/UCSD/decorator-kit">README on GitHub</a> has the full, current documentation, and the <a href="https://github.com/UCSD/decorator-kit/blob/main/CHANGELOG.md">changelog</a> lists what changed in each release.</p>
+	</div>
+
+	<!-- ===== Decorator vs. Decorator Kit ===== -->
+	<section class="kb-section" aria-labelledby="kb-compare">
+		<div class="kb-heading">
+			<p class="kb-kicker">Two packages, two jobs</p>
+			<h2 class="kb-title" id="kb-compare">Decorator or Decorator Kit?</h2>
+			<p class="kb-lede">You use both. The Decorator is the design system. The kit makes sure an AI assistant builds with it correctly.</p>
+		</div>
+
+		<div class="kb-grid kb-grid-2">
+			<article class="kb-card kb-card-blue">
+				<span class="glyphicon glyphicon-th-large" aria-hidden="true"></span>
+				<h3>The Decorator</h3>
+				<p><span class="kb-pkg">ucsd-decorator-v5</span></p>
+				<p>The campus design system: the page shell, layout templates, modules, components, CSS, and JavaScript behind UC San Diego websites. Pages load it from cdn.ucsd.edu, and the npm package is the reference copy of its markup.</p>
+				<a class="kb-card-link" href="https://www.npmjs.com/package/ucsd-decorator-v5">ucsd-decorator-v5 on npm</a>
+			</article>
+			<article class="kb-card kb-card-gold">
+				<span class="glyphicon glyphicon-console" aria-hidden="true"></span>
+				<h3>The Decorator Kit <span class="kb-pill kb-pill-quiet">Beta</span></h3>
+				<p><span class="kb-pkg">ucsd-decorator-kit</span></p>
+				<p>Rules for building with the Decorator using AI. It installs the Decorator, writes instructions your AI tool reads on its own, and adds a check that fails if the header, navigation, search, or footer drift from the campus standard.</p>
+				<a class="kb-card-link" href="https://github.com/UCSD/decorator-kit">ucsd-decorator-kit on GitHub</a>
+			</article>
+		</div>
+
+		<div class="kb-table-wrap">
+			<table class="kb-table">
+				<caption class="sr-only">How the Decorator and the Decorator Kit differ</caption>
+				<thead>
+					<tr>
+						<th scope="col"><span class="sr-only">Question</span></th>
+						<th scope="col">Decorator</th>
+						<th scope="col">Decorator Kit (Beta)</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<th scope="row">What it is</th>
+						<td>Markup, CSS, and JavaScript</td>
+						<td>Rules, an AI skill, and a chrome integrity check</td>
+					</tr>
+					<tr>
+						<th scope="row">Who reads it</th>
+						<td>Your browser, and you</td>
+						<td>Your AI coding tool and your CI pipeline</td>
+					</tr>
+					<tr>
+						<th scope="row">What you get</th>
+						<td>The UC San Diego look, layouts, and components</td>
+						<td>An assistant that builds inside the page canvas and leaves the shared shell alone</td>
+					</tr>
+					<tr>
+						<th scope="row">Works on its own?</th>
+						<td>Yes, with or without AI</td>
+						<td>No. It installs the Decorator and reads markup from it.</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</section>
+
+	<!-- ===== Quick start ===== -->
+	<section class="kb-section kb-dark" id="kb-quick-start" aria-labelledby="kb-qs">
+		<div class="kb-heading">
+			<p class="kb-kicker">Quick start</p>
+			<h2 class="kb-title" id="kb-qs">From empty folder to first page</h2>
+			<p class="kb-lede">You need Node.js and an AI coding tool: Claude Code, Cursor, GitHub Copilot, or any assistant that reads an AGENTS.md file.</p>
+		</div>
+		<ol class="kb-path">
+			<li>
+				<h3>Run the setup command</h3>
+				<p>In a new, empty folder:</p>
+				<div class="guide-prompt">
+					<div class="guide-prompt-bar">
+						<p class="guide-prompt-title"><span class="glyphicon glyphicon-console" aria-hidden="true"></span> Terminal</p>
+						<button type="button" class="guide-copy" aria-label="Copy setup commands" data-copy-target="kb-cmd-init"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+					</div>
+<pre id="kb-cmd-init">mkdir my-site
+cd my-site
+npx ucsd-decorator-kit@latest init</pre>
+				</div>
+			</li>
+			<li>
+				<h3>Open the folder in your AI tool</h3>
+				<p>There's nothing to configure. The kit puts its rule files at the project root, where every supported tool already looks.</p>
+			</li>
+			<li>
+				<h3>Describe what you want, or ask for help</h3>
+				<p>Tell it what to build, or say <strong>help me get started</strong>. It will ask which layout template to start from rather than choosing one for you. That's on purpose.</p>
+			</li>
+		</ol>
+	</section>
+
+	<!-- ===== New or existing project ===== -->
+	<section class="kb-section" aria-labelledby="kb-start">
+		<div class="kb-heading">
+			<p class="kb-kicker">Set up</p>
+			<h2 class="kb-title" id="kb-start">Start a new project, or add the kit to one</h2>
+		</div>
+		<div class="kb-grid kb-grid-2">
+			<article class="kb-card kb-card-blue">
+				<span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
+				<h3>New project: init</h3>
+				<p>Run in an empty folder. It sets up everything a new site needs:</p>
+				<ul class="kb-checks">
+					<li><span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Installs the Decorator and the kit as development dependencies</li>
+					<li><span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Writes rules for Claude Code, Cursor, Copilot, and AGENTS.md tools</li>
+					<li><span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Installs the UC San Diego Decorator skill</li>
+					<li><span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Adds Dependabot and a CI workflow</li>
+					<li><span class="glyphicon glyphicon-ok" aria-hidden="true"></span>For Claude Code, runs the chrome check after every turn</li>
+				</ul>
+				<div class="guide-prompt">
+					<div class="guide-prompt-bar">
+						<p class="guide-prompt-title"><span class="glyphicon glyphicon-console" aria-hidden="true"></span> Terminal</p>
+						<button type="button" class="guide-copy" aria-label="Copy init command" data-copy-target="kb-cmd-new"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+					</div>
+<pre id="kb-cmd-new">npx ucsd-decorator-kit@latest init</pre>
+				</div>
+			</article>
+			<article class="kb-card kb-card-gold">
+				<span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+				<h3>Existing project: add</h3>
+				<p>Installs the rules and the skill, and changes nothing else. It won't touch package.json, add CI, or overwrite your own AGENTS.md.</p>
+				<p>Add the rest with flags when you want them: <strong>--with-decorator</strong>, <strong>--with-ci</strong>, and <strong>--with-hook</strong> for the Claude Code check.</p>
+				<div class="guide-prompt">
+					<div class="guide-prompt-bar">
+						<p class="guide-prompt-title"><span class="glyphicon glyphicon-console" aria-hidden="true"></span> Terminal</p>
+						<button type="button" class="guide-copy" aria-label="Copy add command" data-copy-target="kb-cmd-add"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+					</div>
+<pre id="kb-cmd-add">npx ucsd-decorator-kit add</pre>
+				</div>
+				<a class="kb-card-link" href="https://github.com/UCSD/decorator-kit#already-have-a-project">All add options</a>
+			</article>
+		</div>
+	</section>
+
+	<!-- ===== Keep it current ===== -->
+	<section class="kb-section" aria-labelledby="kb-update">
+		<div class="kb-split">
+			<div>
+				<p class="kb-kicker">Stay current</p>
+				<h2 class="kb-title" id="kb-update">Keep the kit up to date</h2>
+				<p class="kb-lede">The Decorator and the kit are both development dependencies, so Dependabot opens a pull request when either one releases.</p>
+				<p>To upgrade by hand, install the latest kit, then run <strong>sync</strong> to rewrite the rule files it manages.</p>
+				<div class="guide-prompt">
+					<div class="guide-prompt-bar">
+						<p class="guide-prompt-title"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Upgrade</p>
+						<button type="button" class="guide-copy" aria-label="Copy upgrade commands" data-copy-target="kb-cmd-upgrade"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span> <span class="guide-copy-label">Copy</span></button>
+					</div>
+<pre id="kb-cmd-upgrade">npm install --save-dev ucsd-decorator-kit@latest
+npx ucsd-decorator-kit sync</pre>
+				</div>
+			</div>
+			<dl class="kb-commands" aria-label="Commands for keeping a project current">
+				<div>
+					<dt>sync</dt>
+					<dd>Rewrites the generated rule files after an upgrade, or after you edit your project's own rules.</dd>
+				</div>
+				<div>
+					<dt>check</dt>
+					<dd>Fails if the rule files are out of date. Run it in CI so an upgrade can't land without a sync.</dd>
+				</div>
+				<div>
+					<dt>drift</dt>
+					<dd>Reports whether the Decorator changed upstream without a new npm release.</dd>
+				</div>
+				<div>
+					<dt>verify</dt>
+					<dd>Runs the chrome integrity check against your pages. Run it in CI too.</dd>
+				</div>
+			</dl>
+		</div>
+	</section>
+
+	<!-- ===== Help guide ===== -->
+	<section class="kb-section kb-sand" aria-labelledby="kb-help">
+		<div class="kb-split">
+			<div>
+				<p class="kb-kicker">The help guide</p>
+				<h2 class="kb-title" id="kb-help">Not sure what it should look like?</h2>
+				<p class="kb-lede">Say <strong>help me get started</strong>. Instead of writing code right away, your assistant interviews you first.</p>
+				<ol class="kb-steps">
+					<li>It asks six questions in one message, with lettered options, so you can answer in one line.</li>
+					<li>It recommends a layout and modules, each linked to its example in the <a href="https://developer.ucsd.edu/design/decorator/user-guide/">Developer Guide</a>. You pick the layout.</li>
+					<li>It writes the plan to BRIEF.md, builds a first version inside the canvas, and runs the chrome check.</li>
+					<li>It suggests what to ask for next. Later sessions read BRIEF.md before changing the page.</li>
+				</ol>
+				<p class="kb-tip">Using a chat AI without the kit, such as TritonGPT? Paste the starter interview prompt from the Developer Guide's <a href="https://developer.ucsd.edu/design/decorator/user-guide/#start">Start here</a> section.</p>
+			</div>
+			<div class="kb-chat" aria-label="Example conversation">
+				<div class="kb-bubble kb-bubble-you">
+					<span class="kb-bubble-who">You</span>
+					<p>help me get started</p>
+				</div>
+				<div class="kb-bubble kb-bubble-ai">
+					<span class="kb-bubble-who">Your AI assistant</span>
+					<p>A few quick questions first. Answer like “1b, 2 students checking waitlists, 3b…”</p>
+					<ol>
+						<li>What are you building: an information site, a form, a dashboard, a directory or admin tool, or a knowledge base?</li>
+						<li>Who uses it, and what's the one thing they must be able to do?</li>
+						<li>Which campus area is it for?</li>
+						<li>How will it be built and hosted?</li>
+						<li>What data does it touch?</li>
+						<li>What's the site name, and a short form for phones?</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- ===== Where next ===== -->
+	<section class="kb-section" aria-labelledby="kb-next">
+		<div class="kb-heading">
+			<p class="kb-kicker">Go further</p>
+			<h2 class="kb-title" id="kb-next">Where to go next</h2>
+		</div>
+		<div class="kb-grid">
+			<article class="kb-card">
+				<span class="glyphicon glyphicon-book" aria-hidden="true"></span>
+				<h3>Full documentation</h3>
+				<p>Every command and flag, project canvas rules, component libraries, and how the chrome check works.</p>
+				<a class="kb-card-link" href="https://github.com/UCSD/decorator-kit">Read the README</a>
+			</article>
+			<article class="kb-card kb-card-gold">
+				<span class="glyphicon glyphicon-blackboard" aria-hidden="true"></span>
+				<h3>Developer Guide</h3>
+				<p>Layouts, modules, components, and app patterns, each with a prompt you can copy and adapt.</p>
+				<a class="kb-card-link" href="https://developer.ucsd.edu/design/decorator/user-guide/">Browse the guide</a>
+			</article>
+			<article class="kb-card kb-card-green">
+				<span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
+				<h3>Feedback</h3>
+				<p>The kit is in beta. Tell us what broke, what's confusing, or what you need it to do.</p>
+				<a class="kb-card-link" href="https://github.com/UCSD/decorator-kit/issues">Open an issue</a>
+			</article>
+		</div>
+	</section>
+
+	<!-- ===== Closing banner ===== -->
+	<section class="kb-closing" aria-labelledby="kb-closing">
+		<div>
+			<h2 class="kb-title" id="kb-closing">The latest is always on GitHub</h2>
+			<p>This page covers the basics. The README and changelog are updated with every release.</p>
+		</div>
+		<a class="btn btn-primary" href="https://github.com/UCSD/decorator-kit">Go to the repository</a>
+	</section>
+
+</div>
+
+<script src="https://developer.ucsd.edu/design/decorator/user-guide/js/guide.js"></script>

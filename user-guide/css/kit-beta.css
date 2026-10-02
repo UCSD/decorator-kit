@@ -1,0 +1,835 @@
+/*
+ * Decorator Kit (Beta) page — canvas styles.
+ *
+ * Pairs with decorator-kit-beta-body.html. Every rule is scoped under
+ * main#main-content .kb, a wrapper that only exists inside the canvas, so
+ * nothing here can reach the header, navbar, drawer, search, or footer.
+ * No rule paints the page ground or bleeds past its own box: each tinted
+ * section is a rounded panel inside the content column.
+ *
+ * Look borrowed from tritonai.ucsd.edu (gold-topped feature card, navy
+ * gradient band, top-bordered action cards) and the Decorator Kit Developer
+ * Guide (numbered steps, prompt blocks with a copy button). Colors are UC San
+ * Diego brand values; fonts are Roboto and Teko, both loaded by the Decorator.
+ */
+
+main#main-content .kb {
+  --kb-navy: #182b49;
+  --kb-blue: #00629b;
+  --kb-bright: #00c6d7;
+  --kb-gold: #ffcd00;
+  --kb-dark-gold: #c69214;
+  --kb-green: #6e963b;
+  --kb-sand: #f5f0e6;
+  --kb-sand-line: #d9d2c2;
+  --kb-border: #d5d9de;
+  --kb-muted: #52616b;
+  --kb-code-bg: #0f1d33;
+  color: #333;
+  container-name: kb;
+  container-type: inline-size;
+  font-family: Roboto, sans-serif;
+  line-height: 1.55;
+  margin: 8px 0 40px;
+}
+
+main#main-content .kb *,
+main#main-content .kb *::before,
+main#main-content .kb *::after {
+  box-sizing: border-box;
+}
+
+/* ---- Shared type --------------------------------------------------------- */
+
+main#main-content .kb-kicker {
+  color: var(--kb-blue);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+}
+
+main#main-content .kb-dark .kb-kicker {
+  color: var(--kb-gold);
+}
+
+main#main-content .kb h2.kb-title {
+  color: var(--kb-navy);
+  font-family: "Teko-SemiBold", sans-serif;
+  font-size: clamp(34px, 3.4vw, 46px);
+  font-weight: normal;
+  letter-spacing: 0.3px;
+  line-height: 1.02;
+  margin: 0 0 12px;
+  text-transform: none;
+}
+
+main#main-content .kb-lede {
+  color: var(--kb-muted);
+  font-size: 19px;
+  line-height: 1.58;
+  margin: 0 0 22px;
+  max-width: 780px;
+}
+
+main#main-content .kb h3 {
+  color: var(--kb-navy);
+  font-family: Roboto, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0 0 8px;
+}
+
+main#main-content .kb-section {
+  margin: 0 0 64px;
+}
+
+main#main-content .kb-heading {
+  margin-bottom: 28px;
+  max-width: 820px;
+}
+
+main#main-content .kb-heading .kb-lede {
+  margin-bottom: 0;
+}
+
+/* ---- Beta pill ----------------------------------------------------------- */
+
+main#main-content .kb-pill {
+  background: var(--kb-gold);
+  border-radius: 999px;
+  color: var(--kb-navy);
+  display: inline-block;
+  font-family: Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  padding: 7px 12px 6px;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+main#main-content .kb-pill-quiet {
+  background: rgba(0, 98, 155, 0.1);
+  color: var(--kb-blue);
+}
+
+/* ---- Hero: sand feature card with a navy terminal panel ------------------ */
+
+main#main-content .kb-hero {
+  background: var(--kb-sand);
+  border: 1px solid var(--kb-sand-line);
+  border-radius: 14px;
+  border-top: 6px solid var(--kb-gold);
+  box-shadow: 0 18px 46px rgba(24, 43, 73, 0.12);
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  margin: 0 0 28px;
+  overflow: hidden;
+}
+
+main#main-content .kb-hero-copy {
+  align-self: center;
+  padding: 48px 40px 48px 44px;
+}
+
+main#main-content .kb-hero h1 {
+  color: var(--kb-navy);
+  font-family: "Teko-SemiBold", sans-serif;
+  font-size: clamp(46px, 5vw, 64px);
+  font-weight: normal;
+  line-height: 0.95;
+  margin: 6px 0 14px;
+}
+
+main#main-content .kb-hero h1 .kb-pill {
+  font-size: 15px;
+  margin-left: 10px;
+  position: relative;
+  top: -8px;
+}
+
+main#main-content .kb-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+  margin: 0;
+}
+
+main#main-content .kb-actions .btn {
+  margin: 0;
+}
+
+main#main-content .kb-link {
+  color: var(--kb-navy);
+  font-size: 17px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+main#main-content .kb-link:hover,
+main#main-content .kb-link:focus {
+  color: var(--kb-blue);
+  text-decoration-thickness: 3px;
+}
+
+main#main-content .kb-hero-media {
+  align-items: center;
+  background-color: var(--kb-navy);
+  background-image: linear-gradient(145deg, rgba(24, 43, 73, 0.96), rgba(0, 98, 155, 0.86)), url("https://cdn.ucsd.edu/cms/decorator-5/img/navy-simple-grit.jpg");
+  background-position: center;
+  background-size: cover;
+  display: flex;
+  padding: 34px;
+}
+
+/* ---- Terminal window ------------------------------------------------------ */
+
+main#main-content .kb-terminal {
+  background: var(--kb-code-bg);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 10px;
+  box-shadow: 0 20px 38px rgba(0, 0, 0, 0.28);
+  margin: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+main#main-content .kb-terminal-bar {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  gap: 7px;
+  padding: 10px 14px;
+}
+
+main#main-content .kb-terminal-bar span {
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  height: 10px;
+  width: 10px;
+}
+
+main#main-content .kb-terminal-bar span:first-child {
+  background: var(--kb-gold);
+}
+
+main#main-content .kb-terminal-bar em {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  font-style: normal;
+  margin-left: 8px;
+}
+
+main#main-content .kb-terminal pre {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: #e6edf5;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0;
+  padding: 16px 18px 20px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+main#main-content .kb-terminal .kb-prompt {
+  color: var(--kb-gold);
+}
+
+main#main-content .kb-terminal .kb-ok {
+  color: #7fd8e3;
+}
+
+main#main-content .kb-terminal .kb-dim {
+  color: #9fb0c3;
+}
+
+/* ---- Beta notice strip ---------------------------------------------------- */
+
+main#main-content .kb-notice {
+  align-items: flex-start;
+  background: #fff;
+  border: 1px solid var(--kb-border);
+  border-left: 6px solid var(--kb-gold);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(24, 43, 73, 0.06);
+  display: flex;
+  gap: 16px;
+  margin: 0 0 64px;
+  padding: 18px 22px;
+}
+
+main#main-content .kb-notice > .glyphicon {
+  color: var(--kb-dark-gold);
+  font-size: 22px;
+  top: 3px;
+}
+
+main#main-content .kb-notice p {
+  margin: 0;
+}
+
+/* ---- Cards ---------------------------------------------------------------- */
+
+main#main-content .kb-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+main#main-content .kb-grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+main#main-content .kb-card {
+  background: #fff;
+  border: 1px solid var(--kb-border);
+  border-radius: 4px;
+  border-top: 5px solid var(--kb-bright);
+  box-shadow: 0 8px 24px rgba(24, 43, 73, 0.08);
+  display: flex;
+  flex-direction: column;
+  padding: 26px 24px 22px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+main#main-content .kb-card:hover,
+main#main-content .kb-card:focus-within {
+  box-shadow: 0 16px 34px rgba(24, 43, 73, 0.14);
+  transform: translateY(-3px);
+}
+
+main#main-content .kb-card-gold { border-top-color: var(--kb-gold); }
+main#main-content .kb-card-blue { border-top-color: var(--kb-blue); }
+main#main-content .kb-card-green { border-top-color: var(--kb-green); }
+
+main#main-content .kb-card > .glyphicon {
+  color: var(--kb-blue);
+  font-size: 28px;
+  margin-bottom: 14px;
+}
+
+main#main-content .kb-card p {
+  margin: 0 0 12px;
+}
+
+main#main-content .kb-card .kb-card-link {
+  font-weight: 700;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+main#main-content .kb-pkg {
+  background: var(--kb-sand);
+  border-radius: 6px;
+  color: var(--kb-navy);
+  display: inline-block;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 13.5px;
+  margin: 0 0 14px;
+  padding: 4px 10px;
+}
+
+main#main-content .kb-checks {
+  list-style: none;
+  margin: 4px 0 12px;
+  padding: 0;
+}
+
+main#main-content .kb-checks li {
+  margin: 0 0 8px;
+  padding-left: 28px;
+  position: relative;
+}
+
+main#main-content .kb-checks li .glyphicon {
+  color: var(--kb-blue);
+  left: 0;
+  position: absolute;
+  top: 4px;
+}
+
+/* ---- Comparison table ----------------------------------------------------- */
+
+main#main-content .kb-table-wrap {
+  border: 1px solid var(--kb-border);
+  border-radius: 10px;
+  margin-top: 28px;
+  overflow-x: auto;
+}
+
+main#main-content .kb-table {
+  border-collapse: collapse;
+  margin: 0;
+  min-width: 560px;
+  width: 100%;
+}
+
+main#main-content .kb-table th,
+main#main-content .kb-table td {
+  border-top: 1px solid var(--kb-border);
+  padding: 14px 18px;
+  text-align: left;
+  vertical-align: top;
+}
+
+main#main-content .kb-table thead th {
+  background: var(--kb-navy);
+  border-top: 0;
+  color: #fff;
+  font-size: 15px;
+}
+
+main#main-content .kb-table thead th:last-child {
+  box-shadow: inset 0 -4px 0 var(--kb-gold);
+}
+
+main#main-content .kb-table tbody th {
+  color: var(--kb-navy);
+  width: 26%;
+}
+
+main#main-content .kb-table tbody tr:nth-child(even) {
+  background: #faf8f3;
+}
+
+/* ---- Dark band (contained, rounded) -------------------------------------- */
+
+main#main-content .kb-dark {
+  background-color: var(--kb-navy);
+  background-image: linear-gradient(115deg, rgba(24, 43, 73, 0.98), rgba(0, 98, 155, 0.88)), url("https://cdn.ucsd.edu/cms/decorator-5/img/navy-simple-grit.jpg");
+  background-position: center;
+  background-size: cover;
+  border-radius: 14px;
+  color: #fff;
+  padding: 52px 44px;
+}
+
+main#main-content .kb-dark h2.kb-title,
+main#main-content .kb-dark h3,
+main#main-content .kb-dark p,
+main#main-content .kb-dark .kb-lede {
+  color: #fff;
+}
+
+main#main-content .kb-dark a:not(.btn) {
+  color: #fff;
+}
+
+/* Numbered path, like TritonAI's hub-path-list */
+main#main-content .kb-path {
+  counter-reset: kb-step;
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+main#main-content .kb-path > li {
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
+  counter-increment: kb-step;
+  display: grid;
+  gap: 6px 26px;
+  grid-template-columns: 84px minmax(0, 1fr);
+  padding: 24px 0;
+}
+
+main#main-content .kb-path > li:last-child {
+  padding-bottom: 0;
+}
+
+main#main-content .kb-path > li::before {
+  color: var(--kb-gold);
+  content: counter(kb-step, decimal-leading-zero);
+  font-family: "Teko-SemiBold", sans-serif;
+  font-size: 56px;
+  grid-row: span 3;
+  line-height: 0.9;
+}
+
+main#main-content .kb-path h3 {
+  margin: 0;
+}
+
+main#main-content .kb-path p {
+  margin: 0;
+}
+
+/* ---- Prompt / command block (Developer Guide style) ---------------------- */
+
+main#main-content .kb .guide-prompt {
+  background: #f6f7f9;
+  border: 1px solid #e3e5e8;
+  border-radius: 12px;
+  color: var(--kb-navy);
+  margin: 14px 0 0;
+  padding: 12px 14px 14px;
+}
+
+main#main-content .kb-dark .guide-prompt {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+main#main-content .kb .guide-prompt-bar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+main#main-content .kb .guide-prompt-title {
+  align-items: center;
+  color: var(--kb-navy);
+  display: flex;
+  font-size: 13px;
+  font-weight: 700;
+  gap: 8px;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+main#main-content .kb-dark .guide-prompt-title {
+  color: #fff;
+}
+
+main#main-content .kb .guide-prompt-title .glyphicon {
+  align-items: center;
+  background: rgba(0, 98, 155, 0.1);
+  border-radius: 7px;
+  color: var(--kb-blue);
+  display: inline-flex;
+  font-size: 12px;
+  height: 26px;
+  justify-content: center;
+  top: 0;
+  width: 26px;
+}
+
+main#main-content .kb-dark .guide-prompt-title .glyphicon {
+  background: rgba(255, 205, 0, 0.18);
+  color: var(--kb-gold);
+}
+
+main#main-content .kb .guide-prompt pre {
+  background: #fff;
+  border: 1px solid #e3e5e8;
+  border-radius: 8px;
+  color: var(--kb-navy);
+  font-size: 14px;
+  line-height: 1.65;
+  margin: 0;
+  overflow-wrap: anywhere;
+  padding: 12px 16px;
+  white-space: pre-wrap;
+  word-break: normal;
+}
+
+main#main-content .kb-dark .guide-prompt pre {
+  background: var(--kb-code-bg);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #e6edf5;
+}
+
+main#main-content .kb .guide-copy {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #cfd5dc;
+  border-radius: 22px;
+  box-shadow: 0 1px 2px rgba(24, 43, 73, 0.06);
+  color: var(--kb-navy);
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 700;
+  gap: 6px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 8px 18px;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+main#main-content .kb .guide-copy .glyphicon {
+  font-size: 13px;
+  top: 0;
+}
+
+main#main-content .kb .guide-copy:hover {
+  border-color: var(--kb-blue);
+  color: var(--kb-blue);
+}
+
+main#main-content .kb .guide-copy:focus {
+  outline: 3px solid var(--kb-gold);
+  outline-offset: 2px;
+}
+
+main#main-content .kb .guide-copy.is-copied,
+main#main-content .kb .guide-copy.is-copied:hover {
+  background: var(--kb-blue);
+  border-color: var(--kb-blue);
+  color: #fff;
+}
+
+/* ---- Command reference list ---------------------------------------------- */
+
+main#main-content .kb-split {
+  align-items: start;
+  display: grid;
+  gap: 32px 44px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+main#main-content .kb-commands {
+  border: 1px solid var(--kb-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(24, 43, 73, 0.06);
+  margin: 0;
+  overflow: hidden;
+}
+
+main#main-content .kb-commands > div {
+  border-top: 1px solid var(--kb-border);
+  padding: 16px 20px;
+}
+
+main#main-content .kb-commands > div:first-child {
+  border-top: 0;
+}
+
+main#main-content .kb-commands dt {
+  color: var(--kb-blue);
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+main#main-content .kb-commands dd {
+  margin: 0;
+}
+
+/* ---- Help guide: chat mock on sand --------------------------------------- */
+
+main#main-content .kb-sand {
+  background: var(--kb-sand);
+  border: 1px solid var(--kb-sand-line);
+  border-radius: 14px;
+  padding: 48px 44px;
+}
+
+main#main-content .kb-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+}
+
+main#main-content .kb-bubble {
+  border-radius: 16px;
+  box-shadow: 0 8px 22px rgba(24, 43, 73, 0.08);
+  max-width: 92%;
+  padding: 14px 18px;
+}
+
+main#main-content .kb-bubble p {
+  margin: 0;
+}
+
+main#main-content .kb-bubble-who {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+main#main-content .kb-bubble-you {
+  align-self: flex-end;
+  background: var(--kb-blue);
+  border-bottom-right-radius: 4px;
+  color: #fff;
+}
+
+main#main-content .kb-bubble-you p {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 15px;
+}
+
+main#main-content .kb-bubble-ai {
+  align-self: flex-start;
+  background: #fff;
+  border: 1px solid var(--kb-border);
+  border-bottom-left-radius: 4px;
+  color: #333;
+}
+
+main#main-content .kb-bubble-ai .kb-bubble-who {
+  color: var(--kb-blue);
+}
+
+main#main-content .kb-bubble-ai ol {
+  margin: 8px 0 0;
+  padding-left: 22px;
+}
+
+main#main-content .kb-bubble-ai li {
+  margin-bottom: 6px;
+}
+
+main#main-content .kb-bubble-ai li:last-child {
+  margin-bottom: 0;
+}
+
+/* Numbered steps (Developer Guide recipe stack) */
+main#main-content .kb-steps {
+  counter-reset: kb-mini;
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+}
+
+main#main-content .kb-steps li {
+  background: #fff;
+  border-radius: 8px;
+  counter-increment: kb-mini;
+  margin-bottom: 8px;
+  padding: 11px 14px 11px 50px;
+  position: relative;
+}
+
+main#main-content .kb-steps li::before {
+  background: var(--kb-blue);
+  border-radius: 50%;
+  color: #fff;
+  content: counter(kb-mini);
+  font-size: 13px;
+  font-weight: 700;
+  height: 26px;
+  left: 13px;
+  line-height: 26px;
+  position: absolute;
+  text-align: center;
+  top: 10px;
+  width: 26px;
+}
+
+main#main-content .kb-tip {
+  border-left: 4px solid var(--kb-dark-gold);
+  margin: 0;
+  padding: 2px 0 2px 16px;
+}
+
+/* ---- Closing banner (TritonAI hub-subscribe) ----------------------------- */
+
+main#main-content .kb-closing {
+  align-items: center;
+  background: linear-gradient(105deg, #fff 0%, #fff 64%, var(--kb-sand) 64%, var(--kb-sand) 100%);
+  border: 1px solid var(--kb-border);
+  border-radius: 14px;
+  border-top: 5px solid var(--kb-gold);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 40px;
+  justify-content: space-between;
+  padding: 36px 40px;
+}
+
+main#main-content .kb-closing h2.kb-title {
+  font-size: clamp(30px, 3vw, 40px);
+  margin-bottom: 6px;
+}
+
+main#main-content .kb-closing p {
+  margin: 0;
+  max-width: 560px;
+}
+
+/* ---- Responsive ----------------------------------------------------------- */
+
+/* The page may sit in a full-width canvas or a two-column one, so the
+   side-by-side layouts stack on the width of the content column, not the
+   window. The @media block below is the fallback for older browsers. */
+@container kb (max-width: 900px) {
+  main#main-content .kb-hero,
+  main#main-content .kb-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  main#main-content .kb-hero-copy {
+    padding: 40px 32px 32px;
+  }
+
+  main#main-content .kb-hero-media {
+    padding: 26px 32px 32px;
+  }
+}
+
+@media (max-width: 991px) {
+  main#main-content .kb-hero,
+  main#main-content .kb-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  main#main-content .kb-hero-copy {
+    padding: 36px 28px 30px;
+  }
+
+  main#main-content .kb-hero-media {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  main#main-content .kb-dark,
+  main#main-content .kb-sand,
+  main#main-content .kb-closing {
+    padding: 32px 22px;
+  }
+
+  main#main-content .kb-closing {
+    background: var(--kb-sand);
+  }
+
+  main#main-content .kb-path > li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  main#main-content .kb-path > li::before {
+    font-size: 44px;
+    grid-row: auto;
+  }
+
+  main#main-content .kb-bubble {
+    max-width: 100%;
+  }
+
+  main#main-content .kb-terminal pre {
+    font-size: 11.5px;
+    padding: 14px;
+  }
+
+  main#main-content .kb-notice {
+    padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main#main-content .kb-card,
+  main#main-content .kb .guide-copy {
+    transition: none;
+  }
+
+  main#main-content .kb-card:hover,
+  main#main-content .kb-card:focus-within {
+    transform: none;
+  }
+}
