@@ -56,7 +56,11 @@ export async function loadConfig(cwd) {
   const ruleOverlay = await loadOptionalJSON(path.join(cwd, RULES_OVERLAY_FILE));
   const rules = mergeById(ruleDefaults.rules, ruleOverlay?.rules ?? []);
 
-  return { cwd, canvas, regions, rules, manifestFound: manifest !== null };
+  // Built third-party JS tier 4's script scan skips. Human-owned scope;
+  // validated in chrome-styling.mjs, where it is applied.
+  const thirdParty = manifest?.thirdParty ?? [];
+
+  return { cwd, canvas, regions, rules, thirdParty, manifestFound: manifest !== null };
 }
 
 /** Every `*.html` file under `cwd`, excluding node_modules/vendor/core-template and dotfiles. */
@@ -459,6 +463,10 @@ export function explain(config) {
   lines.push("", `structural rules (tier 3): ${config.rules.length}`);
   for (const rule of config.rules) {
     lines.push(`  ${rule.id} — region "${rule.region}"${rule.within ? `, within "${rule.within}"` : ""}`);
+  }
+  if (config.thirdParty?.length) {
+    lines.push("", "third-party JS tier 4 does not scan (decorator-kit.json thirdParty):");
+    for (const pattern of config.thirdParty) lines.push(`  ${pattern}`);
   }
   if (!config.manifestFound) {
     lines.push("", "note: no decorator-kit.json here — using the default canvas main#main-content.");

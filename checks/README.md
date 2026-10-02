@@ -39,7 +39,10 @@ to a branch. On a pull request, this job also flags — as a check annotation,
 not a failure, since a reviewed `--accept` legitimately touches these files —
 any change to `chrome-contract.local.json`, `chrome-styling.local.json`, or
 `chrome-regions.local.json`, printing the golden's recorded `acceptedReason`
-so the reviewer sees it without opening the JSON diff. This is the layer that
+so the reviewer sees it without opening the JSON diff. It warns the same way
+on two fields of `decorator-kit.json`: a changed `canvas` selector, which moves
+the line between canvas and chrome for every tier 4 check, and each pattern
+added to `thirdParty`, since that is JS tier 4 stops scanning. This is the layer that
 catches a self-accepted chrome change no matter which AI tool — or human —
 produced the commit, since it runs on GitHub's infrastructure, not inside
 whatever session made the change.
@@ -65,7 +68,8 @@ hook earlier releases wrote.
 
 The same template
 also adds a `permissions` block: `deny` on editing the three chrome
-`*.local.json` files, and `ask` on any Bash command matching `--accept` —
+`*.local.json` files and `decorator-kit.json`, and `ask` on any Bash command
+matching `--accept` —
 this only protects a project when the person working on it is using Claude
 Code with this template installed; the CLI-level gate above is what has to
 hold for everyone else.
@@ -89,12 +93,13 @@ Four things ship inside this kit, and hold for any Decorator site unmodified:
 | `contracts/ucsd-decorator-5.json` | Tier 3's structural require/forbid rules |
 | `contracts/chrome-styling.json` | Tier 4's campus-widget ids and the (empty by default) exception list |
 
-Two things are specific to the project running this, and neither lives in
+Three things are specific to the project running this, and none lives in
 this kit:
 
 | File | Role |
 |---|---|
 | `decorator-kit.json`'s `canvas` field | The one writable region — `main#main-content` for a plain template, or the selector a project with its own shell names. Falls back to `main#main-content` if the file is absent. |
+| `decorator-kit.json`'s `thirdParty` field | Optional. Built third-party JS that tier 4's script scan skips — see "Framework-rendered canvases" below. Absent by default. |
 | `chrome-contract.local.json` | Tier 2's recorded golden — written by `--accept`, committed to the project, diffed against on every `--check`. |
 
 A project whose chrome genuinely differs from the six default regions or the
@@ -165,6 +170,24 @@ The gate cannot close that one — a lint rule requiring every site selector to 
 scoped under the canvas selector can, and the skill tells agents to write them
 that way.
 
+**A selector anchored on the canvas root is not flagged, whatever it names.**
+If a selector's leftmost compound is the canvas root — `main#main-content`, or
+whatever `canvas` in `decorator-kit.json` names, matched by its id (or by its
+tag and classes when it has no id) — and every combinator after it is a
+descendant (space) or child (`>`), it can only match the canvas or something
+inside it, and the chrome lies outside the canvas. So
+`main#main-content .deck-card .glyphicon` passes even when `.glyphicon` is
+protected; it is exactly the scoping the rules ask for. It still fails:
+
+- with a sibling combinator after the anchor: `main#main-content ~ footer .row`
+  leaves the canvas;
+- when the anchor is not the leftmost compound: `.navbar main#main-content .row`,
+  `body main#main-content .row`, `:is(main#main-content, .navbar) .row`;
+- with a leading combinator (a relative selector nested inside another rule).
+
+The page-ground and global checks below ignore anchoring: a full-bleed band
+painted from inside the canvas is still flagged.
+
 **CSS: any site selector that hits a protected token is flagged.** `[id="…"]`
 and `[class~="…"]` are handled as tokens too, and quoted strings are stripped
 *first*, so `a[href="#search"]` is not read as targeting `#search`. Selector
@@ -195,14 +218,54 @@ folder isn't held to this: the gate never checked it, and turning the check on
 there would fail existing projects on day one.
 
 **JS: `removeAttribute("id")`, `setAttribute("id", …)`, and `.id =` are
-flagged — but only in files that also reference a protected token.** Canvas
+flagged — but only in a function that references a protected token.** Canvas
 scripts assign ids to their own components constantly (a drawer component
-giving each panel an id so its trigger can point `aria-controls` at it), and
-that is not this rule's business. This half is a heuristic, not a parser: it
-does not fully disambiguate a regex literal from division, so a regex
-containing an unescaped brace placed right around an id mutation could in
-principle confuse which function it blames. Real canvas interaction scripts
-are short and rarely hit this.
+giving each panel an id so its trigger can point `aria-controls` at it), and a
+framework runtime sets `.id` on objects that are not elements at all (Vue's
+scheduler: `job.id = instance.uid`). Neither is this rule's business.
+
+The gate is the nearest named enclosing function, the same one a finding
+blames, together with every function lexically enclosing it, module scope
+included. A reference counts only when it is a string literal in code
+position:
+
+- the first argument to a DOM selector API — `querySelector`,
+  `querySelectorAll`, `closest`, `matches`, `getElementById`,
+  `getElementsByClassName`, jQuery's `$`/`jQuery`, and `.find` —
+  read as a selector (`getElementById`'s as an id, `getElementsByClassName`'s as
+  class names);
+- a selector-shaped string on its own — starts with `.`, `#`, or `[` and holds
+  only selector characters — so `const DRAWER = ".navmenu"` counts;
+- an id value: compared with or assigned to `.id`, or the value in
+  `setAttribute("id", …)` — so `el.id = "search"` is always flagged.
+
+Outside a selector API, a token counts only with its sigil (`#search`,
+`.search`), and `[...]` contents never count, so `a[href^='#']` names nothing.
+Identifiers (`location.search`), comments, and prose (`"Navbar, drawer & both
+search forms"`) never count. Earlier releases gated the whole file and
+matched token names as bare words anywhere, strings included; a framework
+bundle carrying both the runtime and the app's copy tripped it on a slide's
+text, and then every `.id =` in the runtime was flagged.
+
+**Know what the per-function gate gives up.** It is lexical. An element fetched
+by selector in one function and mutated in another that does not enclose it is
+not flagged:
+
+```js
+function getDrawer() { return document.getElementById("search"); }
+function dedupe() { getDrawer().removeAttribute("id"); } // not flagged
+```
+
+Nor is a reference in a function nested *inside* the one doing the mutation.
+A reference at module scope, or in an enclosing function, does reach every
+function nested in it, which covers the common closure shape —
+`const panel = $("#search")` at the top, mutated in a handler below. The real
+incident above is that shape, and it is still caught.
+
+This half is a heuristic, not a parser: it does not fully disambiguate a regex
+literal from division, so a regex containing an unescaped brace placed right
+around an id mutation could in principle confuse which function it blames.
+Real canvas interaction scripts are short and rarely hit this.
 
 **CSS: repainting the page ground is flagged too, with no token involved.**
 Found after tier 4 was live: a canvas-scoped
@@ -251,6 +314,66 @@ this gate grows one: below 768px, with the drawer open, the panel must be
 What the canvas contains is not covered by any of this. Styling and scripting
 `main#main-content` is the entire point of the site; tier 4 only draws the line
 at the shell — and at the page ground behind the canvas, which is part of it.
+
+## Framework-rendered canvases
+
+A canvas rendered by Vue, React, or another framework is an empty mount point
+in the built HTML (`<div id="app">`). The derivation then finds almost nothing
+inside the canvas, so every shared Bootstrap word the app really uses at
+runtime — `.row`, `.container`, `.sr-only`, `.active`, `.glyphicon` — derives as
+protected. Two of the rules above exist for that case: canvas-anchored
+selectors are exempt, and the script gate is per function, so a bundle
+carrying the framework runtime and the app's prose does not trip it. A Vue 3 +
+Vite port of a Decorator deck passes tier 4 with neither a code change nor a
+declared exception.
+
+**`thirdParty` in `decorator-kit.json` declares built third-party JS.** For a
+framework runtime split into its own chunk, or a vendored component bundle,
+whose minified function names change every build so that a reviewed
+`function:<name>` exception cannot hold:
+
+```json
+{ "thirdParty": ["dist/assets/vendor-*.js"] }
+```
+
+Paths are project-relative. `**` matches any depth; `*` and `?` match within
+one path segment; a bare path matches that file or everything under that
+directory. Each pattern must start with a literal directory or file name, so
+`**/*.js` is refused. Matching JS files are skipped by tier 4's script scan.
+**CSS is never skipped**: third-party CSS is exactly what leaks into the
+shell, and `canvas-components/` stays strict. A pattern only helps when the
+build splits third-party code into its own file. Vite puts it in the app's
+chunk unless `build.rollupOptions.output.manualChunks` separates it, and
+declaring a chunk that also holds your own code takes your code out of the
+scan too.
+
+Every run prints the effective tier 4 scope, so a reviewer sees what was not
+checked:
+
+```
+tier 4 scanned 2 CSS files and 4 JS files; skipped 1 third-party JS file (declared in decorator-kit.json): dist/assets/vendor-3f9a1c.js
+```
+
+with a note for any pattern that matched no file. `--explain` lists the
+patterns too.
+
+**`thirdParty` is human-owned scope, like `chrome-styling.local.json`.** It
+removes code from the check. A human adds an entry after confirming the file is
+built third-party code, in a pull request a reviewer reads; the `verify` CI job
+flags every added pattern, and the Claude Code template (`add --with-hook`)
+denies agent edits to `decorator-kit.json`. **If you are an AI agent, do not
+add an entry to make a finding go away**, including one in a bundle you
+believe is third-party: surface the finding and stop. `sync` carries the list
+over unchanged and never adds to it.
+
+**`canvas` is the same kind of lever.** It decides which tokens derive as
+protected and what counts as canvas-anchored: `"canvas": "body"` would put
+every class on the page inside the "canvas" and exempt every `body …`
+selector, emptying most of tier 4 in one line. The CI job warns when it
+changes, and the template denies agent edits to the file for this reason too.
+The deny covers Claude Code's Edit and Write tools only; `init`, `add`, and
+`sync` still write the file, and the CI warning is the backstop for any
+other route.
 
 ## The parts that are easy to get wrong
 
@@ -303,8 +426,8 @@ run non-interactively unless `--yes` is passed — which is documented, in both
 `--help` and `rules/00-canvas.md`, as being for a human-triggered
 non-interactive context only, never for an agent to pass itself. A project
 that installs the Claude Code template (`add --with-hook`) also gets a
-`permissions` block denying edits to the three chrome `*.local.json` files
-outright, and requiring explicit approval before any Bash command matching
+`permissions` block denying edits to the three chrome `*.local.json` files and
+`decorator-kit.json` outright, and requiring explicit approval before any Bash command matching
 `--accept` — on top of, not instead of, the CLI-level gate above, which holds
 for any caller regardless of which AI tool (or none) is involved. A PR that
 still changes one of those files gets flagged (not blocked) by the `verify`

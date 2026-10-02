@@ -327,6 +327,7 @@ describe("chrome-contract.mjs CLI: the --accept interlock", () => {
     const after = await runCli(["--check"], dir);
     assert.equal(after.code, 0);
     assert.match(after.stdout, /all four tiers pass/);
+    assert.match(after.stdout, /^tier 4 scanned 0 CSS files and 0 JS files; skipped no third-party JS$/m);
   });
 
   it("--accept refuses while tier 3 fails, and does not touch the already-recorded golden", async () => {
