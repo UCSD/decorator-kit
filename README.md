@@ -349,6 +349,7 @@ channels, alongside the Claude Code plugin and the generated IDE rule files.
 ```
 library/tritonai/ucsd-decorator/SKILL.md   + references/  (published from skills/)
 library/tritonai/ucsd-branding/SKILL.md    retirement pointer
+library/tritonai/ucsd-decorator-kit/SKILL.md   install pointer (library only)
 ```
 
 `library/tritonai/ucsd-decorator/` is a **published copy** of
@@ -359,6 +360,13 @@ duplicate is the same failure mode this kit exists to prevent.
 `ucsd-branding` is the skill this one replaces. It is reduced to a pointer
 rather than deleted, so anyone already invoking that slug is told where it went
 instead of silently loading guidance that routes agents into rendered chrome.
+
+`ucsd-decorator-kit` is the TritonAI entry point for a project that does not
+have the kit yet. It carries no rules: it names this repository and the two
+install commands — `init` for an empty directory, `add --with-decorator` for an
+existing project — and tells the agent to follow the rule files those write. It
+lives only in `library/`, because a project that has the kit no longer needs
+it.
 
 Validate before publishing:
 

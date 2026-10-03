@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **A `ucsd-decorator-kit` skill for the TritonAI Skills Library.** A short
+  pointer at `library/tritonai/ucsd-decorator-kit/` that tells an agent with no
+  kit installed how to get it: `npx ucsd-decorator-kit@latest init` in an empty
+  directory, `npx ucsd-decorator-kit@latest add --with-decorator` in an
+  existing project, then follow the generated rule files. It holds no rules
+  itself.
+
 ## 2.5.0
 
 ### Changed
