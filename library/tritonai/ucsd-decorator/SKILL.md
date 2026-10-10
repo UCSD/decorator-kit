@@ -429,7 +429,8 @@ missed:
 - Every interactive element is keyboard reachable with a visible focus state.
 - `tabindex` is only ever `0` or `-1`.
 - Never use `title` for tooltips. Never disable viewport zoom.
-- Never use color alone to carry meaning; keep 3:1 minimum contrast.
+- Never use color alone to carry meaning. Text contrast is at least 4.5:1, or
+  3:1 for large text; UI components and graphics at least 3:1.
 - Bind every input to a `<label>` with `for`/`id`.
 - `target="_blank"` requires visible text saying so.
 - Touch targets at least 44×44 px.

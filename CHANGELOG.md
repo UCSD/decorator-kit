@@ -11,6 +11,13 @@
   existing project, then follow the generated rule files. It holds no rules
   itself.
 
+### Fixed
+
+- **Text contrast follows WCAG 2.1 AA.** The accessibility rule allowed 3:1 for
+  all text. Normal text now needs 4.5:1; 3:1 still applies to large text
+  (24px, or 18.66px bold) and to UI components and graphics. The skill's
+  summary says the same. See #12.
+
 ## 2.5.0
 
 ### Changed

@@ -458,8 +458,8 @@ generated content must be usable by people with disabilities.
 
 ### Content and presentation
 
-- Minimum 3:1 contrast against adjacent colors for UI components, graphical
-  objects, and text.
+- Contrast is at least 4.5:1 for text, 3:1 for large text (24px, or 18.66px
+  bold), and 3:1 for UI components and graphics against adjacent colors.
 - Never use color as the only means of conveying information or state.
 - Every `<img>` has a meaningful `alt`, or `alt=""` if genuinely decorative.
 - No strobe or flashing. Nothing flashes more than three times per second.
