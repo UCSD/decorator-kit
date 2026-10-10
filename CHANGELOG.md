@@ -4,6 +4,12 @@
 
 ### Added
 
+- **The kickoff interview ships with the skill.** `rules/60-getting-started.md`
+  is now also published as `skills/ucsd-decorator/references/getting-started.md`,
+  like the accessibility and security rules. The skill pointed at the
+  project's `DECORATOR.md` for the six questions, which exists only once the
+  kit is installed, so "help me get started" had nothing to ask without it. A
+  test holds every exported reference page to the whole rule. See #12.
 - **A `ucsd-decorator-kit` skill for the TritonAI Skills Library.** A short
   pointer at `library/tritonai/ucsd-decorator-kit/` that tells an agent with no
   kit installed how to get it: `npx ucsd-decorator-kit@latest init` in an empty

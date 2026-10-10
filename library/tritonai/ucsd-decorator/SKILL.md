@@ -175,8 +175,7 @@ template, never from recall.
 
 When a developer asks to get started — "help me get started", "where do I
 begin", "start a new project" — run the kickoff interview before writing any
-markup. Its full text is "Getting started — the kickoff interview" in the
-project's `DECORATOR.md`, compiled from the kit's `rules/60-getting-started.md`.
+markup. Its full text is in `references/getting-started.md`.
 Ask its six questions in one message, recommend a layout and modules with links
 to the Decorator Kit Developer Guide at
 `https://developer.ucsd.edu/design/decorator/user-guide/`, let the developer
@@ -482,6 +481,7 @@ the source file to restore from. Use it; do not guess.
   table written from live pages; where it disagrees with the references above,
   prefer them
 - `references/component-inventory.md` — kitchen sink, widgets, modules
+- `references/getting-started.md` — the kickoff interview and build brief
 - `references/accessibility.md` — full WCAG 2.1 AA rule set
 - `references/security.md` — full IS-3 / PPM 135-3 rule set
 - `references/distribution.md` — how Decorator is published, and what a consuming project should depend on

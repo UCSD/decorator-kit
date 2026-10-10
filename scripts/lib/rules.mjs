@@ -103,6 +103,7 @@ const NO_LIBRARY_NOTES =
 export const REFERENCE_EXPORTS = new Map([
   ["40-accessibility.md", "accessibility.md"],
   ["50-security.md", "security.md"],
+  ["60-getting-started.md", "getting-started.md"],
 ]);
 
 export const TARGETS = [

@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, before, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
-import { MEMORY_FILE_WARN_CHARS, ON_DEMAND_FILE, TARGETS, renderRuleFiles } from "../scripts/lib/rules.mjs";
+import { MEMORY_FILE_WARN_CHARS, ON_DEMAND_FILE, REFERENCE_EXPORTS, TARGETS, renderRuleFiles } from "../scripts/lib/rules.mjs";
 
 // The rule files load in full in every session; DECORATOR.md is read only when
 // one of them names the task in front of the agent. These tests hold the split
@@ -198,6 +198,25 @@ describe("the kit's own rules", () => {
       if (level === 2) ruleMovedWhole = pointed.has(text);
       else assert.ok(ruleMovedWhole || pointed.has(text), `${ON_DEMAND_FILE} holds "${text}", which no rule file points at`);
     }
+  });
+
+  // A skill installed without the kit has no DECORATOR.md, so its reference
+  // pages carry each exported rule whole, on-demand sections included.
+  it("publish each exported rule whole in the skill's reference pages", async () => {
+    const { outputs: published } = await renderRuleFiles({ rulesDir: path.join(ROOT, "rules"), references: true });
+    for (const [source, destination] of REFERENCE_EXPORTS) {
+      const page = published.get(`skills/ucsd-decorator/references/${destination}`);
+      assert.ok(page, `rules/${source} has no reference page`);
+      assert.doesNotMatch(page, /DECORATOR\.md/, `references/${destination} sends the agent to ${ON_DEMAND_FILE}`);
+      assert.doesNotMatch(page, /<!--\s*on-demand/, `references/${destination} kept an on-demand marker`);
+    }
+
+    // The interview moves whole to DECORATOR.md in the rule files; the skill's
+    // copy is the only one an agent without the kit can read.
+    assert.match(
+      published.get("skills/ucsd-decorator/references/getting-started.md"),
+      /^## Round 1 — ask all six at once$/m,
+    );
   });
 
   it("never import DECORATOR.md, which would load it in every session", () => {
