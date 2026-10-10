@@ -11,6 +11,14 @@
   existing project, then follow the generated rule files. It holds no rules
   itself.
 
+### Changed
+
+- **The skill points to `ucsd-accessibility-compliance` for audits and
+  non-page content.** The Accessibility section names the TritonAI Skills
+  Library's accessibility skill for a full audit and for PDFs, slides, email,
+  or video, which this skill's rules do not cover. It is used only when
+  available; nothing here depends on it.
+
 ## 2.5.0
 
 ### Changed

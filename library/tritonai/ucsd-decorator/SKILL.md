@@ -421,8 +421,11 @@ If the project generates navigation from data (TritonAI builds it from
 ## Accessibility
 
 WCAG 2.1 AA and the UCSD accessibility standards apply to everything you
-generate. `references/accessibility.md` has the full rule set. The ones that get
-missed:
+generate. For an accessibility audit, or for content that is not page markup,
+such as PDFs, slides, email, or video, use the `ucsd-accessibility-compliance`
+skill when it is available.
+
+`references/accessibility.md` has the full rule set. The ones that get missed:
 
 - One `<h1>` per page; heading levels descend without gaps.
 - Every `<img>` gets a meaningful `alt`, or `alt=""` if genuinely decorative.
@@ -496,6 +499,7 @@ the source file to restore from. Use it; do not guess.
 - `Decorator-V5.zip` — **not a source of truth.** Still linked from the docs;
   behind the package on every file. See `references/distribution.md`.
 - Accessibility: `https://accessibility.ucsd.edu/`
+- Accessibility companion skill: `https://github.com/dbalders/UCSD-Skills-Library/tree/main/tritonai/ucsd-accessibility-compliance`
 - Brand: `https://brand.ucsd.edu/`
 
 The live site wins over anything written here. If they differ, pin the live
