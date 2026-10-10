@@ -472,15 +472,19 @@ generated content must be usable by people with disabilities.
 - Keep `aria-expanded`, `aria-controls`, and `aria-hidden` in sync with actual
   state.
 
+### Before a page ships
+
+A page is not done until its automated and manual accessibility checks pass.
+Only an authorized owner can waive a failure, never an agent, and a pass is not
+a claim of full compliance.
+
+**Before you call a page done or publish it, read this section in full in `DECORATOR.md`.**
+
 ### Standards
 
 - <https://accessibility.ucsd.edu/checklists/websites.html>
 - <https://accessibility.ucsd.edu/policies-standards/ucsd-accessibility-guidelines.html>
 - <https://www.w3.org/TR/WCAG21/>
-
-Automated checks do not replace manual verification. Confirm keyboard order,
-focus visibility, zoom and reflow at 200%, and screen reader output for any
-component you add or change.
 
 ---
 

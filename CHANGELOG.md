@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Accessibility checks before a page ships.** `rules/40-accessibility.md`
+  gains "Before a page ships": an automated check the project keeps and runs in
+  CI at mobile and desktop widths, a manual pass with per-component checks for
+  the Decorator's widgets, a report of what ran, and waivers only from an
+  authorized owner, never an agent. The rule files keep two sentences and point
+  to `DECORATOR.md` for the rest, so `CLAUDE.md` stays within its budget. The
+  skill's reference page carries the full text. Adapted from the gate in the
+  TritonAI Skills Library's retired `ucsd-branding` skill.
 - **A `ucsd-decorator-kit` skill for the TritonAI Skills Library.** A short
   pointer at `library/tritonai/ucsd-decorator-kit/` that tells an agent with no
   kit installed how to get it: `npx ucsd-decorator-kit@latest init` in an empty

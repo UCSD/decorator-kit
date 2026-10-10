@@ -434,6 +434,11 @@ missed:
 - `target="_blank"` requires visible text saying so.
 - Touch targets at least 44×44 px.
 
+Before you call a page done or publish it, follow "Before a page ships" in
+`references/accessibility.md`: a scripted check the project keeps, the manual
+pass, and a report of what ran. Only an authorized owner can waive a failure,
+never an agent.
+
 ## Security
 
 `references/security.md` has the full set (IS-3, PPM 135-3). In brief: no

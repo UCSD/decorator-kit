@@ -632,6 +632,104 @@ icon size.
 
 ---
 
+## Accessibility
+
+### Before a page ships
+
+A page is not done until its automated and manual accessibility checks pass.
+Only an authorized owner can waive a failure, never an agent, and a pass is not
+a claim of full compliance.
+
+Every change to a page, template, component, module, widget, or shared style
+needs:
+
+- An automated check of the built pages at mobile and desktop widths, run by a
+  command the project keeps, not a one-off scan.
+- The manual checks that apply to what changed. Automated checks do not replace
+  them.
+- A report of what was checked. Say "no issues found in the checks run", never
+  "fully compliant", unless an authorized accessibility review certified it.
+
+A new automated violation, a browser error, horizontal overflow, a failed
+keyboard interaction, or a manual check that is pending or failed blocks
+publishing until it is fixed or waived.
+
+#### The automated check
+
+Do not rely on an agent remembering to run a one-time audit.
+
+1. Expose one documented command, such as `npm run test:a11y`, that builds or
+   serves the real output and exits nonzero on failure. Use the project's
+   existing package manager and test stack; do not add a second one when an
+   equivalent check already exists.
+2. Run it from the project's default test command, in pull-request checks, and
+   in the job that deploys the production branch.
+3. Scan every route in a documented route inventory at each required mobile and
+   desktop width. When a route and width cannot be scanned, record the route,
+   width, reason, owner, and the manual follow-up in the report so the gap is
+   reviewable.
+4. Fail on browser load errors, new axe or WCAG violations, horizontal
+   overflow, and failed keyboard interactions in shared components.
+5. Save a machine-readable report as a CI artifact naming the route, width,
+   rule, impact, and target of each finding.
+
+A finding in the chrome is not fixed by editing the chrome. Stop and say so,
+as the canvas rules require: name the region and the finding, and let a human
+decide between a waiver and a fix in the Decorator itself.
+
+#### The manual pass
+
+UC San Diego's free tools for this, including Siteimprove, a brand color
+contrast checker, NVDA, and VoiceOver, are at
+<https://accessibility.ucsd.edu/tools/index.html>. For each changed page and
+state:
+
+1. Complete the primary task with Tab, Shift+Tab, Enter, Space, arrow keys in
+   composite widgets, and Escape for anything dismissible.
+2. Confirm focus is always visible, follows a logical order, and returns
+   predictably when a dialog, drawer, menu, or overlay closes.
+3. Check mobile width and 200% zoom for lost, overlapping, or horizontally
+   scrolling content.
+4. Check the contrast of text and components against their backgrounds.
+5. Spot-check headings, landmarks, names, states, and live announcements with
+   VoiceOver, NVDA, or another screen reader.
+6. Exercise the states automation misses: open, closed, selected, disabled,
+   loading, empty, error, and success.
+
+For Decorator components, also check:
+
+| Component | Check |
+|---|---|
+| Navbar, search, dropdowns, sidebar, mobile drawer | Native links and buttons, unique names, `aria-expanded` and `aria-controls` that match state, keyboard open and close, Escape closes, focus returns predictably. |
+| Carousels | A pause control, keyboard-operable previous and next, named slides and controls, hidden slides out of the focus order, no unattended auto-advance. |
+| Tabs and collapse panels | Tab or disclosure semantics, arrow keys where the tab pattern is used, Enter and Space activate, selected and expanded state in sync, hidden content not focusable. |
+| Modals, tooltips, and popovers | Keyboard-reachable trigger; a named modal that takes focus, keeps it inside, returns it to the trigger, and closes with Escape; nothing essential available only on hover. |
+| Forms, input groups, MaxChar, and Wizard | Visible labels, `fieldset` and `legend` for grouped choices, instructions tied to their controls, required state stated in text, errors summarized and tied to fields, counts and step changes announced. |
+| Tables and DataTables | Tables only for tabular data, headers with `scope`, a caption or region name when context is unclear, keyboard-reachable horizontal scroll, announced sort state, every control usable by keyboard. |
+| Alerts, progress bars, badges, and status messages | Status not carried by color alone, names and values exposed, important async changes announced without moving focus, reduced motion honored. |
+| FullCalendar | Keyboard access to dates and events, clear current and selected state, meaningful event names, an equivalent non-visual view of the schedule. |
+| Media | Keyboard-operable controls, no unmuted autoplay, captions for video with audio, transcripts for audio. |
+
+#### Waivers
+
+A waiver names the approver, the scope, the reason, the unresolved risks, who
+owns the fix, and the follow-up date. It comes from an authorized repository,
+content, or accessibility owner, recorded where the project's reviewers will see
+it. An agent never grants one, never infers one from silence or a chat message,
+and never describes a waived result as compliant.
+
+#### The report
+
+When you finish, report:
+
+- the exact automated commands run, and the routes and widths they covered
+- which keyboard, focus, zoom and reflow, contrast, and screen reader checks you
+  completed
+- what you fixed, and what still needs manual review
+- any check you could not run, and why
+
+---
+
 ## Getting started — the kickoff interview
 
 When a developer asks to get started — "help me get started", "where do I
